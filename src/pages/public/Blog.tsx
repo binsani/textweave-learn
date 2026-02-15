@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, User, ArrowRight, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -85,6 +86,7 @@ const blogPosts = [
 ];
 
 export default function Blog() {
+  useDocumentTitle('Blog - Masashi LMS');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -152,6 +154,8 @@ export default function Blog() {
                     <img
                       src={post.image}
                       alt={post.title}
+                      loading="lazy"
+                      onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
@@ -216,6 +220,8 @@ export default function Blog() {
                     <img
                       src={post.image}
                       alt={post.title}
+                      loading="lazy"
+                      onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>

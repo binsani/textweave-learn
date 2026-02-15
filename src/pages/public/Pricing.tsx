@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Check, Zap, Crown, Building2, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -104,6 +105,7 @@ const comparisonFeatures = [
 ];
 
 export default function Pricing() {
+  useDocumentTitle('Pricing - Masashi LMS');
   return (
     <div className="min-h-screen">
       {/* Hero Section */}

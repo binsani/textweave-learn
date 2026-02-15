@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Search, BookOpen, MessageCircle, Mail, ChevronDown, ExternalLink } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -107,6 +108,7 @@ const supportChannels = [
 ];
 
 export default function Help() {
+  useDocumentTitle('Help Center - Masashi LMS');
   const [searchQuery, setSearchQuery] = useState('');
   
   const filteredCategories = faqCategories.map(category => ({

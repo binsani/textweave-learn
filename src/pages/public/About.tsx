@@ -1,4 +1,5 @@
 import { BookOpen, Users, Target, Award, Heart, Lightbulb } from 'lucide-react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Card, CardContent } from '@/components/ui/card';
 
 const values = [
@@ -55,6 +56,7 @@ const team = [
 ];
 
 export default function About() {
+  useDocumentTitle('About - Masashi LMS');
   return (
     <div className="min-h-screen">
       {/* Hero Section */}

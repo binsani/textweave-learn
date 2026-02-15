@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { BookOpen, Clock, Trophy, TrendingUp, ArrowRight, Play } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { useProgressStore } from '@/stores/progressStore';
 import { mockCourses } from '@/data/mockData';
 
 export default function StudentDashboard() {
+  useDocumentTitle('Dashboard - Masashi LMS');
   const { user } = useAuthStore();
   const { courseProgress } = useProgressStore();
 

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { mockCourses } from '@/data/mockData';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const stats = [
   { label: 'Active Learners', value: '12,000+', icon: Users },
@@ -23,7 +24,7 @@ const features = [
 
 export default function Landing() {
   const featuredCourses = mockCourses.filter(c => c.status === 'published').slice(0, 3);
-
+  useDocumentTitle('Masashi LMS - Text-First Learning Platform');
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -157,6 +158,8 @@ export default function Landing() {
                     <img 
                       src={course.thumbnail} 
                       alt={course.title}
+                      loading="lazy"
+                      onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   )}
