@@ -1,0 +1,332 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+  Masashi LMS Design System
+  Academic Traditional Aesthetic
+  All colors in HSL format
+*/
+
+@layer base {
+  :root {
+    /* Academic Traditional Color Palette */
+    --background: 45 30% 98%;           /* Warm ivory */
+    --foreground: 220 25% 15%;          /* Deep scholarly navy */
+
+    --card: 45 25% 99%;                 /* Cream white */
+    --card-foreground: 220 25% 15%;
+
+    --popover: 45 25% 99%;
+    --popover-foreground: 220 25% 15%;
+
+    --primary: 220 55% 25%;             /* Deep navy blue */
+    --primary-foreground: 45 30% 98%;
+
+    --secondary: 35 30% 92%;            /* Warm beige */
+    --secondary-foreground: 220 25% 20%;
+
+    --muted: 40 20% 94%;                /* Soft parchment */
+    --muted-foreground: 220 15% 45%;
+
+    --accent: 38 75% 55%;               /* Scholarly gold */
+    --accent-foreground: 220 25% 12%;
+
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 45 30% 98%;
+
+    --border: 35 20% 88%;               /* Warm gray border */
+    --input: 35 20% 88%;
+    --ring: 220 55% 25%;
+
+    --radius: 0.375rem;
+
+    /* Success & Info colors */
+    --success: 142 55% 40%;
+    --success-foreground: 45 30% 98%;
+    --info: 200 75% 45%;
+    --info-foreground: 45 30% 98%;
+    --warning: 38 90% 55%;
+    --warning-foreground: 220 25% 12%;
+
+    /* Sidebar - Academic styling */
+    --sidebar-background: 45 20% 96%;
+    --sidebar-foreground: 220 25% 25%;
+    --sidebar-primary: 220 55% 25%;
+    --sidebar-primary-foreground: 45 30% 98%;
+    --sidebar-accent: 35 25% 90%;
+    --sidebar-accent-foreground: 220 25% 20%;
+    --sidebar-border: 35 20% 88%;
+    --sidebar-ring: 220 55% 35%;
+
+    /* Learning interface specific */
+    --lesson-bg: 45 30% 99%;
+    --lesson-border: 35 15% 90%;
+    --highlight: 48 95% 80%;            /* Highlighter yellow */
+    --code-bg: 220 15% 95%;
+    --code-border: 220 10% 85%;
+
+    /* Typography */
+    --font-serif: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  .dark {
+    --background: 220 25% 10%;          /* Deep scholarly dark */
+    --foreground: 45 20% 92%;           /* Warm off-white */
+
+    --card: 220 25% 12%;
+    --card-foreground: 45 20% 92%;
+
+    --popover: 220 25% 12%;
+    --popover-foreground: 45 20% 92%;
+
+    --primary: 45 30% 85%;              /* Warm cream */
+    --primary-foreground: 220 25% 10%;
+
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 45 20% 90%;
+
+    --muted: 220 20% 18%;
+    --muted-foreground: 45 15% 60%;
+
+    --accent: 38 70% 50%;               /* Muted gold */
+    --accent-foreground: 220 25% 10%;
+
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 45 20% 92%;
+
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 45 30% 70%;
+
+    --success: 142 45% 35%;
+    --success-foreground: 45 20% 92%;
+    --info: 200 60% 40%;
+    --info-foreground: 45 20% 92%;
+    --warning: 38 70% 45%;
+    --warning-foreground: 220 25% 10%;
+
+    --sidebar-background: 220 25% 8%;
+    --sidebar-foreground: 45 15% 85%;
+    --sidebar-primary: 38 70% 50%;
+    --sidebar-primary-foreground: 220 25% 10%;
+    --sidebar-accent: 220 20% 15%;
+    --sidebar-accent-foreground: 45 15% 85%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 38 70% 50%;
+
+    --lesson-bg: 220 25% 11%;
+    --lesson-border: 220 20% 18%;
+    --highlight: 48 70% 30%;
+    --code-bg: 220 25% 8%;
+    --code-border: 220 20% 18%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+
+  /* Academic Typography Scale */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    @apply font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl leading-tight;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl leading-tight;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl leading-snug;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl leading-snug;
+  }
+
+  h5 {
+    @apply text-lg md:text-xl leading-normal;
+  }
+
+  h6 {
+    @apply text-base md:text-lg leading-normal;
+  }
+
+  /* Prose styling for lesson content */
+  .prose {
+    font-family: var(--font-serif);
+    @apply text-lg leading-relaxed;
+  }
+
+  .prose p {
+    @apply mb-6;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    @apply mt-10 mb-4;
+  }
+
+  .prose ul, .prose ol {
+    @apply my-4 pl-6;
+  }
+
+  .prose li {
+    @apply mb-2;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-accent pl-6 py-2 my-6 italic bg-secondary/30;
+  }
+
+  .prose code {
+    @apply bg-code px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+
+  .prose pre {
+    @apply bg-code border border-code-border rounded-lg p-4 my-6 overflow-x-auto;
+  }
+
+  .prose pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .prose a {
+    @apply text-primary underline underline-offset-2 hover:text-primary/80 transition-colors;
+  }
+
+  .prose table {
+    @apply w-full border-collapse my-6;
+  }
+
+  .prose th, .prose td {
+    @apply border border-border px-4 py-2 text-left;
+  }
+
+  .prose th {
+    @apply bg-muted font-semibold;
+  }
+
+  .prose img {
+    @apply rounded-lg my-6;
+  }
+}
+
+/* Callout Components */
+@layer components {
+  .callout {
+    @apply rounded-lg border p-4 my-6;
+  }
+
+  .callout-info {
+    @apply bg-info/10 border-info/30 text-foreground;
+  }
+
+  .callout-warning {
+    @apply bg-warning/15 border-warning/40 text-foreground;
+  }
+
+  .callout-tip {
+    @apply bg-success/10 border-success/30 text-foreground;
+  }
+
+  .callout-note {
+    @apply bg-muted border-muted-foreground/20 text-foreground;
+  }
+}
+
+/* Custom scrollbar */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-muted/50 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50;
+  }
+
+  /* Reading optimized container */
+  .reading-container {
+    @apply max-w-3xl mx-auto px-6;
+  }
+
+  /* Focus ring for accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
+  }
+
+  /* Hover effects */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-0.5;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-[1.02];
+  }
+
+  .hover-glow {
+    @apply transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer;
+  }
+
+  /* Story link - underline animation */
+  .story-link span {
+    @apply relative inline-block;
+  }
+
+  .story-link span::after {
+    content: '';
+    @apply absolute w-full scale-x-0 h-0.5 bottom-0 left-0 bg-primary origin-bottom-right transition-transform duration-300;
+  }
+
+  .story-link:hover span::after {
+    @apply scale-x-100 origin-bottom-left;
+  }
+
+  /* Card hover effect */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 hover:border-primary/20;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-background/80 backdrop-blur-lg border border-border/50;
+  }
+
+  /* Stagger animation delays */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+}
