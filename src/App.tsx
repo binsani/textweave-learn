@@ -32,6 +32,8 @@ const Privacy = lazy(() => import("@/pages/public/Privacy"));
 const Terms = lazy(() => import("@/pages/public/Terms"));
 const Cookies = lazy(() => import("@/pages/public/Cookies"));
 const AdminLogin = lazy(() => import("@/pages/public/AdminLogin"));
+const StudentLogin = lazy(() => import("@/pages/public/StudentLogin"));
+const InstructorLogin = lazy(() => import("@/pages/public/InstructorLogin"));
 
 const StudentDashboard = lazy(() => import("@/pages/student/Dashboard"));
 const StudentCourses = lazy(() => import("@/pages/student/Courses"));
@@ -91,6 +93,8 @@ const App = () => (
                 <Route path="/cookies" element={<Cookies />} />
                 <Route path="/verify" element={<CertificateVerify />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/student/login" element={<StudentLogin />} />
+                <Route path="/instructor/login" element={<InstructorLogin />} />
               </Route>
 
               {/* Learning Interface - Protected, Standalone */}
