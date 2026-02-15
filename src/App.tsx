@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Layouts (keep eager — needed for shell)
 import { PublicLayout, StudentLayout, InstructorLayout, AdminLayout } from "@/components/layout";
@@ -90,43 +91,53 @@ const App = () => (
                 <Route path="/verify" element={<CertificateVerify />} />
               </Route>
 
-              {/* Learning Interface - Standalone */}
-              <Route path="/learn/:courseId" element={<LearningInterface />} />
-              <Route path="/learn/:courseId/:lessonId" element={<LearningInterface />} />
-              <Route path="/learn/:courseId/:lessonId/quiz/:quizId" element={<QuizInterface />} />
+              {/* Learning Interface - Protected, Standalone */}
+              <Route element={<ProtectedRoute allowedRoles={['student']} />}>
+                <Route path="/learn/:courseId" element={<LearningInterface />} />
+                <Route path="/learn/:courseId/:lessonId" element={<LearningInterface />} />
+                <Route path="/learn/:courseId/:lessonId/quiz/:quizId" element={<QuizInterface />} />
+              </Route>
 
               {/* Student Routes */}
-              <Route path="/student" element={<StudentLayout />}>
-                <Route path="dashboard" element={<StudentDashboard />} />
-                <Route path="courses" element={<StudentCourses />} />
-                <Route path="bookmarks" element={<StudentBookmarks />} />
-                <Route path="notes" element={<StudentNotes />} />
-                <Route path="certificates" element={<StudentCertificates />} />
-                <Route path="settings" element={<StudentSettings />} />
+              <Route element={<ProtectedRoute allowedRoles={['student']} />}>
+                <Route path="/student" element={<StudentLayout />}>
+                  <Route path="dashboard" element={<StudentDashboard />} />
+                  <Route path="courses" element={<StudentCourses />} />
+                  <Route path="bookmarks" element={<StudentBookmarks />} />
+                  <Route path="notes" element={<StudentNotes />} />
+                  <Route path="certificates" element={<StudentCertificates />} />
+                  <Route path="settings" element={<StudentSettings />} />
+                </Route>
               </Route>
 
               {/* Instructor Routes */}
-              <Route path="/instructor" element={<InstructorLayout />}>
-                <Route path="dashboard" element={<InstructorDashboard />} />
-                <Route path="courses" element={<InstructorCourses />} />
-                <Route path="courses/new" element={<CourseEditor />} />
-                <Route path="courses/:courseId/edit" element={<CourseEditor />} />
-                <Route path="analytics" element={<InstructorAnalytics />} />
-                <Route path="students" element={<InstructorStudents />} />
-                <Route path="settings" element={<InstructorSettings />} />
+              <Route element={<ProtectedRoute allowedRoles={['instructor']} />}>
+                <Route path="/instructor" element={<InstructorLayout />}>
+                  <Route path="dashboard" element={<InstructorDashboard />} />
+                  <Route path="courses" element={<InstructorCourses />} />
+                  <Route path="courses/new" element={<CourseEditor />} />
+                  <Route path="courses/:courseId/edit" element={<CourseEditor />} />
+                  <Route path="analytics" element={<InstructorAnalytics />} />
+                  <Route path="students" element={<InstructorStudents />} />
+                  <Route path="settings" element={<InstructorSettings />} />
+                </Route>
               </Route>
 
               {/* Admin Routes */}
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="courses" element={<AdminCourses />} />
-                <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="settings" element={<AdminSettings />} />
+              <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route path="courses" element={<AdminCourses />} />
+                  <Route path="analytics" element={<AdminAnalytics />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                </Route>
               </Route>
 
-              {/* Catch-all */}
-              <Route path="*" element={<NotFound />} />
+              {/* Catch-all with layout */}
+              <Route element={<PublicLayout />}>
+                <Route path="*" element={<NotFound />} />
+              </Route>
             </Routes>
           </Suspense>
         </BrowserRouter>

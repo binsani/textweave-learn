@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Search, ChevronDown, BookOpen, X, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -66,6 +67,7 @@ const sortOptions = [
 const COURSES_PER_PAGE = 9;
 
 export default function Catalog() {
+  useDocumentTitle('Course Catalog - Masashi LMS');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');

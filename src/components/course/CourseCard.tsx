@@ -31,6 +31,8 @@ export function CourseCard({ course, variant = 'default' }: CourseCardProps) {
                 <img
                   src={course.thumbnail}
                   alt={course.title}
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
                   className="w-full h-full object-cover"
                 />
               )}
@@ -68,6 +70,8 @@ export function CourseCard({ course, variant = 'default' }: CourseCardProps) {
             <img
               src={course.thumbnail}
               alt={course.title}
+              loading="lazy"
+              onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (

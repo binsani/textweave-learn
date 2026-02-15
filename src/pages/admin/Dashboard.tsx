@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { 
   Users, 
   BookOpen, 
@@ -23,6 +24,7 @@ import {
 import { mockCourses, mockUsers } from '@/data/mockData';
 
 export default function AdminDashboard() {
+  useDocumentTitle('Admin Dashboard - Masashi LMS');
   const pendingCourses = mockCourses.filter(c => c.status === 'under_review');
   const totalUsers = mockUsers.length;
   const totalCourses = mockCourses.length;

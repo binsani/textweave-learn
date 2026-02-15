@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { 
   BookOpen, 
   Users, 
@@ -40,6 +41,7 @@ import {
 } from '@/components/instructor';
 
 export default function InstructorDashboard() {
+  useDocumentTitle('Instructor Dashboard - Masashi LMS');
   const { user } = useAuthStore();
 
   // Get instructor's courses

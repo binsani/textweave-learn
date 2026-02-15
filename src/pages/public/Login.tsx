@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import type { UserRole } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,7 +32,13 @@ export default function Login() {
         title: 'Welcome back!',
         description: 'You have successfully logged in.',
       });
-      navigate('/student/dashboard');
+      const role = useAuthStore.getState().user?.role;
+      const dashboardMap: Record<UserRole, string> = {
+        student: '/student/dashboard',
+        instructor: '/instructor/dashboard',
+        admin: '/admin/dashboard',
+      };
+      navigate(dashboardMap[role || 'student']);
     } else {
       toast({
         title: 'Login failed',
