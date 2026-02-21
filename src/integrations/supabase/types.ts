@@ -14,16 +14,641 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookmarks: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          lesson_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          title?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmarks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmarks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_progress: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          id: string
+          is_completed: boolean
+          last_accessed_at: string
+          lesson_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          id?: string
+          is_completed?: boolean
+          last_accessed_at?: string
+          lesson_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          id?: string
+          is_completed?: boolean
+          last_accessed_at?: string
+          lesson_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          category: Database["public"]["Enums"]["course_category"]
+          created_at: string
+          description: string
+          enrolled_count: number
+          estimated_hours: number
+          id: string
+          instructor_id: string
+          is_free: boolean
+          learning_objectives: string[] | null
+          level: Database["public"]["Enums"]["course_level"]
+          price: number
+          published_at: string | null
+          rating: number
+          requirements: string[] | null
+          review_count: number
+          short_description: string
+          slug: string
+          status: Database["public"]["Enums"]["course_status"]
+          tags: string[] | null
+          thumbnail: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["course_category"]
+          created_at?: string
+          description?: string
+          enrolled_count?: number
+          estimated_hours?: number
+          id?: string
+          instructor_id: string
+          is_free?: boolean
+          learning_objectives?: string[] | null
+          level?: Database["public"]["Enums"]["course_level"]
+          price?: number
+          published_at?: string | null
+          rating?: number
+          requirements?: string[] | null
+          review_count?: number
+          short_description?: string
+          slug: string
+          status?: Database["public"]["Enums"]["course_status"]
+          tags?: string[] | null
+          thumbnail?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["course_category"]
+          created_at?: string
+          description?: string
+          enrolled_count?: number
+          estimated_hours?: number
+          id?: string
+          instructor_id?: string
+          is_free?: boolean
+          learning_objectives?: string[] | null
+          level?: Database["public"]["Enums"]["course_level"]
+          price?: number
+          published_at?: string | null
+          rating?: number
+          requirements?: string[] | null
+          review_count?: number
+          short_description?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["course_status"]
+          tags?: string[] | null
+          thumbnail?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enrollments: {
+        Row: {
+          course_id: string
+          enrolled_at: string
+          expires_at: string | null
+          id: string
+          status: Database["public"]["Enums"]["enrollment_status"]
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          enrolled_at?: string
+          expires_at?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["enrollment_status"]
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          enrolled_at?: string
+          expires_at?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["enrollment_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          content: string
+          created_at: string
+          has_quiz: boolean
+          id: string
+          is_free: boolean
+          order: number
+          quiz_id: string | null
+          reading_time: number
+          section_id: string
+          slug: string
+          title: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          has_quiz?: boolean
+          id?: string
+          is_free?: boolean
+          order?: number
+          quiz_id?: string | null
+          reading_time?: number
+          section_id: string
+          slug: string
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          has_quiz?: boolean
+          id?: string
+          is_free?: boolean
+          order?: number
+          quiz_id?: string | null
+          reading_time?: number
+          section_id?: string
+          slug?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          content: string
+          course_id: string
+          created_at: string
+          id: string
+          lesson_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          course_id: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          email: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          email: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          correct_answer: string
+          explanation: string | null
+          id: string
+          options: string[] | null
+          order: number
+          points: number
+          question: string
+          quiz_id: string
+          type: Database["public"]["Enums"]["question_type"]
+        }
+        Insert: {
+          correct_answer: string
+          explanation?: string | null
+          id?: string
+          options?: string[] | null
+          order?: number
+          points?: number
+          question: string
+          quiz_id: string
+          type?: Database["public"]["Enums"]["question_type"]
+        }
+        Update: {
+          correct_answer?: string
+          explanation?: string | null
+          id?: string
+          options?: string[] | null
+          order?: number
+          points?: number
+          question?: string
+          quiz_id?: string
+          type?: Database["public"]["Enums"]["question_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_attempts: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          id: string
+          passed: boolean
+          quiz_id: string
+          score: number
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string | null
+          id?: string
+          passed?: boolean
+          quiz_id: string
+          score?: number
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          id?: string
+          passed?: boolean
+          quiz_id?: string
+          score?: number
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          lesson_id: string
+          passing_score: number
+          time_limit: number | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          lesson_id: string
+          passing_score?: number
+          time_limit?: number | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          lesson_id?: string
+          passing_score?: number
+          time_limit?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quizzes_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          comment: string
+          course_id: string
+          created_at: string
+          id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string
+          course_id: string
+          created_at?: string
+          id?: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sections: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          id: string
+          order: number
+          title: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          order?: number
+          title: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sections_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_course_id_from_lesson: {
+        Args: { _lesson_id: string }
+        Returns: string
+      }
+      get_course_id_from_section: {
+        Args: { _section_id: string }
+        Returns: string
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_course_instructor: {
+        Args: { _course_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_enrolled: {
+        Args: { _course_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "student" | "instructor" | "admin"
+      course_category:
+        | "programming"
+        | "data-science"
+        | "business"
+        | "design"
+        | "marketing"
+        | "personal-development"
+        | "mathematics"
+        | "science"
+        | "humanities"
+        | "language"
+      course_level: "beginner" | "intermediate" | "advanced"
+      course_status: "draft" | "pending_review" | "published" | "archived"
+      enrollment_status: "active" | "completed" | "expired"
+      question_type: "multiple_choice" | "true_false" | "short_answer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +775,24 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["student", "instructor", "admin"],
+      course_category: [
+        "programming",
+        "data-science",
+        "business",
+        "design",
+        "marketing",
+        "personal-development",
+        "mathematics",
+        "science",
+        "humanities",
+        "language",
+      ],
+      course_level: ["beginner", "intermediate", "advanced"],
+      course_status: ["draft", "pending_review", "published", "archived"],
+      enrollment_status: ["active", "completed", "expired"],
+      question_type: ["multiple_choice", "true_false", "short_answer"],
+    },
   },
 } as const
