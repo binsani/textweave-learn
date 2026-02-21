@@ -33,9 +33,9 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from '@/components/ui/pagination';
-import { mockCourses } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { CourseCard, CourseCardSkeleton } from '@/components/course';
+import { usePublishedCourses, dbCourseToCardProps } from '@/hooks/useCourses';
 
 const categories = [
   { value: 'all', label: 'All Categories' },
@@ -68,6 +68,7 @@ const COURSES_PER_PAGE = 9;
 
 export default function Catalog() {
   useDocumentTitle('Course Catalog - Masashi LMS');
+  const { data: dbCourses = [], isLoading } = usePublishedCourses();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
@@ -76,22 +77,17 @@ export default function Catalog() {
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isLevelOpen, setIsLevelOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-
-  // Simulate loading state
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, [searchQuery, selectedCategory, selectedLevel, sortBy, showFreeOnly]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, selectedCategory, selectedLevel, sortBy, showFreeOnly]);
 
-  const publishedCourses = mockCourses.filter(c => c.status === 'published');
+  const publishedCourses = useMemo(
+    () => dbCourses.map(dbCourseToCardProps),
+    [dbCourses]
+  );
 
   const filteredCourses = useMemo(() => {
     let courses = [...publishedCourses];
