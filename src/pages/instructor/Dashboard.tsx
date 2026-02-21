@@ -71,9 +71,6 @@ export default function InstructorDashboard() {
       label: 'Total Courses', 
       value: instructorCourses.length.toString(), 
       icon: BookOpen,
-      trend: '+2',
-      trendLabel: 'this month',
-      trendUp: true,
       bgColor: 'bg-primary/10',
       iconColor: 'text-primary'
     },
@@ -81,19 +78,13 @@ export default function InstructorDashboard() {
       label: 'Total Students', 
       value: totalStudents.toLocaleString(), 
       icon: Users,
-      trend: '+124',
-      trendLabel: 'this week',
-      trendUp: true,
       bgColor: 'bg-blue-500/10',
       iconColor: 'text-blue-600'
     },
     { 
-      label: 'Avg. Completion', 
-      value: '68%', 
+      label: 'Published', 
+      value: instructorCourses.filter(c => c.status === 'published').length.toString(), 
       icon: TrendingUp,
-      trend: '+5%',
-      trendLabel: 'vs last month',
-      trendUp: true,
       bgColor: 'bg-green-500/10',
       iconColor: 'text-green-600'
     },
@@ -101,9 +92,6 @@ export default function InstructorDashboard() {
       label: 'Revenue', 
       value: `$${Math.round(totalRevenue).toLocaleString()}`, 
       icon: DollarSign,
-      trend: '+$2,100',
-      trendLabel: 'this month',
-      trendUp: true,
       bgColor: 'bg-amber-500/10',
       iconColor: 'text-amber-600'
     },
@@ -151,18 +139,9 @@ export default function InstructorDashboard() {
                 <div className={`p-2.5 rounded-xl ${stat.bgColor}`}>
                   <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
                 </div>
-                <div className={`flex items-center gap-0.5 text-xs font-medium ${stat.trendUp ? 'text-green-600' : 'text-destructive'}`}>
-                  {stat.trendUp ? (
-                    <ArrowUpRight className="h-3 w-3" />
-                  ) : (
-                    <ArrowDownRight className="h-3 w-3" />
-                  )}
-                  {stat.trend}
-                </div>
               </div>
               <p className="text-2xl font-bold text-foreground mb-0.5">{stat.value}</p>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
-              <p className="text-xs text-muted-foreground mt-1">{stat.trendLabel}</p>
             </CardContent>
           </Card>
         ))}

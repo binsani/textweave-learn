@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { 
   Search, 
-  Filter, 
   Download, 
   Mail,
   MoreVertical,
@@ -13,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
@@ -28,7 +27,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -39,76 +37,141 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuthStore } from '@/stores/authStore';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
-const students = [
-  {
-    id: '1',
-    name: 'Alice Johnson',
-    email: 'alice@example.com',
-    avatar: '',
-    enrolledCourses: ['Web Dev Bootcamp', 'React Masterclass'],
-    progress: 78,
-    lastActive: '2025-02-04',
-    totalSpent: 149,
-    completedCourses: 1,
-    joinedDate: '2024-11-15',
-  },
-  {
-    id: '2',
-    name: 'Bob Smith',
-    email: 'bob@example.com',
-    avatar: '',
-    enrolledCourses: ['Web Dev Bootcamp'],
-    progress: 92,
-    lastActive: '2025-02-03',
-    totalSpent: 99,
-    completedCourses: 0,
-    joinedDate: '2024-12-20',
-  },
-  {
-    id: '3',
-    name: 'Carol Williams',
-    email: 'carol@example.com',
-    avatar: '',
-    enrolledCourses: ['React Masterclass'],
-    progress: 45,
-    lastActive: '2025-02-05',
-    totalSpent: 79,
-    completedCourses: 0,
-    joinedDate: '2025-01-05',
-  },
-  {
-    id: '4',
-    name: 'David Brown',
-    email: 'david@example.com',
-    avatar: '',
-    enrolledCourses: ['Web Dev Bootcamp', 'React Masterclass'],
-    progress: 100,
-    lastActive: '2025-01-28',
-    totalSpent: 149,
-    completedCourses: 2,
-    joinedDate: '2024-08-10',
-  },
-  {
-    id: '5',
-    name: 'Eva Martinez',
-    email: 'eva@example.com',
-    avatar: '',
-    enrolledCourses: ['React Masterclass'],
-    progress: 33,
-    lastActive: '2025-02-01',
-    totalSpent: 79,
-    completedCourses: 0,
-    joinedDate: '2025-01-20',
-  },
-];
-
-const courses = ['All Courses', 'Web Dev Bootcamp', 'React Masterclass', 'Node.js Backend'];
+interface StudentRow {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url: string | null;
+  enrolledCourses: string[];
+  progress: number;
+  lastActive: string;
+  completedCourses: number;
+}
 
 export default function InstructorStudents() {
+  const { user } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [courseFilter, setCourseFilter] = useState('All Courses');
   const [sortBy, setSortBy] = useState('recent');
+
+  // Fetch instructor's courses first
+  const { data: instructorCourses = [] } = useQuery({
+    queryKey: ['instructor-course-list', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('courses')
+        .select('id, title')
+        .eq('instructor_id', user.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+  });
+
+  const courseIds = instructorCourses.map(c => c.id);
+
+  // Fetch enrolled students for those courses
+  const { data: students = [], isLoading } = useQuery({
+    queryKey: ['instructor-students', courseIds],
+    queryFn: async () => {
+      if (courseIds.length === 0) return [];
+
+      const { data: enrollments, error } = await supabase
+        .from('enrollments')
+        .select('user_id, course_id, enrolled_at, status')
+        .in('course_id', courseIds);
+      if (error) throw error;
+      if (!enrollments?.length) return [];
+
+      const uniqueUserIds = [...new Set(enrollments.map(e => e.user_id))];
+
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email, avatar_url')
+        .in('id', uniqueUserIds);
+
+      // Fetch progress for these students
+      const { data: progress } = await supabase
+        .from('course_progress')
+        .select('user_id, course_id, is_completed, last_accessed_at')
+        .in('course_id', courseIds)
+        .in('user_id', uniqueUserIds);
+
+      // Get total lessons per course
+      const { data: sections } = await supabase
+        .from('sections')
+        .select('course_id, lessons(id)')
+        .in('course_id', courseIds);
+
+      const totalLessonsPerCourse: Record<string, number> = {};
+      for (const s of sections ?? []) {
+        totalLessonsPerCourse[s.course_id] = (totalLessonsPerCourse[s.course_id] || 0) + (s.lessons?.length || 0);
+      }
+
+      const courseNameMap: Record<string, string> = {};
+      for (const c of instructorCourses) courseNameMap[c.id] = c.title;
+
+      const profileMap: Record<string, typeof profiles extends (infer T)[] ? T : never> = {};
+      for (const p of profiles ?? []) profileMap[p.id] = p;
+
+      // Build student rows
+      const studentMap: Record<string, StudentRow> = {};
+      for (const e of enrollments) {
+        const p = profileMap[e.user_id];
+        if (!p) continue;
+        if (!studentMap[e.user_id]) {
+          const name = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
+          studentMap[e.user_id] = {
+            id: e.user_id,
+            name,
+            email: p.email,
+            avatar_url: p.avatar_url,
+            enrolledCourses: [],
+            progress: 0,
+            lastActive: e.enrolled_at,
+            completedCourses: 0,
+          };
+        }
+        studentMap[e.user_id].enrolledCourses.push(courseNameMap[e.course_id] || 'Unknown');
+      }
+
+      // Calculate progress per student
+      for (const uid of Object.keys(studentMap)) {
+        const userProgress = (progress ?? []).filter(p => p.user_id === uid);
+        const userEnrollments = enrollments.filter(e => e.user_id === uid);
+        
+        let totalLessons = 0;
+        let completedLessons = 0;
+        let completedCourseCount = 0;
+        let latestAccess = studentMap[uid].lastActive;
+
+        for (const e of userEnrollments) {
+          const tl = totalLessonsPerCourse[e.course_id] || 0;
+          totalLessons += tl;
+          const cp = userProgress.filter(p => p.course_id === e.course_id && p.is_completed);
+          completedLessons += cp.length;
+          if (tl > 0 && cp.length >= tl) completedCourseCount++;
+        }
+
+        for (const p of userProgress) {
+          if (p.last_accessed_at > latestAccess) latestAccess = p.last_accessed_at;
+        }
+
+        studentMap[uid].progress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+        studentMap[uid].completedCourses = completedCourseCount;
+        studentMap[uid].lastActive = latestAccess;
+      }
+
+      return Object.values(studentMap);
+    },
+    enabled: courseIds.length > 0,
+  });
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = 
@@ -120,7 +183,6 @@ export default function InstructorStudents() {
     return matchesSearch && matchesCourse;
   });
 
-  // Sort students
   const sortedStudents = [...filteredStudents].sort((a, b) => {
     switch (sortBy) {
       case 'recent':
@@ -134,15 +196,26 @@ export default function InstructorStudents() {
     }
   });
 
-  const totalStudents = students.length;
-  const activeStudents = students.filter(s => {
-    const lastActive = new Date(s.lastActive);
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return lastActive >= weekAgo;
-  }).length;
-  const avgProgress = Math.round(students.reduce((sum, s) => sum + s.progress, 0) / students.length);
-  const completionRate = Math.round((students.filter(s => s.completedCourses > 0).length / students.length) * 100);
+  const avgProgress = students.length > 0
+    ? Math.round(students.reduce((sum, s) => sum + s.progress, 0) / students.length)
+    : 0;
+  const completionRate = students.length > 0
+    ? Math.round((students.filter(s => s.completedCourses > 0).length / students.length) * 100)
+    : 0;
+
+  const courseFilterOptions = ['All Courses', ...instructorCourses.map(c => c.title)];
+
+  if (isLoading) {
+    return (
+      <div className="p-6 md:p-8 space-y-6">
+        <Skeleton className="h-10 w-48" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 md:p-8">
@@ -173,7 +246,7 @@ export default function InstructorStudents() {
                 <User className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-foreground">{totalStudents}</div>
+                <div className="text-2xl font-bold text-foreground">{students.length}</div>
                 <p className="text-sm text-muted-foreground">Total Students</p>
               </div>
             </div>
@@ -186,7 +259,14 @@ export default function InstructorStudents() {
                 <Clock className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-foreground">{activeStudents}</div>
+                <div className="text-2xl font-bold text-foreground">
+                  {students.filter(s => {
+                    const lastActive = new Date(s.lastActive);
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return lastActive >= weekAgo;
+                  }).length}
+                </div>
                 <p className="text-sm text-muted-foreground">Active This Week</p>
               </div>
             </div>
@@ -238,7 +318,7 @@ export default function InstructorStudents() {
                 <SelectValue placeholder="Filter by course" />
               </SelectTrigger>
               <SelectContent>
-                {courses.map(course => (
+                {courseFilterOptions.map(course => (
                   <SelectItem key={course} value={course}>{course}</SelectItem>
                 ))}
               </SelectContent>
@@ -277,7 +357,7 @@ export default function InstructorStudents() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9">
-                        <AvatarImage src={student.avatar} />
+                        <AvatarImage src={student.avatar_url || undefined} />
                         <AvatarFallback className="bg-primary/10 text-primary text-sm">
                           {student.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
@@ -343,7 +423,9 @@ export default function InstructorStudents() {
           
           {sortedStudents.length === 0 && (
             <div className="py-12 text-center">
-              <p className="text-muted-foreground">No students found matching your criteria.</p>
+              <p className="text-muted-foreground">
+                {students.length === 0 ? 'No students have enrolled in your courses yet.' : 'No students found matching your criteria.'}
+              </p>
             </div>
           )}
         </CardContent>
