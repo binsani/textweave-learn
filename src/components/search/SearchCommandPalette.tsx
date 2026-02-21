@@ -1,28 +1,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BookOpen,
-  FileText,
-  Home,
-  LayoutDashboard,
-  Search,
-  Settings,
-  User,
-  Users,
-  Award,
-  GraduationCap,
+  BookOpen, FileText, Home, LayoutDashboard, Search, Settings, User, Users, Award, GraduationCap,
 } from 'lucide-react';
 import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
+  CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator,
 } from '@/components/ui/command';
 import { useAuthStore } from '@/stores/authStore';
-import { mockCourses } from '@/data/mockData';
+import { usePublishedCourses, dbCourseToCardProps } from '@/hooks/useCourses';
 
 interface SearchResult {
   id: string;
@@ -38,8 +23,8 @@ export function SearchCommandPalette() {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { data: dbCourses } = usePublishedCourses();
 
-  // Open on Cmd+K / Ctrl+K
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -47,22 +32,19 @@ export function SearchCommandPalette() {
         setOpen((open) => !open);
       }
     };
-
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
   }, []);
 
-  // Build searchable items
   const searchItems = useMemo(() => {
     const items: SearchResult[] = [];
+    const courses = (dbCourses ?? []).map(dbCourseToCardProps);
 
-    // Navigation items
     const navItems: SearchResult[] = [
       { id: 'nav-home', title: 'Home', href: '/', icon: <Home className="h-4 w-4" />, category: 'Navigation' },
       { id: 'nav-catalog', title: 'Browse Courses', href: '/catalog', icon: <BookOpen className="h-4 w-4" />, category: 'Navigation' },
     ];
 
-    // Role-specific navigation
     if (user?.role === 'student') {
       navItems.push(
         { id: 'nav-dashboard', title: 'My Dashboard', href: '/student/dashboard', icon: <LayoutDashboard className="h-4 w-4" />, category: 'Navigation' },
@@ -87,8 +69,7 @@ export function SearchCommandPalette() {
 
     items.push(...navItems);
 
-    // Courses
-    mockCourses.forEach((course) => {
+    courses.forEach((course) => {
       items.push({
         id: `course-${course.id}`,
         title: course.title,
@@ -97,44 +78,23 @@ export function SearchCommandPalette() {
         icon: <BookOpen className="h-4 w-4" />,
         category: 'Courses',
       });
-
-      // Lessons from this course
-      course.sections.forEach((section) => {
-        section.lessons.forEach((lesson) => {
-          items.push({
-            id: `lesson-${lesson.id}`,
-            title: lesson.title,
-            description: `${course.title} → ${section.title}`,
-            href: `/learn/${course.id}/${lesson.id}`,
-            icon: <FileText className="h-4 w-4" />,
-            category: 'Lessons',
-          });
-        });
-      });
     });
 
     return items;
-  }, [user]);
+  }, [user, dbCourses]);
 
-  // Filter based on query
   const filteredItems = useMemo(() => {
     if (!query.trim()) return searchItems;
-    
     const lowerQuery = query.toLowerCase();
     return searchItems.filter(
-      (item) =>
-        item.title.toLowerCase().includes(lowerQuery) ||
-        item.description?.toLowerCase().includes(lowerQuery)
+      (item) => item.title.toLowerCase().includes(lowerQuery) || item.description?.toLowerCase().includes(lowerQuery)
     );
   }, [searchItems, query]);
 
-  // Group by category
   const groupedItems = useMemo(() => {
     const groups: Record<string, SearchResult[]> = {};
     filteredItems.forEach((item) => {
-      if (!groups[item.category]) {
-        groups[item.category] = [];
-      }
+      if (!groups[item.category]) groups[item.category] = [];
       groups[item.category].push(item);
     });
     return groups;
@@ -148,33 +108,19 @@ export function SearchCommandPalette() {
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput
-        placeholder="Search courses, lessons, pages..."
-        value={query}
-        onValueChange={setQuery}
-      />
+      <CommandInput placeholder="Search courses, pages..." value={query} onValueChange={setQuery} />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
-        
         {Object.entries(groupedItems).map(([category, items], idx) => (
           <div key={category}>
             {idx > 0 && <CommandSeparator />}
             <CommandGroup heading={category}>
-              {items.slice(0, category === 'Lessons' ? 5 : 10).map((item) => (
-                <CommandItem
-                  key={item.id}
-                  value={`${item.title} ${item.description || ''}`}
-                  onSelect={() => handleSelect(item.href)}
-                  className="gap-3"
-                >
+              {items.slice(0, 10).map((item) => (
+                <CommandItem key={item.id} value={`${item.title} ${item.description || ''}`} onSelect={() => handleSelect(item.href)} className="gap-3">
                   <span className="text-muted-foreground">{item.icon}</span>
                   <div className="flex flex-col flex-1 min-w-0">
                     <span className="font-medium truncate">{item.title}</span>
-                    {item.description && (
-                      <span className="text-xs text-muted-foreground truncate">
-                        {item.description}
-                      </span>
-                    )}
+                    {item.description && <span className="text-xs text-muted-foreground truncate">{item.description}</span>}
                   </div>
                 </CommandItem>
               ))}

@@ -26,7 +26,8 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { mockUsers, mockCourses } from '@/data/mockData';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const userGrowthData = [
   { month: 'Jan', users: 120, students: 100, instructors: 20 },
@@ -63,10 +64,25 @@ const chartConfig: ChartConfig = {
 };
 
 export function PlatformAnalytics() {
-  const totalStudents = mockUsers.filter(u => u.role === 'student').length;
-  const totalInstructors = mockUsers.filter(u => u.role === 'instructor').length;
-  const publishedCourses = mockCourses.filter(c => c.status === 'published').length;
-  const totalEnrollments = mockCourses.reduce((acc, c) => acc + c.enrolledCount, 0);
+  const { data: rolesData = [] } = useQuery({
+    queryKey: ['admin-roles-analytics'],
+    queryFn: async () => {
+      const { data } = await supabase.from('user_roles').select('role');
+      return data ?? [];
+    },
+  });
+  const { data: coursesData = [] } = useQuery({
+    queryKey: ['admin-courses-analytics'],
+    queryFn: async () => {
+      const { data } = await supabase.from('courses').select('status, enrolled_count');
+      return data ?? [];
+    },
+  });
+
+  const totalStudents = rolesData.filter(r => r.role === 'student').length;
+  const totalInstructors = rolesData.filter(r => r.role === 'instructor').length;
+  const publishedCourses = coursesData.filter(c => c.status === 'published').length;
+  const totalEnrollments = coursesData.reduce((acc, c) => acc + c.enrolled_count, 0);
 
   const stats = [
     { 

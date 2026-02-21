@@ -22,16 +22,42 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { mockCourses, mockUsers } from '@/data/mockData';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function AdminDashboard() {
   useDocumentTitle('Admin Dashboard - Masashi LMS');
-  const pendingCourses = mockCourses.filter(c => c.status === 'under_review');
-  const totalUsers = mockUsers.length;
-  const totalCourses = mockCourses.length;
-  const publishedCourses = mockCourses.filter(c => c.status === 'published').length;
-  const students = mockUsers.filter(u => u.role === 'student').length;
-  const instructors = mockUsers.filter(u => u.role === 'instructor').length;
+
+  const { data: coursesData = [] } = useQuery({
+    queryKey: ['admin-courses'],
+    queryFn: async () => {
+      const { data } = await supabase.from('courses').select('id, title, status, enrolled_count, rating, instructor_id');
+      return data ?? [];
+    },
+  });
+  const { data: profilesData = [] } = useQuery({
+    queryKey: ['admin-profiles'],
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('id, email, first_name, last_name, avatar_url, created_at');
+      return data ?? [];
+    },
+  });
+  const { data: rolesData = [] } = useQuery({
+    queryKey: ['admin-roles'],
+    queryFn: async () => {
+      const { data } = await supabase.from('user_roles').select('user_id, role');
+      return data ?? [];
+    },
+  });
+
+  const getUserRole = (userId: string) => rolesData.find(r => r.user_id === userId)?.role || 'student';
+
+  const pendingCourses = coursesData.filter(c => c.status === 'pending_review');
+  const totalUsers = profilesData.length;
+  const totalCourses = coursesData.length;
+  const publishedCourses = coursesData.filter(c => c.status === 'published').length;
+  const students = rolesData.filter(r => r.role === 'student').length;
+  const instructors = rolesData.filter(r => r.role === 'instructor').length;
 
   const stats = [
     {
@@ -76,12 +102,12 @@ export default function AdminDashboard() {
     { type: 'enrollment', user: 'Jordan Lee', action: 'completed', target: 'Data Science 101', time: '5 hrs ago', icon: CheckCircle },
   ];
 
-  const topCourses = mockCourses
+  const topCourses = coursesData
     .filter(c => c.status === 'published')
-    .sort((a, b) => b.enrolledCount - a.enrolledCount)
+    .sort((a, b) => b.enrolled_count - a.enrolled_count)
     .slice(0, 4);
 
-  const recentUsers = mockUsers.slice(0, 5);
+  const recentUsers = profilesData.slice(0, 5);
 
   const getInitials = (name: string) =>
     name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -210,7 +236,8 @@ export default function AdminDashboard() {
               ) : (
                 <div className="space-y-3">
                   {pendingCourses.slice(0, 3).map((course) => {
-                    const instructor = mockUsers.find(u => u.id === course.instructorId);
+                    const instructorProfile = profilesData.find(u => u.id === course.instructor_id);
+                    const instructorName = [instructorProfile?.first_name, instructorProfile?.last_name].filter(Boolean).join(' ') || 'Unknown';
                     return (
                       <div key={course.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                         <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
@@ -219,7 +246,7 @@ export default function AdminDashboard() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{course.title}</p>
                           <p className="text-xs text-muted-foreground">
-                            {instructor?.name || 'Unknown'}
+                            {instructorName}
                           </p>
                         </div>
                         <div className="flex gap-1">
@@ -297,8 +324,7 @@ export default function AdminDashboard() {
           <CardContent className="pt-0">
             <div className="space-y-3">
               {topCourses.map((course, i) => {
-                const instructor = mockUsers.find(u => u.id === course.instructorId);
-                const maxEnroll = topCourses[0]?.enrolledCount || 1;
+                const maxEnroll = topCourses[0]?.enrolled_count || 1;
                 return (
                   <div key={course.id} className="flex items-center gap-3">
                     <span className="text-lg font-bold text-muted-foreground/50 w-6 text-center tabular-nums">
@@ -307,9 +333,9 @@ export default function AdminDashboard() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{course.title}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <Progress value={(course.enrolledCount / maxEnroll) * 100} className="h-1.5 flex-1" />
+                        <Progress value={(course.enrolled_count / maxEnroll) * 100} className="h-1.5 flex-1" />
                         <span className="text-xs text-muted-foreground tabular-nums whitespace-nowrap">
-                          {course.enrolledCount} students
+                          {course.enrolled_count} students
                         </span>
                       </div>
                     </div>
@@ -338,33 +364,37 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="space-y-1">
-              {recentUsers.map((user, i) => (
+              {recentUsers.map((user, i) => {
+                const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email;
+                const role = getUserRole(user.id);
+                return (
                 <div key={user.id}>
                   <div className="flex items-center gap-3 py-2.5">
                     <Avatar className="h-9 w-9">
-                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarImage src={user.avatar_url ?? undefined} alt={name} />
                       <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
-                        {getInitials(user.name)}
+                        {getInitials(name)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{user.name}</p>
+                      <p className="text-sm font-medium truncate">{name}</p>
                       <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                     </div>
                     <Badge
                       variant="outline"
                       className={`capitalize text-xs ${
-                        user.role === 'admin' ? 'border-destructive/30 text-destructive' :
-                        user.role === 'instructor' ? 'border-[hsl(var(--info))]/30 text-[hsl(var(--info))]' :
+                        role === 'admin' ? 'border-destructive/30 text-destructive' :
+                        role === 'instructor' ? 'border-[hsl(var(--info))]/30 text-[hsl(var(--info))]' :
                         'border-primary/30 text-primary'
                       }`}
                     >
-                      {user.role}
+                      {role}
                     </Badge>
                   </div>
                   {i < recentUsers.length - 1 && <Separator />}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>

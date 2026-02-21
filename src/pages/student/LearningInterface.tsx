@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { Menu, PanelRight, PanelRightClose } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { mockCourses } from '@/data/mockData';
+import { useCourseById, dbCourseToCardProps } from '@/hooks/useCourses';
 import { useUIStore } from '@/stores/uiStore';
 import { useProgressStore } from '@/stores/progressStore';
 import {
@@ -51,8 +51,11 @@ export default function LearningInterface() {
   const initCourseProgress = useProgressStore(state => state.initCourseProgress);
   const updateLastAccessed = useProgressStore(state => state.updateLastAccessed);
 
-  // Find course and lesson
-  const course: Course | undefined = mockCourses.find(c => c.id === courseId);
+  const { data: dbCourse, isLoading: courseLoading } = useCourseById(courseId);
+  const course: Course | undefined = useMemo(
+    () => dbCourse ? dbCourseToCardProps(dbCourse) : undefined,
+    [dbCourse]
+  );
   
   const findLesson = (): { lesson: Lesson | null; section: Section | null } => {
     if (!course) return { lesson: null, section: null };
