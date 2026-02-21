@@ -22,28 +22,21 @@ export default function AdminLogin() {
     e.preventDefault();
     setIsLoading(true);
 
-    const success = await login(formData.email, formData.password);
+    const result = await login(formData.email, formData.password);
 
-    if (success) {
-      const role = useAuthStore.getState().user?.role;
-      if (role !== 'admin') {
-        useAuthStore.getState().logout();
-        toast({
-          title: 'Access denied',
-          description: 'This login is for administrators only.',
-          variant: 'destructive',
-        });
-        setIsLoading(false);
-        return;
-      }
-      toast({ title: 'Welcome, Admin!', description: 'You have successfully logged in.' });
-      navigate('/admin/dashboard');
+    if (result.success) {
+      setTimeout(() => {
+        const role = useAuthStore.getState().user?.role;
+        if (role !== 'admin') {
+          toast({ title: 'Access denied', description: 'This login is for administrators only.', variant: 'destructive' });
+          useAuthStore.getState().logout();
+        } else {
+          toast({ title: 'Welcome, Admin!', description: 'You have successfully logged in.' });
+          navigate('/admin/dashboard');
+        }
+      }, 200);
     } else {
-      toast({
-        title: 'Login failed',
-        description: 'Invalid email or password.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Login failed', description: result.error || 'Invalid email or password.', variant: 'destructive' });
     }
 
     setIsLoading(false);
@@ -65,59 +58,31 @@ export default function AdminLogin() {
               <Label htmlFor="admin-email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="admin-email"
-                  type="email"
-                  placeholder="admin@masashi.edu"
-                  className="pl-10"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
+                <Input id="admin-email" type="email" placeholder="admin@example.com" className="pl-10" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
               </div>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="admin-password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="admin-password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  className="pl-10 pr-10"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
+                <Input id="admin-password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" className="pl-10 pr-10" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} required />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" aria-label={showPassword ? 'Hide password' : 'Show password'}>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
-
             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign In as Admin'}
             </Button>
           </form>
 
-          <div className="mt-6 rounded-lg bg-muted/50 p-3 text-center text-xs text-muted-foreground">
-            <p className="font-medium mb-1">Demo Credentials</p>
-            <p>Email: <span className="font-mono text-foreground">admin@masashi.edu</span></p>
-            <p>Password: <span className="font-mono text-foreground">any password</span></p>
+          <div className="mt-6 text-center space-y-2">
+            <Link to="/forgot-password" className="text-sm text-primary hover:underline">Forgot password?</Link>
+            <p className="text-sm text-muted-foreground">
+              Not an admin?{' '}
+              <Link to="/login" className="text-primary font-medium hover:underline">Go to regular login</Link>
+            </p>
           </div>
-
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Not an admin?{' '}
-            <Link to="/login" className="text-primary font-medium hover:underline">
-              Go to regular login
-            </Link>
-          </p>
         </CardContent>
       </Card>
     </div>

@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Lock, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
@@ -37,22 +38,26 @@ const passwordRequirements: PasswordRequirement[] = [
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
+  const { updatePassword } = useAuthStore();
   const { toast } = useToast();
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    password: '',
-    confirmPassword: '',
-  });
+  const [hasRecoveryToken, setHasRecoveryToken] = useState(false);
+  const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Check if token exists
-  if (!token) {
+  // Check for recovery token in URL hash (Supabase sends type=recovery in hash)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.includes('type=recovery') || hash.includes('access_token')) {
+      setHasRecoveryToken(true);
+    }
+  }, []);
+
+  if (!hasRecoveryToken) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-muted/30">
         <Card className="w-full max-w-md shadow-elegant">
@@ -85,31 +90,33 @@ export default function ResetPassword() {
     e.preventDefault();
     setErrors({});
 
-    // Validate form
     const result = resetSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       result.error.errors.forEach((err) => {
-        if (err.path[0]) {
-          fieldErrors[err.path[0] as string] = err.message;
-        }
+        if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
       });
       setErrors(fieldErrors);
       return;
     }
 
     setIsLoading(true);
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
+    const res = await updatePassword(formData.password);
     setIsLoading(false);
-    setIsSuccess(true);
-    
-    toast({
-      title: 'Password reset successful',
-      description: 'Your password has been updated. You can now log in.',
-    });
+
+    if (res.success) {
+      setIsSuccess(true);
+      toast({
+        title: 'Password reset successful',
+        description: 'Your password has been updated. You can now log in.',
+      });
+    } else {
+      toast({
+        title: 'Error',
+        description: res.error || 'Could not reset password.',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (isSuccess) {
@@ -127,16 +134,10 @@ export default function ResetPassword() {
               <CheckCircle className="h-6 w-6 text-primary" />
             </div>
             <CardTitle className="font-serif text-2xl">Password reset!</CardTitle>
-            <CardDescription>
-              Your password has been successfully updated.
-            </CardDescription>
+            <CardDescription>Your password has been successfully updated.</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            <Button 
-              className="w-full" 
-              size="lg"
-              onClick={() => navigate('/login')}
-            >
+            <Button className="w-full" size="lg" onClick={() => navigate('/login')}>
               Continue to login
             </Button>
           </CardContent>
@@ -156,9 +157,7 @@ export default function ResetPassword() {
             <span className="font-serif text-2xl font-bold">Masashi LMS</span>
           </Link>
           <CardTitle className="font-serif text-2xl">Create new password</CardTitle>
-          <CardDescription>
-            Enter your new password below
-          </CardDescription>
+          <CardDescription>Enter your new password below</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -172,38 +171,21 @@ export default function ResetPassword() {
                   placeholder="••••••••"
                   className="pl-10 pr-10"
                   value={formData.password}
-                  onChange={(e) => {
-                    setFormData({ ...formData, password: e.target.value });
-                    setErrors({ ...errors, password: '' });
-                  }}
+                  onChange={(e) => { setFormData({ ...formData, password: e.target.value }); setErrors({ ...errors, password: '' }); }}
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" aria-label={showPassword ? 'Hide password' : 'Show password'}>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
-              )}
-              
-              {/* Password requirements */}
+              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               <div className="mt-3 space-y-2">
                 {passwordRequirements.map((req, index) => {
                   const isMet = req.test(formData.password);
                   return (
                     <div key={index} className="flex items-center gap-2 text-sm">
-                      {isMet ? (
-                        <CheckCircle className="h-4 w-4 text-primary" />
-                      ) : (
-                        <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30" />
-                      )}
-                      <span className={isMet ? 'text-primary' : 'text-muted-foreground'}>
-                        {req.label}
-                      </span>
+                      {isMet ? <CheckCircle className="h-4 w-4 text-primary" /> : <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30" />}
+                      <span className={isMet ? 'text-primary' : 'text-muted-foreground'}>{req.label}</span>
                     </div>
                   );
                 })}
@@ -220,23 +202,14 @@ export default function ResetPassword() {
                   placeholder="••••••••"
                   className="pl-10 pr-10"
                   value={formData.confirmPassword}
-                  onChange={(e) => {
-                    setFormData({ ...formData, confirmPassword: e.target.value });
-                    setErrors({ ...errors, confirmPassword: '' });
-                  }}
+                  onChange={(e) => { setFormData({ ...formData, confirmPassword: e.target.value }); setErrors({ ...errors, confirmPassword: '' }); }}
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-              )}
+              {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
               {formData.confirmPassword && formData.password === formData.confirmPassword && (
                 <div className="flex items-center gap-2 text-sm text-primary">
                   <CheckCircle className="h-4 w-4" />

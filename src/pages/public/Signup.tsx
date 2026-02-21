@@ -12,12 +12,13 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { signup } = useAuthStore();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     role: 'student' as 'student' | 'instructor',
@@ -27,16 +28,29 @@ export default function Signup() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate signup with mock login
-    const success = await login(formData.email, 'password');
+    const result = await signup(
+      formData.email,
+      formData.password,
+      formData.firstName,
+      formData.lastName,
+      formData.role
+    );
 
-    toast({
-      title: 'Account created!',
-      description: 'Welcome to Masashi LMS.',
-    });
+    if (result.success) {
+      toast({
+        title: 'Account created!',
+        description: 'Please check your email to verify your account before signing in.',
+      });
+      navigate('/login');
+    } else {
+      toast({
+        title: 'Signup failed',
+        description: result.error || 'Could not create account.',
+        variant: 'destructive',
+      });
+    }
 
     setIsLoading(false);
-    navigate(formData.role === 'instructor' ? '/instructor/dashboard' : '/student/dashboard');
   };
 
   return (
@@ -54,17 +68,30 @@ export default function Signup() {
         </CardHeader>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="firstName"
+                    type="text"
+                    placeholder="John"
+                    className="pl-10"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
                 <Input
-                  id="name"
+                  id="lastName"
                   type="text"
-                  placeholder="John Doe"
-                  className="pl-10"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Doe"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                   required
                 />
               </div>
@@ -98,17 +125,18 @@ export default function Signup() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
-                  minLength={8}
+                  minLength={6}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">Must be at least 8 characters</p>
+              <p className="text-xs text-muted-foreground">Must be at least 6 characters</p>
             </div>
 
             <div className="space-y-3">
