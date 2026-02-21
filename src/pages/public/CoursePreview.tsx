@@ -63,7 +63,7 @@ export default function CoursePreview() {
                 <span className="text-background/60">•</span>
                 <span className="flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  {course.enrollmentCount.toLocaleString()} students
+                  {(course.enrollmentCount ?? course.enrolledCount ?? 0).toLocaleString()} students
                 </span>
                 <span className="text-background/60">•</span>
                 <span className="flex items-center gap-1">
