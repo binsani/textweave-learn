@@ -5,11 +5,9 @@ import {
   DollarSign, 
   Star, 
   Eye,
-  BookOpen,
-  Clock
+  BookOpen
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -18,8 +16,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { 
-  LineChart, 
-  Line, 
   AreaChart, 
   Area, 
   BarChart, 
@@ -34,72 +30,107 @@ import {
   Cell,
   Legend
 } from 'recharts';
-
-const enrollmentData = [
-  { month: 'Aug', enrollments: 45, revenue: 2250 },
-  { month: 'Sep', enrollments: 52, revenue: 2600 },
-  { month: 'Oct', enrollments: 78, revenue: 3900 },
-  { month: 'Nov', enrollments: 95, revenue: 4750 },
-  { month: 'Dec', enrollments: 110, revenue: 5500 },
-  { month: 'Jan', enrollments: 142, revenue: 7100 },
-];
-
-const coursePerformance = [
-  { name: 'Web Dev Bootcamp', enrollments: 1234, completion: 68, rating: 4.8 },
-  { name: 'React Masterclass', enrollments: 856, completion: 72, rating: 4.9 },
-  { name: 'Node.js Backend', enrollments: 0, completion: 0, rating: 0 },
-];
-
-const trafficSources = [
-  { name: 'Organic Search', value: 35, color: 'hsl(var(--primary))' },
-  { name: 'Direct', value: 25, color: 'hsl(var(--chart-2))' },
-  { name: 'Social Media', value: 20, color: 'hsl(var(--chart-3))' },
-  { name: 'Referrals', value: 15, color: 'hsl(var(--chart-4))' },
-  { name: 'Email', value: 5, color: 'hsl(var(--chart-5))' },
-];
-
-const studentEngagement = [
-  { day: 'Mon', views: 245, completions: 32 },
-  { day: 'Tue', views: 312, completions: 45 },
-  { day: 'Wed', views: 287, completions: 38 },
-  { day: 'Thu', views: 356, completions: 52 },
-  { day: 'Fri', views: 298, completions: 41 },
-  { day: 'Sat', views: 189, completions: 28 },
-  { day: 'Sun', views: 156, completions: 22 },
-];
-
-const stats = [
-  {
-    title: 'Total Students',
-    value: '2,090',
-    change: '+12.5%',
-    trend: 'up',
-    icon: Users,
-  },
-  {
-    title: 'Total Revenue',
-    value: '$21,010',
-    change: '+8.2%',
-    trend: 'up',
-    icon: DollarSign,
-  },
-  {
-    title: 'Avg Rating',
-    value: '4.85',
-    change: '+0.3',
-    trend: 'up',
-    icon: Star,
-  },
-  {
-    title: 'Course Views',
-    value: '45.2K',
-    change: '-2.1%',
-    trend: 'down',
-    icon: Eye,
-  },
-];
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuthStore } from '@/stores/authStore';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function InstructorAnalytics() {
+  const { user } = useAuthStore();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['instructor-analytics', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+
+      // Fetch courses
+      const { data: courses } = await supabase
+        .from('courses')
+        .select('id, title, enrolled_count, rating, review_count, price, status')
+        .eq('instructor_id', user.id);
+
+      const courseList = courses ?? [];
+      const courseIds = courseList.map(c => c.id);
+
+      // Fetch enrollments with dates
+      const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('course_id, enrolled_at')
+        .in('course_id', courseIds.length > 0 ? courseIds : ['none']);
+
+      // Fetch reviews
+      const { data: reviews } = await supabase
+        .from('reviews')
+        .select('course_id, rating, created_at')
+        .in('course_id', courseIds.length > 0 ? courseIds : ['none']);
+
+      const totalStudents = courseList.reduce((s, c) => s + c.enrolled_count, 0);
+      const totalRevenue = courseList.reduce((s, c) => s + c.price * c.enrolled_count * 0.7, 0);
+      const publishedWithRating = courseList.filter(c => c.status === 'published' && c.rating > 0);
+      const avgRating = publishedWithRating.length > 0
+        ? (publishedWithRating.reduce((s, c) => s + Number(c.rating), 0) / publishedWithRating.length).toFixed(2)
+        : '0';
+
+      // Build monthly enrollment data
+      const monthlyMap: Record<string, { enrollments: number; revenue: number }> = {};
+      for (const e of enrollments ?? []) {
+        const d = new Date(e.enrolled_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (!monthlyMap[key]) monthlyMap[key] = { enrollments: 0, revenue: 0 };
+        monthlyMap[key].enrollments++;
+        const course = courseList.find(c => c.id === e.course_id);
+        monthlyMap[key].revenue += (course?.price || 0) * 0.7;
+      }
+
+      const sortedMonths = Object.keys(monthlyMap).sort();
+      const last6 = sortedMonths.slice(-6);
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const enrollmentChartData = last6.map(k => ({
+        month: monthNames[parseInt(k.split('-')[1]) - 1],
+        enrollments: monthlyMap[k].enrollments,
+        revenue: Math.round(monthlyMap[k].revenue),
+      }));
+
+      // Course performance
+      const coursePerformance = courseList
+        .filter(c => c.status === 'published')
+        .map(c => ({
+          name: c.title,
+          enrollments: c.enrolled_count,
+          rating: Number(c.rating),
+        }));
+
+      return {
+        totalStudents,
+        totalRevenue: Math.round(totalRevenue),
+        avgRating,
+        totalCourses: courseList.length,
+        enrollmentChartData,
+        coursePerformance,
+      };
+    },
+    enabled: !!user,
+  });
+
+  if (isLoading || !data) {
+    return (
+      <div className="p-6 md:p-8 space-y-6">
+        <Skeleton className="h-10 w-48" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <Skeleton className="h-80" />
+      </div>
+    );
+  }
+
+  const stats = [
+    { title: 'Total Students', value: data.totalStudents.toLocaleString(), icon: Users },
+    { title: 'Total Revenue', value: `$${data.totalRevenue.toLocaleString()}`, icon: DollarSign },
+    { title: 'Avg Rating', value: data.avgRating, icon: Star },
+    { title: 'Total Courses', value: data.totalCourses.toString(), icon: BookOpen },
+  ];
+
   return (
     <div className="p-6 md:p-8">
       {/* Header */}
@@ -108,17 +139,6 @@ export default function InstructorAnalytics() {
           <h1 className="font-serif text-3xl font-bold text-foreground mb-2">Analytics</h1>
           <p className="text-muted-foreground">Track your course performance and student engagement</p>
         </div>
-        <Select defaultValue="30d">
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select period" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7d">Last 7 days</SelectItem>
-            <SelectItem value="30d">Last 30 days</SelectItem>
-            <SelectItem value="90d">Last 90 days</SelectItem>
-            <SelectItem value="12m">Last 12 months</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Stats Grid */}
@@ -128,10 +148,6 @@ export default function InstructorAnalytics() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-2">
                 <stat.icon className="h-5 w-5 text-muted-foreground" />
-                <span className={`text-sm flex items-center gap-1 ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                  {stat.trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                  {stat.change}
-                </span>
               </div>
               <div className="text-2xl font-bold text-foreground">{stat.value}</div>
               <p className="text-sm text-muted-foreground">{stat.title}</p>
@@ -140,150 +156,92 @@ export default function InstructorAnalytics() {
         ))}
       </div>
 
-      {/* Charts Grid */}
+      {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
-        {/* Enrollment & Revenue Chart */}
         <Card>
           <CardHeader>
             <CardTitle>Enrollments & Revenue</CardTitle>
-            <CardDescription>Monthly trends over the last 6 months</CardDescription>
+            <CardDescription>Monthly trends</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={enrollmentData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="month" className="text-xs" />
-                  <YAxis yAxisId="left" className="text-xs" />
-                  <YAxis yAxisId="right" orientation="right" className="text-xs" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }} 
-                  />
-                  <Area 
-                    yAxisId="left"
-                    type="monotone" 
-                    dataKey="enrollments" 
-                    stroke="hsl(var(--primary))" 
-                    fill="hsl(var(--primary))" 
-                    fillOpacity={0.2}
-                    name="Enrollments"
-                  />
-                  <Area 
-                    yAxisId="right"
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="hsl(var(--chart-2))" 
-                    fill="hsl(var(--chart-2))" 
-                    fillOpacity={0.2}
-                    name="Revenue ($)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Student Engagement */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Engagement</CardTitle>
-            <CardDescription>Course views and lesson completions this week</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={studentEngagement}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="day" className="text-xs" />
-                  <YAxis className="text-xs" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }} 
-                  />
-                  <Bar dataKey="views" fill="hsl(var(--primary))" name="Views" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="completions" fill="hsl(var(--chart-3))" name="Completions" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Traffic Sources */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Traffic Sources</CardTitle>
-            <CardDescription>Where your students come from</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={trafficSources}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {trafficSources.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              {data.enrollmentChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={data.enrollmentChartData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="month" className="text-xs" />
+                    <YAxis yAxisId="left" className="text-xs" />
+                    <YAxis yAxisId="right" orientation="right" className="text-xs" />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))', 
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }} 
+                    />
+                    <Area 
+                      yAxisId="left"
+                      type="monotone" 
+                      dataKey="enrollments" 
+                      stroke="hsl(var(--primary))" 
+                      fill="hsl(var(--primary))" 
+                      fillOpacity={0.2}
+                      name="Enrollments"
+                    />
+                    <Area 
+                      yAxisId="right"
+                      type="monotone" 
+                      dataKey="revenue" 
+                      stroke="hsl(var(--chart-2))" 
+                      fill="hsl(var(--chart-2))" 
+                      fillOpacity={0.2}
+                      name="Revenue ($)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  No enrollment data yet
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
         {/* Course Performance Table */}
-        <Card className="lg:col-span-2">
+        <Card>
           <CardHeader>
             <CardTitle>Course Performance</CardTitle>
-            <CardDescription>Comparison of your published courses</CardDescription>
+            <CardDescription>Your published courses</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {coursePerformance.map((course, index) => (
-                <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <BookOpen className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{course.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {course.enrollments > 0 ? `${course.enrollments.toLocaleString()} students` : 'Not published'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-6 text-sm">
-                    <div className="text-right">
-                      <p className="text-muted-foreground">Completion</p>
-                      <p className="font-medium">{course.completion > 0 ? `${course.completion}%` : '-'}</p>
+              {data.coursePerformance.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No published courses yet</div>
+              ) : (
+                data.coursePerformance.map((course, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <BookOpen className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">{course.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {course.enrollments > 0 ? `${course.enrollments.toLocaleString()} students` : 'No students yet'}
+                        </p>
+                      </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-muted-foreground">Rating</p>
+                      <p className="text-muted-foreground text-sm">Rating</p>
                       <p className="font-medium flex items-center gap-1">
                         <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                        {course.rating > 0 ? course.rating : '-'}
+                        {course.rating > 0 ? course.rating.toFixed(1) : '-'}
                       </p>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

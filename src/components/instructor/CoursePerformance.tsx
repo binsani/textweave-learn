@@ -1,54 +1,54 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import type { Course } from '@/types';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CoursePerformanceProps {
   courses: Course[];
 }
 
 export function CoursePerformance({ courses }: CoursePerformanceProps) {
-  // Calculate performance metrics for each course
+  const courseIds = courses.map(c => c.id);
+
+  // Fetch real completion data
+  const { data: progressData } = useQuery({
+    queryKey: ['course-performance-progress', courseIds],
+    queryFn: async () => {
+      if (courseIds.length === 0) return {};
+      const { data } = await supabase
+        .from('course_progress')
+        .select('course_id, is_completed')
+        .in('course_id', courseIds);
+
+      // Count completed vs total per course
+      const stats: Record<string, { completed: number; total: number }> = {};
+      for (const p of data ?? []) {
+        if (!stats[p.course_id]) stats[p.course_id] = { completed: 0, total: 0 };
+        stats[p.course_id].total++;
+        if (p.is_completed) stats[p.course_id].completed++;
+      }
+      return stats;
+    },
+    enabled: courseIds.length > 0,
+  });
+
   const courseMetrics = courses.slice(0, 5).map((course) => {
-    const completionRate = Math.round(Math.random() * 40 + 50); // Mock: 50-90%
-    const avgRating = course.rating;
-    const trend = Math.random() > 0.3 ? 'up' : Math.random() > 0.5 ? 'down' : 'stable';
-    const trendValue = Math.round(Math.random() * 15 + 1);
+    const stats = progressData?.[course.id];
+    const completionRate = stats && stats.total > 0
+      ? Math.round((stats.completed / stats.total) * 100)
+      : 0;
 
     return {
       id: course.id,
       title: course.title,
       students: course.enrollmentCount || course.enrolledCount,
       completionRate,
-      avgRating,
-      trend,
-      trendValue,
+      avgRating: course.rating,
       revenue: course.price * (course.enrollmentCount || course.enrolledCount) * 0.7,
     };
   });
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'up':
-        return <TrendingUp className="h-3 w-3 text-green-500" />;
-      case 'down':
-        return <TrendingDown className="h-3 w-3 text-destructive" />;
-      default:
-        return <Minus className="h-3 w-3 text-muted-foreground" />;
-    }
-  };
-
-  const getTrendColor = (trend: string) => {
-    switch (trend) {
-      case 'up':
-        return 'text-green-600';
-      case 'down':
-        return 'text-destructive';
-      default:
-        return 'text-muted-foreground';
-    }
-  };
 
   return (
     <Card>
@@ -77,12 +77,6 @@ export function CoursePerformance({ courses }: CoursePerformanceProps) {
                       ⭐ {course.avgRating.toFixed(1)}
                     </span>
                   </div>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  {getTrendIcon(course.trend)}
-                  <span className={`text-xs font-medium ${getTrendColor(course.trend)}`}>
-                    {course.trend === 'stable' ? '0%' : `${course.trend === 'up' ? '+' : '-'}${course.trendValue}%`}
-                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
