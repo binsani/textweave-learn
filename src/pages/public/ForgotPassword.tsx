@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
@@ -13,6 +14,7 @@ const emailSchema = z.string().email('Please enter a valid email address');
 
 export default function ForgotPassword() {
   const { toast } = useToast();
+  const { resetPassword } = useAuthStore();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -22,7 +24,6 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError('');
 
-    // Validate email
     const result = emailSchema.safeParse(email);
     if (!result.success) {
       setError(result.error.errors[0].message);
@@ -30,17 +31,22 @@ export default function ForgotPassword() {
     }
 
     setIsLoading(true);
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
+    const res = await resetPassword(email);
     setIsLoading(false);
-    setIsSubmitted(true);
-    
-    toast({
-      title: 'Reset link sent',
-      description: 'Check your email for password reset instructions.',
-    });
+
+    if (res.success) {
+      setIsSubmitted(true);
+      toast({
+        title: 'Reset link sent',
+        description: 'Check your email for password reset instructions.',
+      });
+    } else {
+      toast({
+        title: 'Error',
+        description: res.error || 'Could not send reset link.',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (isSubmitted) {
@@ -68,20 +74,11 @@ export default function ForgotPassword() {
                 Didn't receive the email? Check your spam folder or try again with a different email address.
               </AlertDescription>
             </Alert>
-            
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={() => setIsSubmitted(false)}
-            >
+            <Button variant="outline" className="w-full" onClick={() => setIsSubmitted(false)}>
               Try another email
             </Button>
-            
             <div className="text-center">
-              <Link 
-                to="/login" 
-                className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-              >
+              <Link to="/login" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
                 <ArrowLeft className="h-4 w-4" />
                 Back to login
               </Link>
@@ -119,28 +116,18 @@ export default function ForgotPassword() {
                   placeholder="you@example.com"
                   className="pl-10"
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setError('');
-                  }}
+                  onChange={(e) => { setEmail(e.target.value); setError(''); }}
                   required
                 />
               </div>
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
-              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
-
             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
               {isLoading ? 'Sending...' : 'Send reset link'}
             </Button>
           </form>
-
           <div className="mt-6 text-center">
-            <Link 
-              to="/login" 
-              className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-            >
+            <Link to="/login" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
               <ArrowLeft className="h-4 w-4" />
               Back to login
             </Link>

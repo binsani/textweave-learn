@@ -22,24 +22,21 @@ export default function InstructorLogin() {
     e.preventDefault();
     setIsLoading(true);
 
-    const success = await login(formData.email, formData.password);
+    const result = await login(formData.email, formData.password);
 
-    if (success) {
-      const role = useAuthStore.getState().user?.role;
-      if (role !== 'instructor') {
-        useAuthStore.getState().logout();
-        toast({
-          title: 'Access denied',
-          description: 'This login is for instructors only. Please use the appropriate login page.',
-          variant: 'destructive',
-        });
-        setIsLoading(false);
-        return;
-      }
+    if (result.success) {
       toast({ title: 'Welcome back!', description: 'Your teaching dashboard is ready.' });
-      navigate('/instructor/dashboard');
+      setTimeout(() => {
+        const role = useAuthStore.getState().user?.role;
+        if (role !== 'instructor') {
+          toast({ title: 'Access denied', description: 'This login is for instructors only.', variant: 'destructive' });
+          useAuthStore.getState().logout();
+        } else {
+          navigate('/instructor/dashboard');
+        }
+      }, 200);
     } else {
-      toast({ title: 'Login failed', description: 'Invalid email or password.', variant: 'destructive' });
+      toast({ title: 'Login failed', description: result.error || 'Invalid email or password.', variant: 'destructive' });
     }
 
     setIsLoading(false);
@@ -61,7 +58,7 @@ export default function InstructorLogin() {
               <Label htmlFor="instructor-email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="instructor-email" type="email" placeholder="instructor@masashi.edu" className="pl-10" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+                <Input id="instructor-email" type="email" placeholder="instructor@example.com" className="pl-10" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
               </div>
             </div>
             <div className="space-y-2">
@@ -79,16 +76,13 @@ export default function InstructorLogin() {
             </Button>
           </form>
 
-          <div className="mt-6 rounded-lg bg-muted/50 p-3 text-center text-xs text-muted-foreground">
-            <p className="font-medium mb-1">Demo Credentials</p>
-            <p>Email: <span className="font-mono text-foreground">instructor@masashi.edu</span></p>
-            <p>Password: <span className="font-mono text-foreground">any password</span></p>
+          <div className="mt-6 text-center space-y-2">
+            <Link to="/forgot-password" className="text-sm text-primary hover:underline">Forgot password?</Link>
+            <p className="text-sm text-muted-foreground">
+              Not an instructor?{' '}
+              <Link to="/login" className="text-primary font-medium hover:underline">Go to main login</Link>
+            </p>
           </div>
-
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Not an instructor?{' '}
-            <Link to="/login" className="text-primary font-medium hover:underline">Go to main login</Link>
-          </p>
         </CardContent>
       </Card>
     </div>

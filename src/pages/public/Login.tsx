@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import type { UserRole } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/hooks/use-toast';
+import type { UserRole } from '@/types';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -25,24 +25,27 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    const success = await login(formData.email, formData.password);
+    const result = await login(formData.email, formData.password);
 
-    if (success) {
+    if (result.success) {
       toast({
         title: 'Welcome back!',
         description: 'You have successfully logged in.',
       });
-      const role = useAuthStore.getState().user?.role;
-      const dashboardMap: Record<UserRole, string> = {
-        student: '/student/dashboard',
-        instructor: '/instructor/dashboard',
-        admin: '/admin/dashboard',
-      };
-      navigate(dashboardMap[role || 'student']);
+      // Wait a tick for auth state to propagate
+      setTimeout(() => {
+        const role = useAuthStore.getState().user?.role;
+        const dashboardMap: Record<UserRole, string> = {
+          student: '/student/dashboard',
+          instructor: '/instructor/dashboard',
+          admin: '/admin/dashboard',
+        };
+        navigate(dashboardMap[role || 'student']);
+      }, 100);
     } else {
       toast({
         title: 'Login failed',
-        description: 'Invalid email or password.',
+        description: result.error || 'Invalid email or password.',
         variant: 'destructive',
       });
     }
@@ -103,6 +106,7 @@ export default function Login() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>

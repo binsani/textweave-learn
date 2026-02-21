@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useAuthStore } from "@/stores/authStore";
 
 // Layouts (keep eager — needed for shell)
 import { PublicLayout, StudentLayout, InstructorLayout, AdminLayout } from "@/components/layout";
@@ -61,10 +62,20 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
+function AuthInitializer({ children }: { children: React.ReactNode }) {
+  const initialize = useAuthStore((s) => s.initialize);
+  useEffect(() => {
+    const unsubscribe = initialize();
+    return unsubscribe;
+  }, [initialize]);
+  return <>{children}</>;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ErrorBoundary>
+        <AuthInitializer>
         <Toaster />
         <Sonner />
         <BrowserRouter>
@@ -147,6 +158,7 @@ const App = () => (
             </Routes>
           </Suspense>
         </BrowserRouter>
+      </AuthInitializer>
       </ErrorBoundary>
     </TooltipProvider>
   </QueryClientProvider>
