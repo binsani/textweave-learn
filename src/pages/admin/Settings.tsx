@@ -81,7 +81,6 @@ export default function AdminSettings() {
   });
 
   const onSubmit = (data: GeneralFormValues) => {
-    console.log(data);
     toast({
       title: 'Settings saved',
       description: 'Platform settings have been updated successfully.',

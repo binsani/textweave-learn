@@ -67,11 +67,11 @@ export function CourseApprovalList() {
   const pendingCount = allCourses.filter(c => c.status === 'pending_review').length;
 
   const handleApprove = (courseId: string) => {
-    console.log('Approving course:', courseId);
+    // TODO: Update course status via Supabase
   };
 
   const handleReject = () => {
-    console.log('Rejecting course:', selectedCourse, 'Reason:', rejectReason);
+    // TODO: Update course status via Supabase
     setRejectDialogOpen(false);
     setRejectReason('');
     setSelectedCourse(null);

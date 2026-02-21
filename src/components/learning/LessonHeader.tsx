@@ -35,7 +35,7 @@ export function LessonHeader({ lesson, courseId, sectionTitle }: LessonHeaderPro
     if (isBookmarked) {
       removeBookmark(courseId, lesson.id);
     } else {
-      addBookmark(courseId, lesson.id);
+      addBookmark(courseId, lesson.id, lesson.title);
     }
   };
 

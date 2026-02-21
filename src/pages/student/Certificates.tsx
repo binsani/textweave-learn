@@ -1,44 +1,100 @@
 import { useState } from 'react';
-import { Award, Download } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Award } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CertificateCard, CertificatePreview } from '@/components/certificate';
 import { useAuthStore } from '@/stores/authStore';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// Mock certificates data
-const mockCertificates = [
-  {
-    id: 'CERT-2024-001',
-    studentName: 'Alex Thompson',
-    courseName: 'Python Programming Fundamentals',
-    instructorName: 'Dr. Sarah Mitchell',
-    completionDate: '2024-06-15T10:00:00Z',
-    courseHours: 15,
-  },
-  {
-    id: 'CERT-2024-002',
-    studentName: 'Alex Thompson',
-    courseName: 'Data Science with Python',
-    instructorName: 'Prof. James Anderson',
-    completionDate: '2024-08-20T10:00:00Z',
-    courseHours: 24,
-  },
-];
+interface CertificateData {
+  id: string;
+  studentName: string;
+  courseName: string;
+  instructorName: string;
+  completionDate: string;
+  courseHours: number;
+}
 
 export default function StudentCertificates() {
   const { user } = useAuthStore();
-  const [selectedCertificate, setSelectedCertificate] = useState<typeof mockCertificates[0] | null>(null);
+  const [selectedCertificate, setSelectedCertificate] = useState<CertificateData | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  // Use user's name in certificates
-  const certificates = mockCertificates.map(cert => ({
-    ...cert,
-    studentName: user?.name || cert.studentName,
-  }));
+  const { data: certificates = [], isLoading } = useQuery({
+    queryKey: ['certificates', user?.id],
+    queryFn: async (): Promise<CertificateData[]> => {
+      if (!user) return [];
 
-  const handleView = (cert: typeof mockCertificates[0]) => {
+      // Get all courses where user has completed every lesson
+      const { data: progress, error: pErr } = await supabase
+        .from('course_progress')
+        .select('course_id, lesson_id, is_completed, completed_at')
+        .eq('user_id', user.id)
+        .eq('is_completed', true);
+      if (pErr) throw pErr;
+
+      if (!progress?.length) return [];
+
+      // Group completed lessons by course
+      const completedByCourse: Record<string, { count: number; lastDate: string }> = {};
+      for (const row of progress) {
+        if (!completedByCourse[row.course_id]) {
+          completedByCourse[row.course_id] = { count: 0, lastDate: row.completed_at || '' };
+        }
+        completedByCourse[row.course_id].count++;
+        if ((row.completed_at || '') > completedByCourse[row.course_id].lastDate) {
+          completedByCourse[row.course_id].lastDate = row.completed_at || '';
+        }
+      }
+
+      const courseIds = Object.keys(completedByCourse);
+      if (!courseIds.length) return [];
+
+      // Fetch courses with their sections/lessons counts and instructor
+      const { data: courses, error: cErr } = await supabase
+        .from('courses')
+        .select('id, title, estimated_hours, instructor:profiles!courses_instructor_id_fkey(first_name, last_name), sections(lessons(id))')
+        .in('id', courseIds);
+      if (cErr) throw cErr;
+
+      const certs: CertificateData[] = [];
+      for (const course of courses ?? []) {
+        const totalLessons = (course.sections ?? []).reduce((acc: number, s: any) => acc + (s.lessons?.length || 0), 0);
+        const completed = completedByCourse[course.id];
+        if (completed && completed.count >= totalLessons && totalLessons > 0) {
+          const instructor = course.instructor as any;
+          const instructorName = instructor
+            ? [instructor.first_name, instructor.last_name].filter(Boolean).join(' ')
+            : 'Instructor';
+          certs.push({
+            id: `CERT-${course.id.slice(0, 8).toUpperCase()}`,
+            studentName: user.name,
+            courseName: course.title,
+            instructorName,
+            completionDate: completed.lastDate,
+            courseHours: Number(course.estimated_hours),
+          });
+        }
+      }
+      return certs;
+    },
+    enabled: !!user,
+  });
+
+  const handleView = (cert: CertificateData) => {
     setSelectedCertificate(cert);
     setPreviewOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 md:p-8 space-y-4">
+        <Skeleton className="h-10 w-48" />
+        {[1, 2].map(i => <Skeleton key={i} className="h-20 w-full" />)}
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 md:p-8">
