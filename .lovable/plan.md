@@ -1,93 +1,92 @@
 
 
-# Deploy-Readiness Audit (Frontend Only)
+# Deploy-Readiness: Pending Tasks
 
-The app is well-built with all pages complete, consistent styling, error boundaries, code-splitting, and a clean codebase. Below are the remaining items to address before deploying.
-
----
-
-## 1. SEO and Meta Tags
-
-Currently only `index.html` has meta tags. React Router pages don't update the document title or meta description per route.
-
-**Fix:** Add a lightweight `useDocumentTitle` hook (or use `react-helmet-async`) so each page sets its own `<title>` and `<meta description>`. This is critical for SEO and for users bookmarking pages.
+Here is a complete list of everything that still needs to be done before the app is production-ready, organized by priority.
 
 ---
 
-## 2. Accessibility (a11y) Improvements
+## Critical (Must Fix)
 
-- The mobile menu toggle button in `PublicLayout.tsx` has an `aria-label`, which is good.
-- However, many interactive elements across the app (e.g., icon-only buttons, form inputs without visible labels in some components) could benefit from an accessibility pass.
-- The blog and help page images from Unsplash may need more descriptive `alt` text.
-- Keyboard navigation should be verified on the course sidebar and quiz interface.
+### 1. Real Authentication (Replace Mock Auth)
+The `authStore.ts` still authenticates against `mockUsers` -- no real passwords are checked and no sessions are created. The `Signup.tsx` page fakes account creation. Both Login and Signup must be rewritten to use the real authentication system (Supabase Auth) so users can actually register and sign in.
 
----
+- Rewrite `authStore.ts` to use `supabase.auth.signInWithPassword` / `signUp` / `signOut` / `onAuthStateChange`
+- Update `Login.tsx` to call real sign-in
+- Update `Signup.tsx` to call real sign-up (with first_name/last_name metadata so the `handle_new_user` trigger populates profiles)
+- Update `ForgotPassword.tsx` and `ResetPassword.tsx` to use `supabase.auth.resetPasswordForEmail` / `updateUser`
+- Update role-specific login pages (`StudentLogin`, `InstructorLogin`, `AdminLogin`) similarly
+- Remove the `switchRole` dev bypass from authStore
 
-## 3. Image Optimization
+### 2. Migrate All Pages Off Mock Data (17 files remaining)
+These files still import from `mockData.ts` and must be converted to fetch from the database:
 
-- No images use `loading="lazy"` for below-the-fold content.
-- Course thumbnails and blog images (external Unsplash URLs) have no fallback if they fail to load. Adding `onError` handlers with a placeholder fallback would prevent broken image icons.
-- Consider adding `width` and `height` attributes to prevent layout shift (CLS).
+| Area | Files |
+|------|-------|
+| **Student pages** | Dashboard, Courses, Bookmarks, Notes, LearningInterface, QuizInterface |
+| **Instructor pages** | Dashboard, CourseEditor |
+| **Admin pages** | Dashboard |
+| **Admin components** | PlatformAnalytics, CourseApprovalList, UserManagementTable |
+| **Public pages** | Landing, CoursePreview |
+| **Stores** | progressStore (uses mockCourseProgress) |
+| **Components** | SearchCommandPalette |
 
----
-
-## 4. Login Redirect Logic
-
-Currently `Login.tsx` always redirects to `/student/dashboard` after login, ignoring the user's actual role. It should redirect based on role (student/instructor/admin) similar to the `getDashboardLink()` logic already in `PublicLayout.tsx`.
-
----
-
-## 5. Route Protection
-
-There are no route guards. Any unauthenticated user can navigate directly to `/student/dashboard`, `/instructor/dashboard`, or `/admin/dashboard`. A `ProtectedRoute` wrapper component should redirect unauthenticated users to `/login` and optionally check role-based access.
-
----
-
-## 6. 404 Page Styling
-
-The `NotFound` page is minimal and doesn't use `PublicLayout`, so it lacks the header/footer. It should be wrapped in the public layout or at least include navigation back to the app.
+### 3. Seed the Database
+All database tables are currently empty. At minimum, seed one or two courses with sections, lessons, and quiz data so the app has content to display after launch.
 
 ---
 
-## 7. Favicon and PWA Basics
+## High Priority
 
-- `favicon.ico` and `favicon.png` exist, which is good.
-- No `manifest.json` or `apple-touch-icon` -- adding these would improve mobile "Add to Home Screen" experience and is a quick win.
+### 4. Wire Up Progress Tracking to Database
+The `progressStore` currently persists to `localStorage` via Zustand. Progress, notes, and bookmarks should read/write to the `course_progress`, `notes`, and `bookmarks` database tables so data persists across devices.
 
----
-
-## 8. Performance: Font Loading
-
-The app loads Google Fonts (Crimson Pro + Inter) via a CSS `@import`, which is render-blocking. Switching to a `<link rel="preload">` in `index.html` would improve First Contentful Paint.
+### 5. Wire Up Certificates
+`Certificates.tsx` uses hardcoded mock data. It needs a `certificates` table (or derive from `course_progress` where `is_completed = true`) and fetch real completion data.
 
 ---
 
-## 9. Remove Dev-Only Features
+## Medium Priority
 
-The `switchRole` function in `authStore.ts` allows role switching without authentication. If any UI exposes this (e.g., a dev toolbar), it should be removed or gated behind a dev-mode flag before deploying.
+### 6. Image Fallbacks on Remaining Pages
+`CoursePreview`, `Help`, and `Instructors` pages render external images without `onError` fallback handlers. Add `onError={(e) => { e.currentTarget.src = '/placeholder.svg' }}`.
 
----
-
-## Summary: Priority Order
-
-| Priority | Item | Effort |
-|----------|------|--------|
-| High | Route protection (guards) | Medium |
-| High | Login redirect by role | Small |
-| High | SEO / page titles | Small |
-| Medium | Image lazy loading + fallbacks | Small |
-| Medium | 404 page with layout | Small |
-| Medium | Font preloading | Small |
-| Low | Accessibility pass | Medium |
-| Low | PWA manifest | Small |
-| Low | Remove dev role-switching | Small |
+### 7. Accessibility Pass
+- Add `aria-label` to icon-only buttons across layouts
+- Verify keyboard navigation on course sidebar and quiz interface
+- Improve `alt` text on blog/help page images
 
 ---
 
-## Technical Details
+## Low Priority
 
-- **Route Guards**: Create a `ProtectedRoute` component that reads `useAuthStore` and wraps role-specific route groups. Redirect to `/login` if unauthenticated, or to the appropriate dashboard if wrong role.
-- **Page Titles**: A simple `useEffect(() => { document.title = "Page - Masashi LMS" }, [])` in each page, or a shared hook.
-- **Font Preload**: Move the Google Fonts URL from `index.css` `@import` to `<link rel="preconnect">` + `<link rel="preload">` in `index.html`.
-- **Image Fallbacks**: Add `onError={(e) => { e.currentTarget.src = '/placeholder.svg' }}` to `<img>` tags with external sources.
+### 8. Remove `mockData.ts`
+Once all imports are migrated, delete `src/data/mockData.ts` entirely.
+
+### 9. Environment Cleanup
+Ensure no dev-only code (console.logs, test credentials) remains in production builds.
+
+---
+
+## Summary
+
+| # | Task | Priority | Effort |
+|---|------|----------|--------|
+| 1 | Real authentication (Supabase Auth) | Critical | Large |
+| 2 | Migrate 17 files off mock data | Critical | Large |
+| 3 | Seed database with content | Critical | Medium |
+| 4 | Progress/notes/bookmarks to DB | High | Medium |
+| 5 | Certificates from DB | High | Small |
+| 6 | Image fallbacks on remaining pages | Medium | Small |
+| 7 | Accessibility pass | Medium | Medium |
+| 8 | Delete mockData.ts | Low | Trivial |
+| 9 | Environment cleanup | Low | Trivial |
+
+---
+
+## Technical Notes
+
+- **Auth migration**: The existing `ProtectedRoute` reads from `useAuthStore`. Once the store is backed by Supabase Auth sessions, route protection will work automatically with real users.
+- **Data migration order**: Start with authentication (task 1), then seed data (task 3), then migrate pages in this order: public-facing pages (Landing, CoursePreview, Catalog) -> student pages -> instructor pages -> admin pages.
+- **The `handle_new_user` trigger** already creates a profile and assigns the `student` role on signup, so the Signup page just needs to pass `first_name` and `last_name` as user metadata.
 
