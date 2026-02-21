@@ -1,10 +1,10 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { 
   CheckCircle, 
   XCircle, 
   Eye, 
   Clock,
-  MessageSquare,
   User,
   BookOpen,
   Filter
@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -28,10 +29,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { mockCourses, mockUsers } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
+import { dbCourseToCardProps, type DbCourse } from '@/hooks/useCourses';
 import type { CourseStatus } from '@/types';
 
-const statusColors: Record<CourseStatus, string> = {
+const statusColors: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
   pending_review: 'bg-yellow-500/10 text-yellow-600',
   under_review: 'bg-blue-500/10 text-blue-600',
@@ -45,16 +47,27 @@ export function CourseApprovalList() {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
 
-  const filteredCourses = mockCourses.filter(course => {
+  const { data: allCourses = [], isLoading } = useQuery({
+    queryKey: ['admin-all-courses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('courses')
+        .select(`*, instructor:profiles!courses_instructor_id_fkey(*), sections(*, lessons(*))`)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map((c) => dbCourseToCardProps(c as DbCourse));
+    },
+  });
+
+  const filteredCourses = allCourses.filter(course => {
     if (statusFilter === 'all') return true;
     return course.status === statusFilter;
   });
 
-  const pendingCount = mockCourses.filter(c => c.status === 'under_review' || c.status === 'pending_review').length;
+  const pendingCount = allCourses.filter(c => c.status === 'pending_review').length;
 
   const handleApprove = (courseId: string) => {
     console.log('Approving course:', courseId);
-    // In real app, this would update the course status
   };
 
   const handleReject = () => {
@@ -63,6 +76,16 @@ export function CourseApprovalList() {
     setRejectReason('');
     setSelectedCourse(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-28 w-full" />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -80,7 +103,6 @@ export function CourseApprovalList() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Courses</SelectItem>
-            <SelectItem value="under_review">Under Review</SelectItem>
             <SelectItem value="pending_review">Pending Review</SelectItem>
             <SelectItem value="published">Published</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
@@ -92,8 +114,7 @@ export function CourseApprovalList() {
       {/* Course List */}
       <div className="space-y-4">
         {filteredCourses.map((course) => {
-          const instructor = mockUsers.find(u => u.id === course.instructorId);
-          const isPending = course.status === 'under_review' || course.status === 'pending_review';
+          const isPending = course.status === 'pending_review';
           
           return (
             <Card key={course.id} className={isPending ? 'border-accent/30' : ''}>
@@ -108,7 +129,7 @@ export function CourseApprovalList() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <h3 className="font-medium text-foreground truncate">{course.title}</h3>
-                      <Badge className={statusColors[course.status]}>
+                      <Badge className={statusColors[course.status] || ''}>
                         {course.status.replace('_', ' ')}
                       </Badge>
                     </div>
@@ -118,7 +139,7 @@ export function CourseApprovalList() {
                     <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <User className="h-4 w-4" />
-                        <span>{instructor?.name || 'Unknown'}</span>
+                        <span>{course.instructor?.name || 'Unknown'}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <BookOpen className="h-4 w-4" />

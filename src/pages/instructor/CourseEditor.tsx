@@ -21,16 +21,16 @@ import {
   Trash2,
   Settings,
   BookOpen,
-  HelpCircle,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
-import { mockCourses } from '@/data/mockData';
+import { useCourseById, dbCourseToCardProps } from '@/hooks/useCourses';
 import {
   CourseMetadataForm,
   SectionManager,
   LessonEditor,
   QuizEditor,
 } from '@/components/course-editor';
+import { PageLoader } from '@/components/PageLoader';
 import type { Course, Section, Lesson, Quiz } from '@/types';
 
 type EditorView = 'details' | 'curriculum' | 'lesson' | 'quiz';
@@ -40,6 +40,8 @@ export default function CourseEditor() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const isNewCourse = courseId === 'new';
+
+  const { data: dbCourse, isLoading } = useCourseById(isNewCourse ? undefined : courseId);
 
   // Initialize course data
   const [course, setCourse] = useState<Partial<Course>>(() => {
@@ -70,7 +72,7 @@ export default function CourseEditor() {
         updatedAt: new Date().toISOString(),
       };
     }
-    return mockCourses.find(c => c.id === courseId) || {};
+    return {};
   });
 
   const [sections, setSections] = useState<Section[]>(course.sections || []);
@@ -80,10 +82,20 @@ export default function CourseEditor() {
   const [editingQuiz, setEditingQuiz] = useState<{ lessonId: string; lessonTitle: string; quiz: Quiz | null } | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Update hasChanges when course or sections change
+  // Populate from DB when loaded
+  useEffect(() => {
+    if (dbCourse && !isNewCourse) {
+      const mapped = dbCourseToCardProps(dbCourse);
+      setCourse(mapped);
+      setSections(mapped.sections || []);
+    }
+  }, [dbCourse, isNewCourse]);
+
   useEffect(() => {
     setHasChanges(true);
   }, [course, sections]);
+
+  if (!isNewCourse && isLoading) return <PageLoader />;
 
   const handleSaveDetails = (data: any) => {
     setCourse({ ...course, ...data, updatedAt: new Date().toISOString() });
@@ -105,14 +117,10 @@ export default function CourseEditor() {
 
   const handleSaveLesson = (updatedLesson: Lesson) => {
     if (!editingLesson) return;
-
     setSections(
       sections.map(s =>
         s.id === editingLesson.sectionId
-          ? {
-              ...s,
-              lessons: s.lessons.map(l => (l.id === updatedLesson.id ? updatedLesson : l)),
-            }
+          ? { ...s, lessons: s.lessons.map(l => (l.id === updatedLesson.id ? updatedLesson : l)) }
           : s
       )
     );
@@ -122,36 +130,21 @@ export default function CourseEditor() {
   };
 
   const handleEditQuiz = (lessonId: string, quizId?: string) => {
-    // Find the lesson
     let foundLesson: Lesson | undefined;
     for (const section of sections) {
       foundLesson = section.lessons.find(l => l.id === lessonId);
       if (foundLesson) break;
     }
-
     if (foundLesson) {
-      // Mock quiz data - in real app, fetch from API
       const existingQuiz: Quiz | null = quizId
-        ? {
-            id: quizId,
-            lessonId,
-            title: `${foundLesson.title} Quiz`,
-            questions: [],
-            passingScore: 70,
-          }
+        ? { id: quizId, lessonId, title: `${foundLesson.title} Quiz`, questions: [], passingScore: 70 }
         : null;
-
-      setEditingQuiz({
-        lessonId,
-        lessonTitle: foundLesson.title,
-        quiz: existingQuiz,
-      });
+      setEditingQuiz({ lessonId, lessonTitle: foundLesson.title, quiz: existingQuiz });
       setEditorView('quiz');
     }
   };
 
   const handleSaveQuiz = (quiz: Quiz) => {
-    // Update the lesson to mark it as having a quiz
     setSections(
       sections.map(s => ({
         ...s,
@@ -171,7 +164,6 @@ export default function CourseEditor() {
   };
 
   const handleSaveAll = () => {
-    // In real app, save to API
     setCourse({ ...course, sections, updatedAt: new Date().toISOString() });
     setHasChanges(false);
     toast.success('All changes saved');
@@ -182,7 +174,6 @@ export default function CourseEditor() {
       case 'published':
         return <Badge className="bg-green-500/10 text-green-600 border-0">Published</Badge>;
       case 'pending_review':
-      case 'under_review':
         return <Badge className="bg-amber-500/10 text-amber-600 border-0">Under Review</Badge>;
       case 'draft':
       default:
@@ -190,17 +181,13 @@ export default function CourseEditor() {
     }
   };
 
-  // Render lesson or quiz editor
   if (editorView === 'lesson' && editingLesson) {
     return (
       <div className="p-6 md:p-8 max-w-5xl mx-auto">
         <LessonEditor
           lesson={editingLesson.lesson}
           onSave={handleSaveLesson}
-          onBack={() => {
-            setEditingLesson(null);
-            setEditorView('curriculum');
-          }}
+          onBack={() => { setEditingLesson(null); setEditorView('curriculum'); }}
         />
       </div>
     );
@@ -214,10 +201,7 @@ export default function CourseEditor() {
           lessonId={editingQuiz.lessonId}
           lessonTitle={editingQuiz.lessonTitle}
           onSave={handleSaveQuiz}
-          onBack={() => {
-            setEditingQuiz(null);
-            setEditorView('curriculum');
-          }}
+          onBack={() => { setEditingQuiz(null); setEditorView('curriculum'); }}
         />
       </div>
     );
