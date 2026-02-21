@@ -113,11 +113,7 @@ export default function Instructors() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    console.log('Instructor application submitted:', { 
-      name: `${data.firstName} ${data.lastName}`,
-      email: data.email,
-      expertise: data.expertise,
-    });
+    // Application data would be sent to an API endpoint
     
     toast({
       title: 'Application Submitted!',

@@ -69,6 +69,14 @@ export default function LearningInterface() {
 
   const { lesson, section } = findLesson();
 
+  const loadProgress = useProgressStore(state => state.loadProgress);
+  const loaded = useProgressStore(state => state.loaded);
+
+  // Load progress from DB on mount
+  useEffect(() => {
+    if (!loaded) loadProgress();
+  }, [loaded, loadProgress]);
+
   // Initialize progress and update last accessed
   useEffect(() => {
     if (course && lesson) {

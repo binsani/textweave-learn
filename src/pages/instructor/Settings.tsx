@@ -82,7 +82,6 @@ export default function InstructorSettings() {
   });
 
   const onSubmit = (data: ProfileFormValues) => {
-    console.log(data);
     toast({
       title: 'Settings saved',
       description: 'Your profile has been updated successfully.',
