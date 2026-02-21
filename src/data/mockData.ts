@@ -289,6 +289,1051 @@ Practice these concepts before moving on to control flow!
 `;
 
 // ============================================
+// React Course Lesson Content (Markdown)
+// ============================================
+
+const reactIntroContent = `
+# Introduction to React
+
+React is a powerful JavaScript library for building user interfaces. Created by Facebook (now Meta) in 2013, React has become the most popular front-end library in the world, powering applications like Instagram, Netflix, Airbnb, and countless others.
+
+## What is React?
+
+React is a **declarative**, **component-based** library that makes it painless to create interactive UIs. Instead of manipulating the DOM directly, you describe what you want to see, and React efficiently updates the view when your data changes.
+
+> "React makes it painless to create interactive UIs. Design simple views for each state in your application, and React will efficiently update and render just the right components when your data changes." — React Documentation
+
+### Why React?
+
+1. **Component-Based**: Build encapsulated components that manage their own state
+2. **Declarative**: Design simple views for each state in your application
+3. **Learn Once, Write Anywhere**: Use React for web, mobile (React Native), and desktop
+4. **Virtual DOM**: Efficient rendering through a lightweight DOM representation
+5. **Massive Ecosystem**: Thousands of libraries, tools, and community resources
+
+## How React Works
+
+React uses a **Virtual DOM** — a lightweight copy of the actual DOM. When state changes occur:
+
+1. React creates a new Virtual DOM tree
+2. It compares it with the previous one (called "diffing")
+3. Only the changed elements are updated in the real DOM (called "reconciliation")
+
+This makes React incredibly fast, even for complex applications.
+
+:::info
+**Key Concept**: React follows a unidirectional data flow. Data flows from parent components to child components via props, making your app predictable and easier to debug.
+:::
+
+## Setting Up Your First React Project
+
+The recommended way to start a new React project is using **Vite**:
+
+\`\`\`bash
+npm create vite@latest my-react-app -- --template react-ts
+cd my-react-app
+npm install
+npm run dev
+\`\`\`
+
+This creates a project with:
+- React 18+ with TypeScript
+- Vite for fast development builds
+- Hot Module Replacement (HMR)
+
+## Your First React Component
+
+Let's create a simple component:
+
+\`\`\`tsx
+function Welcome() {
+  return (
+    <div>
+      <h1>Welcome to React!</h1>
+      <p>This is your first component.</p>
+    </div>
+  );
+}
+
+export default Welcome;
+\`\`\`
+
+### What is JSX?
+
+The HTML-like syntax you see above is called **JSX** (JavaScript XML). It lets you write UI code that looks like HTML but is actually JavaScript:
+
+\`\`\`tsx
+// JSX gets compiled to:
+const element = React.createElement(
+  'h1',
+  null,
+  'Hello, World!'
+);
+
+// But you write it as:
+const element = <h1>Hello, World!</h1>;
+\`\`\`
+
+:::tip
+**JSX Rules**: Every JSX expression must have a single root element. Use fragments \`<></>\` when you don't want an extra DOM wrapper.
+:::
+
+## React Project Structure
+
+A typical React project looks like this:
+
+| File/Folder | Purpose |
+|-------------|---------|
+| src/App.tsx | Root component |
+| src/main.tsx | Entry point |
+| src/components/ | Reusable UI components |
+| src/pages/ | Page-level components |
+| src/hooks/ | Custom React hooks |
+| src/types/ | TypeScript type definitions |
+| public/ | Static assets |
+
+## Summary
+
+In this lesson, you learned:
+
+- What React is and why it's popular
+- How the Virtual DOM works
+- How to set up a React project with Vite
+- How to write your first JSX component
+- The typical React project structure
+
+In the next lesson, we'll dive deep into components and props!
+`;
+
+const reactComponentsPropsContent = `
+# Components and Props
+
+Components are the building blocks of every React application. In this lesson, you'll learn how to create reusable components and pass data between them using props.
+
+## What Are Components?
+
+A React component is a **self-contained piece of UI** that can be reused throughout your application. Think of components as custom HTML elements with their own logic and styling.
+
+### Function Components
+
+Modern React uses **function components** exclusively:
+
+\`\`\`tsx
+// Simple component
+function Greeting() {
+  return <h1>Hello, World!</h1>;
+}
+
+// Arrow function component
+const Greeting = () => {
+  return <h1>Hello, World!</h1>;
+};
+\`\`\`
+
+:::info
+**Best Practice**: Always start component names with a capital letter. React treats lowercase tags as HTML elements and uppercase as components.
+:::
+
+## Understanding Props
+
+Props (short for "properties") are how you pass data from a parent component to a child component. They are **read-only** — a component should never modify its own props.
+
+\`\`\`tsx
+// Defining a component with props
+interface UserCardProps {
+  name: string;
+  email: string;
+  avatar?: string;
+  isOnline: boolean;
+}
+
+function UserCard({ name, email, avatar, isOnline }: UserCardProps) {
+  return (
+    <div className="user-card">
+      {avatar && <img src={avatar} alt={name} />}
+      <h3>{name}</h3>
+      <p>{email}</p>
+      <span>{isOnline ? '🟢 Online' : '⚫ Offline'}</span>
+    </div>
+  );
+}
+\`\`\`
+
+### Using the Component
+
+\`\`\`tsx
+function App() {
+  return (
+    <div>
+      <UserCard
+        name="Alice Johnson"
+        email="alice@example.com"
+        avatar="/avatars/alice.jpg"
+        isOnline={true}
+      />
+      <UserCard
+        name="Bob Smith"
+        email="bob@example.com"
+        isOnline={false}
+      />
+    </div>
+  );
+}
+\`\`\`
+
+## The Children Prop
+
+The special \`children\` prop lets you pass content between a component's opening and closing tags:
+
+\`\`\`tsx
+interface CardProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+function Card({ title, children }: CardProps) {
+  return (
+    <div className="card">
+      <h2>{title}</h2>
+      <div className="card-content">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// Usage
+function App() {
+  return (
+    <Card title="Welcome">
+      <p>This is the card content!</p>
+      <button>Click me</button>
+    </Card>
+  );
+}
+\`\`\`
+
+## Conditional Rendering
+
+React gives you several ways to conditionally render content:
+
+\`\`\`tsx
+function Dashboard({ user, notifications }: DashboardProps) {
+  return (
+    <div>
+      {/* Ternary operator */}
+      {user ? <UserProfile user={user} /> : <LoginForm />}
+
+      {/* Logical AND */}
+      {notifications.length > 0 && (
+        <NotificationBadge count={notifications.length} />
+      )}
+
+      {/* Early return pattern */}
+      {!user && <p>Please log in to continue.</p>}
+    </div>
+  );
+}
+\`\`\`
+
+:::warning
+**Avoid this pitfall**: \`{count && <Component />}\` will render \`0\` when count is 0. Use \`{count > 0 && <Component />}\` instead.
+:::
+
+## Rendering Lists
+
+Use \`.map()\` to render arrays of data:
+
+\`\`\`tsx
+interface Course {
+  id: string;
+  title: string;
+  instructor: string;
+}
+
+function CourseList({ courses }: { courses: Course[] }) {
+  return (
+    <ul>
+      {courses.map((course) => (
+        <li key={course.id}>
+          <h3>{course.title}</h3>
+          <p>By {course.instructor}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+\`\`\`
+
+:::tip
+**Always provide a unique \`key\` prop** when rendering lists. Use a stable identifier like \`id\`, never use array index as key if the list can change.
+:::
+
+## Component Composition Patterns
+
+### Container / Presentational Pattern
+
+Separate your logic from your UI:
+
+\`\`\`tsx
+// Presentational: Only handles display
+function CourseCard({ title, description, rating }: CourseCardProps) {
+  return (
+    <div className="course-card">
+      <h3>{title}</h3>
+      <p>{description}</p>
+      <StarRating value={rating} />
+    </div>
+  );
+}
+
+// Container: Handles data fetching and logic
+function CourseCardContainer({ courseId }: { courseId: string }) {
+  const course = useCourse(courseId);
+  
+  if (!course) return <Skeleton />;
+  
+  return (
+    <CourseCard
+      title={course.title}
+      description={course.description}
+      rating={course.rating}
+    />
+  );
+}
+\`\`\`
+
+## Summary
+
+Key takeaways:
+
+- Components are reusable, self-contained pieces of UI
+- Props pass data from parent to child components (read-only)
+- Use TypeScript interfaces to type your props
+- The \`children\` prop enables flexible component composition
+- Always use unique \`key\` props when rendering lists
+- Follow composition patterns for clean, maintainable code
+
+Next up: State management with useState and useEffect!
+`;
+
+const reactStateEffectsContent = `
+# State and Side Effects
+
+State is what makes React applications interactive. In this lesson, you'll learn how to manage component state with \`useState\` and handle side effects with \`useEffect\`.
+
+## What is State?
+
+State is **data that changes over time** within a component. When state changes, React automatically re-renders the component to reflect the new data.
+
+### useState Hook
+
+\`\`\`tsx
+import { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+      <button onClick={() => setCount(0)}>
+        Reset
+      </button>
+    </div>
+  );
+}
+\`\`\`
+
+:::info
+**How it works**: \`useState\` returns an array with two elements — the current value and a function to update it. We use array destructuring to name them.
+:::
+
+### State with Complex Types
+
+\`\`\`tsx
+interface FormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
+function ContactForm() {
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    email: '',
+    message: '',
+  });
+
+  const handleChange = (field: keyof FormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <form>
+      <input
+        value={formData.name}
+        onChange={(e) => handleChange('name', e.target.value)}
+        placeholder="Your name"
+      />
+      <input
+        value={formData.email}
+        onChange={(e) => handleChange('email', e.target.value)}
+        placeholder="Your email"
+      />
+      <textarea
+        value={formData.message}
+        onChange={(e) => handleChange('message', e.target.value)}
+        placeholder="Your message"
+      />
+    </form>
+  );
+}
+\`\`\`
+
+:::warning
+**Never mutate state directly!** Always use the setter function. \`state.push(item)\` won't trigger a re-render — use \`setState([...state, item])\` instead.
+:::
+
+## Understanding useEffect
+
+\`useEffect\` lets you perform **side effects** — things like fetching data, setting up subscriptions, or manually changing the DOM.
+
+### Basic Usage
+
+\`\`\`tsx
+import { useState, useEffect } from 'react';
+
+function UserProfile({ userId }: { userId: string }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUser() {
+      setLoading(true);
+      const response = await fetch(\\\`/api/users/\\\${userId}\\\`);
+      const data = await response.json();
+      setUser(data);
+      setLoading(false);
+    }
+
+    fetchUser();
+  }, [userId]); // Re-run when userId changes
+
+  if (loading) return <p>Loading...</p>;
+  if (!user) return <p>User not found</p>;
+
+  return <div>{user.name}</div>;
+}
+\`\`\`
+
+### Dependency Array Rules
+
+| Dependency Array | Behavior |
+|-----------------|----------|
+| \`useEffect(() => {}, [])\` | Runs once on mount |
+| \`useEffect(() => {}, [a, b])\` | Runs when a or b changes |
+| \`useEffect(() => {})\` | Runs after every render (avoid!) |
+
+### Cleanup Function
+
+Effects can return a cleanup function that runs before the effect re-runs or when the component unmounts:
+
+\`\`\`tsx
+function Timer() {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSeconds(prev => prev + 1);
+    }, 1000);
+
+    // Cleanup: clear interval when component unmounts
+    return () => clearInterval(interval);
+  }, []);
+
+  return <p>Timer: {seconds}s</p>;
+}
+\`\`\`
+
+:::tip
+**Always clean up** subscriptions, timers, and event listeners to prevent memory leaks.
+:::
+
+## Lifting State Up
+
+When two components need to share state, move the state to their closest common parent:
+
+\`\`\`tsx
+function TemperatureConverter() {
+  const [celsius, setCelsius] = useState(0);
+  const fahrenheit = (celsius * 9) / 5 + 32;
+
+  return (
+    <div>
+      <TemperatureInput
+        label="Celsius"
+        value={celsius}
+        onChange={setCelsius}
+      />
+      <TemperatureDisplay
+        celsius={celsius}
+        fahrenheit={fahrenheit}
+      />
+    </div>
+  );
+}
+\`\`\`
+
+## Summary
+
+Key takeaways:
+
+- \`useState\` manages local component state
+- Always use the setter function — never mutate state directly
+- \`useEffect\` handles side effects like data fetching
+- The dependency array controls when effects re-run
+- Always clean up effects that create subscriptions
+- Lift state up to share data between sibling components
+
+Next lesson: React hooks deep dive!
+`;
+
+const reactHooksContent = `
+# React Hooks Deep Dive
+
+Hooks are functions that let you "hook into" React features. Beyond \`useState\` and \`useEffect\`, React provides several powerful hooks and lets you create your own.
+
+## useRef — Persistent References
+
+\`useRef\` creates a mutable reference that persists across renders without causing re-renders:
+
+\`\`\`tsx
+import { useRef, useEffect } from 'react';
+
+function SearchInput() {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Focus the input on mount
+    inputRef.current?.focus();
+  }, []);
+
+  return <input ref={inputRef} placeholder="Search..." />;
+}
+\`\`\`
+
+### useRef for Values
+
+\`\`\`tsx
+function StopWatch() {
+  const [time, setTime] = useState(0);
+  const intervalRef = useRef<number | null>(null);
+
+  const start = () => {
+    intervalRef.current = setInterval(() => {
+      setTime(prev => prev + 1);
+    }, 1000);
+  };
+
+  const stop = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  };
+
+  return (
+    <div>
+      <p>{time} seconds</p>
+      <button onClick={start}>Start</button>
+      <button onClick={stop}>Stop</button>
+    </div>
+  );
+}
+\`\`\`
+
+## useMemo — Expensive Computations
+
+\`useMemo\` caches the result of an expensive calculation:
+
+\`\`\`tsx
+import { useMemo } from 'react';
+
+function CourseList({ courses, searchQuery }: Props) {
+  const filteredCourses = useMemo(() => {
+    return courses.filter(course =>
+      course.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [courses, searchQuery]);
+
+  return (
+    <ul>
+      {filteredCourses.map(course => (
+        <li key={course.id}>{course.title}</li>
+      ))}
+    </ul>
+  );
+}
+\`\`\`
+
+:::tip
+**When to use useMemo**: Only for genuinely expensive computations. Don't wrap every calculation — React is fast enough for most operations without memoization.
+:::
+
+## useCallback — Stable Function References
+
+\`useCallback\` returns a memoized function that only changes when its dependencies change:
+
+\`\`\`tsx
+import { useCallback } from 'react';
+
+function ParentComponent() {
+  const [count, setCount] = useState(0);
+
+  const handleClick = useCallback(() => {
+    setCount(prev => prev + 1);
+  }, []);
+
+  return <ChildComponent onClick={handleClick} />;
+}
+\`\`\`
+
+## Custom Hooks
+
+Custom hooks let you extract component logic into reusable functions:
+
+\`\`\`tsx
+// Custom hook for local storage
+function useLocalStorage<T>(key: string, initialValue: T) {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch {
+      return initialValue;
+    }
+  });
+
+  const setValue = (value: T | ((prev: T) => T)) => {
+    const valueToStore = value instanceof Function 
+      ? value(storedValue) 
+      : value;
+    setStoredValue(valueToStore);
+    window.localStorage.setItem(key, JSON.stringify(valueToStore));
+  };
+
+  return [storedValue, setValue] as const;
+}
+
+// Usage
+function Settings() {
+  const [theme, setTheme] = useLocalStorage('theme', 'light');
+  
+  return (
+    <button onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+      Current: {theme}
+    </button>
+  );
+}
+\`\`\`
+
+### Custom Hook for Data Fetching
+
+\`\`\`tsx
+function useFetch<T>(url: string) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch');
+        const json = await response.json();
+        if (!cancelled) {
+          setData(json);
+          setError(null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Unknown error');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchData();
+    return () => { cancelled = true; };
+  }, [url]);
+
+  return { data, loading, error };
+}
+\`\`\`
+
+## Rules of Hooks
+
+| Rule | Explanation |
+|------|-------------|
+| Only call at the top level | Don't call inside loops, conditions, or nested functions |
+| Only call from React functions | Use in function components or custom hooks |
+| Start custom hooks with "use" | Convention that enables linting and tooling |
+
+## Summary
+
+- \`useRef\` for DOM references and mutable values that don't trigger re-renders
+- \`useMemo\` for caching expensive computations
+- \`useCallback\` for stable function references
+- Custom hooks extract and share logic between components
+- Always follow the Rules of Hooks
+
+Next: Styling and building real-world layouts with Tailwind CSS!
+`;
+
+const reactTailwindContent = `
+# Styling React with Tailwind CSS
+
+Tailwind CSS is a utility-first CSS framework that pairs perfectly with React's component model. Instead of writing custom CSS, you compose styles using pre-built utility classes.
+
+## Why Tailwind CSS?
+
+Traditional CSS approaches often lead to:
+- Naming conflicts and specificity wars
+- Unused styles accumulating over time
+- Context-switching between CSS and component files
+
+Tailwind solves these by putting styles directly in your markup:
+
+\`\`\`tsx
+// Traditional CSS approach
+<div className="card">
+  <h2 className="card-title">Hello</h2>
+</div>
+
+// Tailwind approach
+<div className="rounded-lg border bg-white p-6 shadow-sm">
+  <h2 className="text-xl font-bold text-gray-900">Hello</h2>
+</div>
+\`\`\`
+
+## Setting Up Tailwind with React
+
+\`\`\`bash
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+\`\`\`
+
+Configure \`tailwind.config.js\`:
+
+\`\`\`js
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        primary: "hsl(var(--primary))",
+        secondary: "hsl(var(--secondary))",
+      },
+    },
+  },
+  plugins: [],
+};
+\`\`\`
+
+## Core Tailwind Concepts
+
+### Responsive Design
+
+Tailwind uses mobile-first breakpoint prefixes:
+
+\`\`\`tsx
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {courses.map(course => (
+    <CourseCard key={course.id} course={course} />
+  ))}
+</div>
+\`\`\`
+
+| Prefix | Min-width | Common devices |
+|--------|-----------|---------------|
+| (none) | 0px | Mobile |
+| sm: | 640px | Large phones |
+| md: | 768px | Tablets |
+| lg: | 1024px | Laptops |
+| xl: | 1280px | Desktops |
+| 2xl: | 1536px | Large screens |
+
+### Hover, Focus, and State Variants
+
+\`\`\`tsx
+<button className="bg-blue-600 hover:bg-blue-700 focus:ring-2 
+  focus:ring-blue-500 active:bg-blue-800 disabled:opacity-50
+  transition-colors duration-200">
+  Click Me
+</button>
+\`\`\`
+
+### Dark Mode
+
+\`\`\`tsx
+<div className="bg-white dark:bg-gray-900">
+  <h1 className="text-gray-900 dark:text-white">
+    This adapts to dark mode!
+  </h1>
+</div>
+\`\`\`
+
+## Building a Reusable Component
+
+\`\`\`tsx
+import { cn } from "@/lib/utils";
+
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "outline";
+  size?: "sm" | "md" | "lg";
+}
+
+function Button({ 
+  variant = "primary", 
+  size = "md", 
+  className, 
+  children, 
+  ...props 
+}: ButtonProps) {
+  return (
+    <button
+      className={cn(
+        "inline-flex items-center justify-center rounded-lg font-medium transition-colors",
+        {
+          "bg-primary text-white hover:bg-primary/90": variant === "primary",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80": variant === "secondary",
+          "border border-input bg-background hover:bg-accent": variant === "outline",
+        },
+        {
+          "h-8 px-3 text-sm": size === "sm",
+          "h-10 px-4": size === "md",
+          "h-12 px-6 text-lg": size === "lg",
+        },
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+\`\`\`
+
+:::tip
+**The \`cn()\` utility** merges Tailwind classes intelligently, handling conflicts. Use \`clsx\` + \`tailwind-merge\` for this. It's essential for building flexible components.
+:::
+
+## Common Layout Patterns
+
+### Flexbox Layouts
+
+\`\`\`tsx
+// Centered content
+<div className="flex items-center justify-center min-h-screen">
+  <div>Centered!</div>
+</div>
+
+// Navbar
+<nav className="flex items-center justify-between px-6 py-4">
+  <Logo />
+  <div className="flex items-center gap-4">
+    <NavLinks />
+    <UserMenu />
+  </div>
+</nav>
+\`\`\`
+
+### Grid Layouts
+
+\`\`\`tsx
+// Dashboard grid
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+  <StatCard title="Users" value="1,234" />
+  <StatCard title="Revenue" value="$5,678" />
+  <StatCard title="Courses" value="42" />
+  <StatCard title="Rating" value="4.8" />
+</div>
+\`\`\`
+
+## Summary
+
+- Tailwind CSS uses utility classes for styling directly in JSX
+- Responsive design is mobile-first with breakpoint prefixes
+- Use \`cn()\` utility for merging classes in reusable components
+- Dark mode, hover states, and animations are built-in
+- Combine Tailwind with component libraries like shadcn/ui for rapid development
+
+Congratulations on completing the React fundamentals course!
+`;
+
+const reactRoutingContent = `
+# Routing in React
+
+Single-page applications (SPAs) need client-side routing to navigate between different views without full page reloads. React Router is the standard routing library for React applications.
+
+## Installing React Router
+
+\`\`\`bash
+npm install react-router-dom
+\`\`\`
+
+## Basic Setup
+
+Wrap your app with \`BrowserRouter\` and define routes:
+
+\`\`\`tsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/courses/:id" element={<CourseDetail />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+\`\`\`
+
+## Navigation
+
+Use the \`Link\` component instead of anchor tags:
+
+\`\`\`tsx
+import { Link, NavLink } from 'react-router-dom';
+
+function Navbar() {
+  return (
+    <nav>
+      <Link to="/">Home</Link>
+      <NavLink 
+        to="/courses" 
+        className={({ isActive }) => 
+          isActive ? 'text-primary font-bold' : 'text-muted'
+        }
+      >
+        Courses
+      </NavLink>
+    </nav>
+  );
+}
+\`\`\`
+
+:::info
+**NavLink vs Link**: Use \`NavLink\` when you need active state styling (like in navigation menus). Use \`Link\` for regular navigation.
+:::
+
+## Dynamic Routes and URL Parameters
+
+\`\`\`tsx
+import { useParams } from 'react-router-dom';
+
+function CourseDetail() {
+  const { id } = useParams<{ id: string }>();
+
+  return <h1>Course ID: {id}</h1>;
+}
+\`\`\`
+
+## Programmatic Navigation
+
+\`\`\`tsx
+import { useNavigate } from 'react-router-dom';
+
+function LoginForm() {
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    await login();
+    navigate('/dashboard');
+  };
+
+  return <button onClick={handleLogin}>Log In</button>;
+}
+\`\`\`
+
+## Nested Routes and Layouts
+
+\`\`\`tsx
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<PublicLayout />}>
+        <Route index element={<Home />} />
+        <Route path="about" element={<About />} />
+      </Route>
+      <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route index element={<Overview />} />
+        <Route path="settings" element={<Settings />} />
+      </Route>
+    </Routes>
+  );
+}
+
+function PublicLayout() {
+  return (
+    <div>
+      <Navbar />
+      <main>
+        <Outlet /> {/* Child routes render here */}
+      </main>
+      <Footer />
+    </div>
+  );
+}
+\`\`\`
+
+## Protected Routes
+
+\`\`\`tsx
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+// Usage
+<Route 
+  path="/dashboard" 
+  element={
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  } 
+/>
+\`\`\`
+
+## Summary
+
+- React Router handles client-side navigation in SPAs
+- Use \`Link\` and \`NavLink\` for declarative navigation
+- \`useParams\` extracts URL parameters
+- \`useNavigate\` enables programmatic navigation
+- Nested routes with \`Outlet\` create layout hierarchies
+- Protected routes guard authenticated content
+`;
+
+// ============================================
 // Mock Lessons
 // ============================================
 
@@ -357,6 +1402,84 @@ const pythonLessons: Lesson[] = [
   },
 ];
 
+const reactLessons: Lesson[] = [
+  {
+    id: 'lesson-7-1',
+    sectionId: 'section-7-1',
+    courseId: 'course-7',
+    title: 'Introduction to React',
+    slug: 'introduction-to-react',
+    content: reactIntroContent,
+    order: 1,
+    readingTime: 12,
+    isFree: true,
+    hasQuiz: true,
+    quizId: 'quiz-3',
+  },
+  {
+    id: 'lesson-7-2',
+    sectionId: 'section-7-1',
+    courseId: 'course-7',
+    title: 'Components and Props',
+    slug: 'components-and-props',
+    content: reactComponentsPropsContent,
+    order: 2,
+    readingTime: 15,
+    isFree: true,
+    hasQuiz: true,
+    quizId: 'quiz-4',
+  },
+  {
+    id: 'lesson-7-3',
+    sectionId: 'section-7-2',
+    courseId: 'course-7',
+    title: 'State and Side Effects',
+    slug: 'state-and-side-effects',
+    content: reactStateEffectsContent,
+    order: 1,
+    readingTime: 14,
+    isFree: false,
+    hasQuiz: true,
+    quizId: 'quiz-5',
+  },
+  {
+    id: 'lesson-7-4',
+    sectionId: 'section-7-2',
+    courseId: 'course-7',
+    title: 'React Hooks Deep Dive',
+    slug: 'react-hooks-deep-dive',
+    content: reactHooksContent,
+    order: 2,
+    readingTime: 16,
+    isFree: false,
+    hasQuiz: false,
+  },
+  {
+    id: 'lesson-7-5',
+    sectionId: 'section-7-3',
+    courseId: 'course-7',
+    title: 'Routing in React',
+    slug: 'routing-in-react',
+    content: reactRoutingContent,
+    order: 1,
+    readingTime: 10,
+    isFree: false,
+    hasQuiz: false,
+  },
+  {
+    id: 'lesson-7-6',
+    sectionId: 'section-7-3',
+    courseId: 'course-7',
+    title: 'Styling with Tailwind CSS',
+    slug: 'styling-with-tailwind-css',
+    content: reactTailwindContent,
+    order: 2,
+    readingTime: 13,
+    isFree: false,
+    hasQuiz: false,
+  },
+];
+
 // ============================================
 // Mock Sections
 // ============================================
@@ -385,6 +1508,33 @@ const pythonSections: Section[] = [
     description: 'Work with lists, dictionaries, and more',
     order: 3,
     lessons: [],
+  },
+];
+
+const reactSections: Section[] = [
+  {
+    id: 'section-7-1',
+    courseId: 'course-7',
+    title: 'React Fundamentals',
+    description: 'Core concepts: JSX, components, and props',
+    order: 1,
+    lessons: reactLessons.filter(l => l.sectionId === 'section-7-1'),
+  },
+  {
+    id: 'section-7-2',
+    courseId: 'course-7',
+    title: 'State Management & Hooks',
+    description: 'Managing state, side effects, and custom hooks',
+    order: 2,
+    lessons: reactLessons.filter(l => l.sectionId === 'section-7-2'),
+  },
+  {
+    id: 'section-7-3',
+    courseId: 'course-7',
+    title: 'Building Real Applications',
+    description: 'Routing, styling, and production patterns',
+    order: 3,
+    lessons: reactLessons.filter(l => l.sectionId === 'section-7-3'),
   },
 ];
 
@@ -617,6 +1767,47 @@ export const mockCourses: Course[] = [
     updatedAt: '2024-06-22T10:00:00Z',
     publishedAt: '2024-02-01T10:00:00Z',
   },
+  {
+    id: 'course-7',
+    title: 'Web Development with React',
+    slug: 'web-development-with-react',
+    description: 'A comprehensive guide to building modern web applications with React. Learn component architecture, state management, hooks, routing, and styling with Tailwind CSS. This text-based course takes you from React fundamentals to building production-ready applications.',
+    shortDescription: 'Build modern web apps with React, hooks, and Tailwind CSS.',
+    thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+    instructorId: 'user-2',
+    instructor: mockUsers.find(u => u.id === 'user-2'),
+    category: 'programming',
+    tags: ['react', 'javascript', 'typescript', 'tailwind', 'web development', 'frontend'],
+    level: 'intermediate',
+    status: 'published',
+    sections: reactSections,
+    totalLessons: 6,
+    totalDuration: 80,
+    enrolledCount: 3182,
+    enrollmentCount: 3182,
+    estimatedHours: 2,
+    learningObjectives: [
+      'Understand React component architecture and JSX',
+      'Master state management with useState and useEffect',
+      'Build custom hooks for reusable logic',
+      'Implement client-side routing with React Router',
+      'Style applications using Tailwind CSS utility classes',
+      'Follow best practices for production React applications'
+    ],
+    requirements: [
+      'Basic HTML, CSS, and JavaScript knowledge',
+      'Familiarity with ES6+ syntax (arrow functions, destructuring)',
+      'Node.js installed on your computer',
+      'A code editor (VS Code recommended)'
+    ],
+    rating: 4.9,
+    reviewCount: 487,
+    price: 0,
+    isFree: true,
+    createdAt: '2025-01-10T10:00:00Z',
+    updatedAt: '2025-02-15T10:00:00Z',
+    publishedAt: '2025-01-20T10:00:00Z',
+  },
 ];
 
 
@@ -667,6 +1858,147 @@ export const mockQuizzes: Quiz[] = [
         options: ['echo()', 'console.log()', 'print()', 'display()'],
         correctAnswer: '2',
         explanation: 'The print() function is used to output text and values in Python.',
+        points: 10,
+        order: 3,
+      },
+    ],
+  },
+  {
+    id: 'quiz-3',
+    lessonId: 'lesson-7-1',
+    title: 'React Fundamentals Quiz',
+    description: 'Test your understanding of React basics and JSX',
+    passingScore: 70,
+    questions: [
+      {
+        id: 'q-3-1',
+        quizId: 'quiz-3',
+        type: 'multiple_choice',
+        question: 'What does React use to efficiently update the DOM?',
+        options: ['Shadow DOM', 'Virtual DOM', 'Real DOM manipulation', 'Web Workers'],
+        correctAnswer: '1',
+        explanation: 'React uses a Virtual DOM — a lightweight JavaScript representation of the real DOM — to calculate the minimal set of changes needed.',
+        points: 10,
+        order: 1,
+      },
+      {
+        id: 'q-3-2',
+        quizId: 'quiz-3',
+        type: 'true_false',
+        question: 'JSX is a separate language from JavaScript.',
+        options: ['True', 'False'],
+        correctAnswer: '1',
+        explanation: 'JSX is not a separate language — it\'s a syntax extension that gets compiled to regular JavaScript (React.createElement calls).',
+        points: 10,
+        order: 2,
+      },
+      {
+        id: 'q-3-3',
+        quizId: 'quiz-3',
+        type: 'multiple_choice',
+        question: 'Which tool is recommended for creating a new React project?',
+        options: ['Create React App', 'Webpack', 'Vite', 'Parcel'],
+        correctAnswer: '2',
+        explanation: 'Vite is the modern recommended tool for new React projects, offering fast builds and hot module replacement.',
+        points: 10,
+        order: 3,
+      },
+    ],
+  },
+  {
+    id: 'quiz-4',
+    lessonId: 'lesson-7-2',
+    title: 'Components & Props Quiz',
+    description: 'Test your knowledge of React components and props',
+    passingScore: 70,
+    questions: [
+      {
+        id: 'q-4-1',
+        quizId: 'quiz-4',
+        type: 'multiple_choice',
+        question: 'What is the correct way to pass data from a parent to a child component?',
+        options: ['State', 'Props', 'Context', 'Refs'],
+        correctAnswer: '1',
+        explanation: 'Props (properties) are the primary mechanism for passing data from parent to child components in React.',
+        points: 10,
+        order: 1,
+      },
+      {
+        id: 'q-4-2',
+        quizId: 'quiz-4',
+        type: 'true_false',
+        question: 'A React component can modify the props it receives.',
+        options: ['True', 'False'],
+        correctAnswer: '1',
+        explanation: 'Props are read-only. A component should never modify its own props — this is a core principle of React.',
+        points: 10,
+        order: 2,
+      },
+      {
+        id: 'q-4-3',
+        quizId: 'quiz-4',
+        type: 'multiple_choice',
+        question: 'Why is the "key" prop important when rendering lists?',
+        options: [
+          'It makes the list look better',
+          'It helps React identify which items changed, were added, or removed',
+          'It sorts the list automatically',
+          'It is required by JavaScript'
+        ],
+        correctAnswer: '1',
+        explanation: 'Keys help React identify which items have changed, been added, or removed, enabling efficient re-rendering of lists.',
+        points: 10,
+        order: 3,
+      },
+    ],
+  },
+  {
+    id: 'quiz-5',
+    lessonId: 'lesson-7-3',
+    title: 'State & Effects Quiz',
+    description: 'Test your understanding of useState and useEffect',
+    passingScore: 70,
+    questions: [
+      {
+        id: 'q-5-1',
+        quizId: 'quiz-5',
+        type: 'multiple_choice',
+        question: 'What happens when you call a setState function in React?',
+        options: [
+          'The page reloads',
+          'The component re-renders with the new state',
+          'Nothing visible happens',
+          'The DOM is directly modified'
+        ],
+        correctAnswer: '1',
+        explanation: 'Calling a state setter triggers a re-render of the component with the updated state value.',
+        points: 10,
+        order: 1,
+      },
+      {
+        id: 'q-5-2',
+        quizId: 'quiz-5',
+        type: 'true_false',
+        question: 'useEffect with an empty dependency array [] runs after every render.',
+        options: ['True', 'False'],
+        correctAnswer: '1',
+        explanation: 'An empty dependency array means the effect runs only once — after the initial mount. It does NOT run after every render.',
+        points: 10,
+        order: 2,
+      },
+      {
+        id: 'q-5-3',
+        quizId: 'quiz-5',
+        type: 'multiple_choice',
+        question: 'What is the purpose of the cleanup function returned from useEffect?',
+        options: [
+          'To reset state to initial values',
+          'To cancel subscriptions and prevent memory leaks',
+          'To log errors to the console',
+          'To re-run the effect immediately'
+        ],
+        correctAnswer: '1',
+        explanation: 'The cleanup function runs before the effect re-runs or when the component unmounts, preventing memory leaks from subscriptions, timers, etc.',
         points: 10,
         order: 3,
       },
