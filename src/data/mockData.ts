@@ -1808,6 +1808,847 @@ export const mockCourses: Course[] = [
     updatedAt: '2025-02-15T10:00:00Z',
     publishedAt: '2025-01-20T10:00:00Z',
   },
+  {
+    id: 'course-101',
+    title: 'Prompt Engineering Mastery: From Basics to Advanced',
+    slug: 'prompt-engineering-mastery',
+    description: 'Learn the art and science of crafting effective prompts for AI language models. This course covers fundamental principles, advanced techniques, and practical applications to help you get the most out of AI assistants like ChatGPT.',
+    shortDescription: 'Unlock the full potential of AI with expert prompt engineering.',
+    thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780a5c6b6e?w=800',
+    instructorId: 'user-2',
+    category: 'data-science',
+    tags: ['prompt engineering', 'AI', 'ChatGPT', 'NLP'],
+    level: 'beginner',
+    status: 'published',
+    sections: [
+      {
+        id: 'section-101-1',
+        courseId: 'course-101',
+        title: 'Introduction to Prompt Engineering',
+        description: 'Lay the foundation by understanding what prompt engineering is and how AI language models work.',
+        order: 1,
+        lessons: [
+          {
+            id: 'lesson-101-1',
+            sectionId: 'section-101-1',
+            courseId: 'course-101',
+            title: 'What is Prompt Engineering?',
+            slug: 'what-is-prompt-engineering',
+            content: `# What is Prompt Engineering?
+
+Welcome to the first lesson of **Prompt Engineering Mastery**! In this lesson, we'll define prompt engineering, explore why it's a critical skill, and look at examples of effective prompts.
+
+## What is a Prompt?
+
+A prompt is the text input you give to an AI language model (like ChatGPT, Claude, or GPT-4) to generate a response. It can be a question, an instruction, a statement, or any combination of these. The quality of the prompt directly influences the quality of the output.
+
+## Why Prompt Engineering Matters
+
+Prompt engineering is the practice of designing, refining, and optimizing prompts to achieve desired results. It matters because:
+
+- **Accuracy**: Well-crafted prompts reduce ambiguity and lead to more accurate responses.
+- **Efficiency**: You spend less time tweaking and repeating queries.
+- **Creativity**: Good prompts can unlock novel and creative outputs.
+- **Control**: You can guide the model's tone, style, and format.
+
+:::info
+Prompt engineering is not just for tech experts. Writers, marketers, educators, and hobbyists all benefit from learning how to communicate effectively with AI.
+:::
+
+## Anatomy of a Good Prompt
+
+A good prompt typically includes:
+
+1. **Clear instruction**: Tell the model exactly what you want it to do.
+2. **Context**: Provide background information if needed.
+3. **Format**: Specify the desired output structure (e.g., bullet points, JSON, table).
+4. **Examples**: Show one or more examples of the expected output (few-shot prompting).
+
+Let's compare a vague prompt with a refined one:
+
+| Aspect | Vague Prompt | Refined Prompt |
+|--------|--------------|----------------|
+| Instruction | "Write about dogs." | "Write a 300-word blog post about the benefits of adopting a rescue dog." |
+| Context | (none) | "Target audience: first-time dog owners. Tone: warm and encouraging." |
+| Format | Paragraph | "Use subheadings: Introduction, Benefits, Tips for Adoption, Conclusion." |
+| Example | (none) | "Include an example like: 'Many rescue dogs are already house-trained.'" |
+
+## Common Mistakes to Avoid
+
+- **Being too vague**: "Tell me about history" → Instead, ask "What were the main causes of World War I?"
+- **Overloading**: Asking for too many things in one prompt.
+- **Ignoring constraints**: Not specifying word count, tone, or audience.
+
+\`\`\`text
+Bad: "Write a story."
+Good: "Write a 500-word science fiction story about a robot who learns to paint, with a hopeful ending."
+\`\`\`
+
+## Try It Yourself
+
+Think of a task you'd like AI to help with. Write a prompt, then refine it using the anatomy above.
+
+> "The key to getting what you want from AI is telling it exactly what you need." — Anonymous
+
+:::tip
+Start simple, then iteratively add details based on the responses you receive.
+:::
+
+## Summary
+
+- Prompt engineering is the process of designing inputs to AI models to achieve desired outputs.
+- Effective prompts are clear, specific, and provide context.
+- Avoiding common mistakes saves time and improves output quality.
+
+In the next lesson, we'll explore how AI language models actually work under the hood.`,
+            order: 1,
+            readingTime: 8,
+            isFree: true,
+            hasQuiz: true,
+            quizId: 'quiz-101-1',
+          },
+          {
+            id: 'lesson-101-2',
+            sectionId: 'section-101-1',
+            courseId: 'course-101',
+            title: 'Understanding AI Language Models',
+            slug: 'understanding-ai-language-models',
+            content: `# Understanding AI Language Models
+
+Before we dive deeper into prompt engineering, it's helpful to understand the technology behind it. In this lesson, we'll cover the basics of large language models (LLMs) and how they interpret prompts.
+
+## What is a Language Model?
+
+A language model is a type of artificial intelligence trained to understand and generate human-like text. It learns patterns, grammar, facts, and some reasoning abilities from vast amounts of text data.
+
+### Key Concepts
+
+- **Training**: LLMs are trained on diverse internet text, books, articles, and more.
+- **Tokenization**: Text is broken into tokens (words or subwords) that the model processes.
+- **Prediction**: Given a sequence of tokens, the model predicts the next most likely token.
+- **Context Window**: The amount of text the model can consider at once (e.g., 4K, 8K, or 100K tokens).
+
+## How Models "Understand" Prompts
+
+When you enter a prompt, the model doesn't truly "understand" in the human sense. It uses statistical patterns to generate a coherent continuation. However, due to the scale of training, the outputs often appear remarkably intelligent.
+
+### Important Factors
+
+- **Prompt Position**: Early words set the context for everything that follows.
+- **Instruction Following**: Models are fine-tuned to follow instructions, but they can still be misled.
+- **Sensitivity**: Small changes in wording can lead to vastly different outputs.
+
+| Factor | Impact |
+|--------|--------|
+| Word choice | "Explain" vs "Summarize" triggers different response styles. |
+| Order of details | Listing requirements first helps the model prioritize. |
+| Punctuation | A question mark signals you want an answer. |
+
+## The Role of Temperature and Top-p
+
+When using APIs (like OpenAI's), you can adjust parameters that affect randomness:
+
+- **Temperature**: Lower values (0-0.5) make output more deterministic; higher values (0.8-2) increase creativity.
+- **Top-p**: Nucleus sampling; a value like 0.9 means the model considers only the top 90% probable tokens.
+
+\`\`\`python
+# Example using pseudo-code
+response = openai.ChatCompletion.create(
+  model="gpt-4",
+  messages=[{"role": "user", "content": "Write a haiku about AI."}],
+  temperature=0.7,
+  top_p=0.9
+)
+\`\`\`
+
+:::warning
+High temperature can lead to more creative but potentially nonsensical outputs. Use it wisely!
+:::
+
+## Summary
+
+- Language models are trained to predict text based on patterns.
+- They don't truly understand but can mimic understanding.
+- Prompt design interacts with model architecture and parameters.
+- Adjusting temperature and top-p controls output randomness.
+
+Next, we'll move into core principles for crafting effective prompts.`,
+            order: 2,
+            readingTime: 10,
+            isFree: true,
+            hasQuiz: false,
+          },
+        ],
+      },
+      {
+        id: 'section-101-2',
+        courseId: 'course-101',
+        title: 'Core Principles of Effective Prompts',
+        description: 'Learn the fundamental techniques that make prompts clear, specific, and powerful.',
+        order: 2,
+        lessons: [
+          {
+            id: 'lesson-101-3',
+            sectionId: 'section-101-2',
+            courseId: 'course-101',
+            title: 'Clarity and Specificity',
+            slug: 'clarity-and-specificity',
+            content: `# Clarity and Specificity
+
+The foundation of any good prompt is clarity. If the model doesn't understand what you want, it can't give you a useful answer. This lesson focuses on making your prompts crystal clear and highly specific.
+
+## Why Clarity Matters
+
+Ambiguous prompts lead to ambiguous responses. Consider this example:
+
+> "Tell me about the weather."
+
+The model doesn't know: which location? What time? What aspects (temperature, humidity, forecast)? A better prompt:
+
+> "What is the current temperature in New York City in degrees Celsius?"
+
+## Techniques for Clarity
+
+### Use Direct Language
+
+Avoid unnecessary words. Get to the point.
+
+| Unclear | Clear |
+|---------|-------|
+| "I was wondering if you might be able to provide some information on..." | "Provide information on..." |
+| "Could you maybe give me a list of..." | "List..." |
+
+### Specify the Output Format
+
+If you want a list, ask for a list. If you want a table, ask for a table.
+
+\`\`\`text
+Prompt: "List three benefits of meditation in bullet points."
+\`\`\`
+
+### Provide Constraints
+
+Word count, tone, audience, etc.
+
+\`\`\`text
+Prompt: "Write a 100-word product description for a noise-cancelling headphone, targeting busy professionals. Use a professional but approachable tone."
+\`\`\`
+
+## Specificity Drives Quality
+
+Specific prompts give the model guardrails. Compare:
+
+- **Vague**: "Write a poem about nature."
+- **Specific**: "Write a haiku about a forest after rain, focusing on the smell of wet pine and the sound of dripping water."
+
+## Example Table
+
+| Prompt | Specificity | Expected Quality |
+|--------|-------------|------------------|
+| "Explain photosynthesis." | Low | Generic textbook explanation |
+| "Explain photosynthesis to a 10-year-old using an analogy of a factory." | High | Engaging, age-appropriate, memorable |
+
+## Callout: The Power of "Act as..."
+
+:::tip
+"Act as a seasoned travel blogger. Write a review of a beach resort in Mexico, highlighting the food, service, and activities."
+:::
+
+## Summary
+
+- Clarity reduces ambiguity and improves response relevance.
+- Specify format, constraints, and audience.
+- Use direct language and avoid fluff.
+- Role-playing prompts add valuable context.
+
+Next, we'll explore how providing context can further refine outputs.`,
+            order: 1,
+            readingTime: 9,
+            isFree: false,
+            hasQuiz: false,
+          },
+          {
+            id: 'lesson-101-4',
+            sectionId: 'section-101-2',
+            courseId: 'course-101',
+            title: 'Providing Context',
+            slug: 'providing-context',
+            content: `# Providing Context
+
+Context is the background information that helps the model understand the situation, audience, and purpose of your request. In this lesson, we'll explore how to effectively provide context in your prompts.
+
+## Why Context Matters
+
+Without context, the model operates in a vacuum. With context, it can tailor its response to your specific needs.
+
+### Examples of Context
+
+- **Audience**: Who will read this? (experts, beginners, children)
+- **Purpose**: Why do you need this? (to inform, to persuade, to entertain)
+- **Previous conversation**: What has been discussed already?
+- **Domain**: What field or industry is this related to?
+
+## How to Add Context
+
+1. **Direct statements**: "I am a beginner learning Python."
+2. **Background paragraphs**: "We've been discussing renewable energy, and now I need..."
+3. **Examples**: Show what you mean by giving an example.
+
+### Example With Context
+
+> "Explain blockchain to a group of high school students who are familiar with basic internet concepts but have no background in finance or cryptography. Use simple analogies."
+
+## Using Context to Set Tone and Style
+
+- "Write in a formal, academic tone."
+- "Make it humorous and lighthearted."
+- "Use simple language for non-native speakers."
+
+## Table: Context Elements
+
+| Context Element | Example |
+|-----------------|---------|
+| Audience | "Explain to a 5-year-old" |
+| Purpose | "To convince someone to adopt a pet" |
+| Constraints | "In 200 words or less" |
+| Background | "Assume the reader knows what AI is" |
+
+## Code Block: Prompt with Rich Context
+
+\`\`\`text
+Prompt:
+You are a career coach. I am a software engineer with 5 years of experience looking to transition into product management. Write a personalized action plan for the next 6 months, including courses to take, skills to develop, and networking strategies. Keep the tone encouraging and practical.
+\`\`\`
+
+:::info
+The more relevant context you provide, the less the model has to guess, leading to more accurate and useful responses.
+:::
+
+## Summary
+
+- Context helps the model tailor responses to your specific situation.
+- Include audience, purpose, background, and constraints.
+- Use examples and role-playing to provide rich context.
+- In multi-turn conversations, maintain context by referring back.
+
+Next up: Role Prompting and Persona – a powerful way to inject context.`,
+            order: 2,
+            readingTime: 8,
+            isFree: false,
+            hasQuiz: false,
+          },
+          {
+            id: 'lesson-101-5',
+            sectionId: 'section-101-2',
+            courseId: 'course-101',
+            title: 'Role Prompting and Persona',
+            slug: 'role-prompting-and-persona',
+            content: `# Role Prompting and Persona
+
+Assigning a role or persona to the AI is one of the most effective prompt engineering techniques. It frames the entire interaction and can dramatically improve the relevance and depth of responses.
+
+## What is Role Prompting?
+
+Role prompting means instructing the AI to adopt a specific character, profession, or perspective.
+
+> "You are a seasoned financial advisor. Provide investment advice for a 30-year-old with moderate risk tolerance."
+
+## Why It Works
+
+- **Focus**: The role narrows the domain, reducing irrelevant information.
+- **Tone**: The model mimics the expected tone of that role.
+- **Knowledge**: The model draws on knowledge associated with that role.
+
+## Examples of Roles
+
+| Role | Use Case |
+|------|----------|
+| Teacher | Explain complex topics simply |
+| Journalist | Write a news article |
+| Chef | Suggest recipes and cooking techniques |
+| Therapist | Provide empathetic advice |
+| Historian | Analyze historical events |
+
+## Crafting Effective Role Prompts
+
+1. **Be specific**: "You are a marine biologist specializing in coral reefs."
+2. **Add context**: "You are explaining to a group of tourists."
+3. **Define the task**: "Describe the impact of climate change on the Great Barrier Reef."
+
+### Example
+
+\`\`\`text
+Prompt: You are a world-class sommelier. I have just finished a rich, grilled steak dinner. Recommend a red wine to pair with it, and explain why your choice complements the meal.
+\`\`\`
+
+## Advanced: Multi-Role Conversations
+
+> "You are a skeptical scientist and an enthusiastic marketer debating the benefits of a new AI tool. Write a short script where they discuss it."
+
+:::warning
+Be cautious when asking the AI to impersonate real people or professionals in regulated fields (e.g., doctors, lawyers). Always verify critical information from qualified sources.
+:::
+
+## Summary
+
+- Role prompting assigns a persona to the AI, focusing its responses.
+- Be specific about the role and context.
+- Combine with other principles like clarity and constraints.
+- Use multi-role prompts for creative dialogues.
+
+In the next section, we'll dive into advanced techniques like chain-of-thought and few-shot prompting.`,
+            order: 3,
+            readingTime: 10,
+            isFree: false,
+            hasQuiz: true,
+            quizId: 'quiz-101-2',
+          },
+        ],
+      },
+      {
+        id: 'section-101-3',
+        courseId: 'course-101',
+        title: 'Advanced Prompting Techniques',
+        description: 'Take your skills to the next level with methods like chain-of-thought, few-shot learning, and iterative refinement.',
+        order: 3,
+        lessons: [
+          {
+            id: 'lesson-101-6',
+            sectionId: 'section-101-3',
+            courseId: 'course-101',
+            title: 'Chain-of-Thought Prompting',
+            slug: 'chain-of-thought-prompting',
+            content: `# Chain-of-Thought Prompting
+
+Chain-of-thought (CoT) prompting is a technique that encourages the model to show its reasoning step by step. This is especially useful for complex problems involving logic, math, or multi-step tasks.
+
+## What is Chain-of-Thought?
+
+Instead of asking for a direct answer, you prompt the model to explain its reasoning process.
+
+### Standard Prompt
+
+> "If a store has 15 apples and sells 7, then gets 10 more, how many apples does it have?"
+
+### Chain-of-Thought Prompt
+
+> "If a store has 15 apples and sells 7, then gets 10 more, how many apples does it have? Let's think step by step."
+
+The second prompt nudges the model to break down the problem:
+
+1. Start with 15 apples.
+2. Sell 7 → 15 - 7 = 8.
+3. Get 10 more → 8 + 10 = 18.
+4. Answer: 18 apples.
+
+## Why It Works
+
+- **Reduces errors**: The model is less likely to skip steps.
+- **Transparency**: You can see the logic and verify it.
+- **Learning**: Useful for tutoring or explaining concepts.
+
+## When to Use Chain-of-Thought
+
+- Math word problems
+- Logical puzzles
+- Multi-step instructions
+- Complex decision making
+
+## Table: CoT vs Standard
+
+| Task | Standard Prompt | CoT Prompt | Outcome |
+|------|-----------------|------------|---------|
+| Math problem | "Solve 23 * 47" | "Solve 23 * 47 step by step" | More accurate |
+| Logic | "Is this argument valid?" | "Analyze the argument step by step" | Clearer reasoning |
+
+:::tip
+For simple, factual queries, chain-of-thought is overkill. Reserve it for tasks that genuinely benefit from step-by-step reasoning.
+:::
+
+## Summary
+
+- Chain-of-thought prompting elicits step-by-step reasoning.
+- It improves accuracy on complex tasks.
+- Use "Let's think step by step" or provide examples.
+- Combine with other techniques for best results.
+
+Next, we'll explore few-shot prompting: giving examples to guide the model.`,
+            order: 1,
+            readingTime: 9,
+            isFree: false,
+            hasQuiz: false,
+          },
+          {
+            id: 'lesson-101-7',
+            sectionId: 'section-101-3',
+            courseId: 'course-101',
+            title: 'Few-Shot Prompting',
+            slug: 'few-shot-prompting',
+            content: `# Few-Shot Prompting
+
+Few-shot prompting is a technique where you provide a few examples of the desired input-output behavior within the prompt.
+
+## What is Few-Shot Prompting?
+
+Instead of just describing what you want, you show the model examples. This is especially useful for tasks that are hard to describe in words.
+
+### Few-Shot Example
+
+> "Translate English to French:
+> English: 'Good morning' -> French: 'Bonjour'
+> English: 'Thank you' -> French: 'Merci'
+> English: 'Hello, how are you?' -> French:"
+
+## Why Few-Shot Works
+
+- **Pattern recognition**: The model identifies the transformation from examples.
+- **Reduces ambiguity**: Examples clarify exactly what you want.
+- **Consistency**: Outputs follow the style of the examples.
+
+## Example: Sentiment Classification
+
+\`\`\`text
+Classify the sentiment of these movie reviews as positive, negative, or neutral.
+
+Review: "This movie was fantastic! I loved it." -> Sentiment: positive
+Review: "It was boring and too long." -> Sentiment: negative
+Review: "The film was okay, nothing special." -> Sentiment: neutral
+Review: "An absolute masterpiece!" -> Sentiment:
+\`\`\`
+
+## Tips for Good Few-Shot Prompts
+
+1. **Use diverse examples** that cover edge cases.
+2. **Be consistent** in formatting.
+3. **Place the actual query last** after the examples.
+4. **Label clearly** (e.g., "Input: ... Output: ...").
+
+## Table: Few-Shot vs Zero-Shot
+
+| Aspect | Zero-Shot | Few-Shot |
+|--------|-----------|----------|
+| Requires examples | No | Yes (2-5 usually) |
+| Flexibility | High for common tasks | Better for niche tasks |
+| Prompt length | Short | Longer (uses more tokens) |
+
+:::info
+Remember that examples consume tokens. Keep them concise to stay within context limits.
+:::
+
+## Summary
+
+- Few-shot prompting uses examples to guide the model.
+- It's powerful for tasks where description alone is insufficient.
+- Provide clear, consistent examples.
+- Place the actual query after the examples.
+
+Next, we'll look at iterative refinement – how to polish prompts through multiple rounds.`,
+            order: 2,
+            readingTime: 9,
+            isFree: false,
+            hasQuiz: false,
+          },
+          {
+            id: 'lesson-101-8',
+            sectionId: 'section-101-3',
+            courseId: 'course-101',
+            title: 'Iterative Refinement',
+            slug: 'iterative-refinement',
+            content: `# Iterative Refinement
+
+Prompt engineering is rarely a one-shot process. Iterative refinement – the practice of tweaking your prompts based on the outputs you receive – is essential for achieving high-quality results.
+
+## The Iterative Process
+
+1. **Draft** an initial prompt.
+2. **Test** it and observe the output.
+3. **Analyze** what worked and what didn't.
+4. **Refine** the prompt (add clarity, context, examples, etc.).
+5. **Repeat** until satisfied.
+
+## Common Refinements
+
+| Issue | Refinement |
+|-------|------------|
+| Output too vague | Add specificity, constraints |
+| Wrong tone | Specify tone (formal, humorous) |
+| Missing information | Provide more context |
+| Incorrect format | Give an example of desired format |
+| Off-topic | Rephrase to narrow focus |
+
+## Example: Iterating a Prompt
+
+### Draft 1
+> "Write a recipe for chocolate cake."
+**Output**: A generic recipe.
+
+### Refinement 2
+> "Write a recipe for a vegan, gluten-free chocolate cake. Include ingredients with measurements, step-by-step instructions, and baking time at 350°F. Use simple language."
+**Output**: Much more usable.
+
+## Tracking Changes
+
+| Version | Prompt | Output Quality |
+|---------|--------|----------------|
+| 1 | "Write a recipe..." | Generic |
+| 2 | "Vegan, gluten-free..." | Better but unclear |
+| 3 | "Vegan, gluten-free + detailed instructions" | Excellent |
+
+:::tip
+Iterative refinement is a skill. Don't expect perfection on the first try. Each iteration teaches you something about the model and your own communication.
+:::
+
+## Summary
+
+- Iterative refinement is the process of gradually improving prompts.
+- Test, analyze, refine, repeat.
+- Keep track of changes to learn what works.
+- Small tweaks can lead to significantly better outputs.
+
+In the final section, we'll apply these skills to real-world scenarios and discuss ethical considerations.`,
+            order: 3,
+            readingTime: 8,
+            isFree: false,
+            hasQuiz: true,
+            quizId: 'quiz-101-3',
+          },
+        ],
+      },
+      {
+        id: 'section-101-4',
+        courseId: 'course-101',
+        title: 'Practical Applications and Best Practices',
+        description: 'Apply your skills to content creation, coding, and understand the ethical landscape of AI.',
+        order: 4,
+        lessons: [
+          {
+            id: 'lesson-101-9',
+            sectionId: 'section-101-4',
+            courseId: 'course-101',
+            title: 'Prompt Engineering for Content Creation',
+            slug: 'prompt-engineering-for-content-creation',
+            content: `# Prompt Engineering for Content Creation
+
+Content creators – bloggers, marketers, scriptwriters – can leverage AI to brainstorm ideas, draft content, and refine messaging.
+
+## Brainstorming Ideas
+
+> "Give me 10 blog post ideas for a sustainable living website. Focus on practical tips for beginners."
+
+## Drafting and Outlining
+
+> "Write an outline for a 1500-word article on the benefits of meditation. Include an introduction, 3 main sections with subpoints, and a conclusion."
+
+## Refining and Repurposing
+
+> "Rewrite this blog post as a LinkedIn update: [paste content]"
+> "Summarize this long article into a Twitter thread with 5 tweets."
+
+## Table: Content Types and Prompts
+
+| Content Type | Prompt Example |
+|--------------|----------------|
+| Blog post | "Write a how-to guide on..." |
+| Email newsletter | "Draft a welcome email for new subscribers..." |
+| Video script | "Write a 2-minute script for a YouTube video about..." |
+| Ad copy | "Create a Facebook ad for an online course..." |
+
+:::warning
+AI-generated content is a starting point. Always review, edit, and add your unique voice. Plagiarism and factual errors are possible.
+:::
+
+## Summary
+
+- AI can assist with brainstorming, drafting, and refining content.
+- Tailor prompts to the specific content type and platform.
+- Combine techniques for strategic content planning.
+- Always review and personalize AI outputs.
+
+Next, we'll see how prompt engineering applies to coding tasks.`,
+            order: 1,
+            readingTime: 10,
+            isFree: false,
+            hasQuiz: false,
+          },
+          {
+            id: 'lesson-101-10',
+            sectionId: 'section-101-4',
+            courseId: 'course-101',
+            title: 'Prompt Engineering for Coding',
+            slug: 'prompt-engineering-for-coding',
+            content: `# Prompt Engineering for Coding
+
+AI assistants can help programmers write, debug, and explain code. Effective prompts are key to getting useful coding help.
+
+## Generating Code
+
+> "Write a Python function that takes a list of numbers and returns the sum of squares of even numbers."
+
+## Debugging
+
+> "This JavaScript function is supposed to reverse a string but it's not working. Can you find the bug?"
+
+## Explaining Code
+
+> "Explain this SQL query line by line: SELECT department, COUNT(*) FROM employees GROUP BY department HAVING COUNT(*) > 5;"
+
+## Table: Coding Tasks and Prompt Patterns
+
+| Task | Prompt Pattern |
+|------|----------------|
+| Generate function | "Write a [language] function that [description]" |
+| Find bug | "Why is this code not working? [code]" |
+| Optimize | "Optimize this code for speed/memory: [code]" |
+| Convert language | "Convert this [language] code to [language]: [code]" |
+| Add comments | "Add comments to this code explaining each step: [code]" |
+
+:::warning
+AI can produce incorrect or insecure code. Always test and review before using in production.
+:::
+
+## Summary
+
+- Specify language, functionality, and constraints for code generation.
+- Use prompts to debug, explain, and refactor code.
+- Always verify AI-generated code.
+
+Next, we'll discuss the ethical considerations and limitations of AI.`,
+            order: 2,
+            readingTime: 9,
+            isFree: false,
+            hasQuiz: false,
+          },
+          {
+            id: 'lesson-101-11',
+            sectionId: 'section-101-4',
+            courseId: 'course-101',
+            title: 'Ethical Considerations and Limitations',
+            slug: 'ethical-considerations-and-limitations',
+            content: `# Ethical Considerations and Limitations
+
+As prompt engineers, we must be aware of the ethical implications and limitations of AI. Responsible use ensures that our applications are fair, safe, and beneficial.
+
+## Bias and Fairness
+
+AI models learn from internet text, which contains biases. Prompts can inadvertently amplify these biases.
+
+### Mitigation
+
+- Use inclusive language in prompts.
+- Explicitly ask for diverse perspectives.
+- Review outputs for bias.
+
+## Misinformation
+
+AI can generate convincing but false information. Always fact-check critical outputs.
+
+:::info
+Treat AI as a brainstorming tool, not a definitive source of truth.
+:::
+
+## Privacy and Data
+
+Avoid including personal or sensitive information in prompts, especially when using public APIs.
+
+## Limitations to Keep in Mind
+
+| Limitation | Description |
+|------------|-------------|
+| Context window | Models can only consider a limited amount of text. |
+| Lack of true understanding | Responses are based on patterns, not comprehension. |
+| Sensitivity to wording | Small changes can cause large output variations. |
+| No real-time learning | Models don't update with new information unless retrained. |
+
+:::warning
+Always consider the potential impact of your AI-powered applications. Strive to use AI for good, and be transparent about AI involvement.
+:::
+
+## Summary
+
+- Be aware of bias and strive for fairness in prompts.
+- Verify information and avoid sharing sensitive data.
+- Understand the limitations of AI models.
+- Use prompt engineering ethically and responsibly.
+
+In our final lesson, we'll wrap up and suggest next steps for your prompt engineering journey.`,
+            order: 3,
+            readingTime: 10,
+            isFree: false,
+            hasQuiz: false,
+          },
+          {
+            id: 'lesson-101-12',
+            sectionId: 'section-101-4',
+            courseId: 'course-101',
+            title: 'Course Wrap-up and Next Steps',
+            slug: 'course-wrap-up-and-next-steps',
+            content: `# Course Wrap-up and Next Steps
+
+Congratulations on completing "Prompt Engineering Mastery"! You've learned the fundamental principles, advanced techniques, and practical applications of prompt engineering.
+
+## Key Takeaways
+
+- **Clarity and specificity** are the bedrock of effective prompts.
+- **Context and role prompting** tailor responses to your needs.
+- **Chain-of-thought** and **few-shot prompting** tackle complex tasks.
+- **Iterative refinement** turns good prompts into great ones.
+- **Ethical considerations** ensure responsible use of AI.
+
+## Your Prompt Engineering Toolkit
+
+1. **Basic principles**: clarity, context, constraints.
+2. **Advanced techniques**: CoT, few-shot, personas.
+3. **Refinement process**: test, analyze, tweak.
+4. **Application patterns**: content, coding, analysis.
+5. **Ethical guardrails**: bias, privacy, verification.
+
+## Practice Ideas
+
+- **Daily journal**: Write one prompt a day and refine it.
+- **Project**: Use AI to help with a real project (blog, code, planning).
+- **Community**: Share prompts and learn from others.
+
+> "The best way to predict the future is to invent it." – Alan Kay
+
+## Summary
+
+- Review the core concepts and techniques.
+- Apply your skills through practice and projects.
+- Explore community resources and continue learning.
+- Use AI responsibly and creatively.
+
+Thank you for taking this course. We'd love to hear your feedback!`,
+            order: 4,
+            readingTime: 6,
+            isFree: false,
+            hasQuiz: true,
+            quizId: 'quiz-101-4',
+          },
+        ],
+      },
+    ],
+    totalLessons: 12,
+    totalDuration: 106,
+    enrolledCount: 1874,
+    estimatedHours: 3,
+    learningObjectives: [
+      'Design clear and specific prompts for various AI tasks.',
+      'Apply advanced techniques like chain-of-thought and few-shot prompting.',
+      'Evaluate and refine prompts through iterative testing.',
+      'Identify ethical considerations and limitations of AI language models.',
+    ],
+    requirements: [
+      'Basic familiarity with using chat-based AI tools (e.g., ChatGPT).',
+      'No programming experience required.',
+    ],
+    rating: 4.7,
+    reviewCount: 256,
+    price: 0,
+    isFree: true,
+    createdAt: '2024-01-01T10:00:00Z',
+    updatedAt: '2024-06-15T10:00:00Z',
+    publishedAt: '2024-01-15T10:00:00Z',
+  },
 ];
 
 
@@ -2002,6 +2843,57 @@ export const mockQuizzes: Quiz[] = [
         points: 10,
         order: 3,
       },
+    ],
+  },
+  {
+    id: 'quiz-101-1',
+    lessonId: 'lesson-101-1',
+    title: 'Quiz: What is Prompt Engineering?',
+    description: 'Test your understanding of the basics of prompt engineering.',
+    passingScore: 70,
+    questions: [
+      { id: 'q-1011-1', quizId: 'quiz-101-1', type: 'multiple_choice', question: 'What is prompt engineering?', options: ['Writing code for AI models', 'Designing and refining inputs to AI models to achieve desired outputs', 'Training AI models from scratch', 'Creating graphics for AI interfaces'], correctAnswer: '1', explanation: 'Prompt engineering focuses on crafting inputs (prompts) to get the best possible responses from AI models.', points: 10, order: 1 },
+      { id: 'q-1011-2', quizId: 'quiz-101-1', type: 'true_false', question: 'A vague prompt like "Tell me about dogs" is just as effective as a specific one.', options: ['True', 'False'], correctAnswer: '1', explanation: 'Specific prompts yield more relevant and useful responses.', points: 10, order: 2 },
+      { id: 'q-1011-3', quizId: 'quiz-101-1', type: 'multiple_choice', question: 'Which of the following is NOT a component of a good prompt?', options: ['Clear instruction', 'Context', 'Ambiguity', 'Desired format'], correctAnswer: '2', explanation: 'Ambiguity is the enemy of good prompts.', points: 10, order: 3 },
+    ],
+  },
+  {
+    id: 'quiz-101-2',
+    lessonId: 'lesson-101-5',
+    title: 'Quiz: Role Prompting and Persona',
+    description: 'Check your knowledge of role-based prompting.',
+    passingScore: 70,
+    questions: [
+      { id: 'q-1012-1', quizId: 'quiz-101-2', type: 'multiple_choice', question: 'What is role prompting?', options: ['Asking the AI to play a game', 'Instructing the AI to adopt a specific character or profession', 'Assigning the AI a name', 'Telling the AI to speak in first person'], correctAnswer: '1', explanation: 'Role prompting means giving the AI a persona to shape its responses.', points: 10, order: 1 },
+      { id: 'q-1012-2', quizId: 'quiz-101-2', type: 'multiple_choice', question: 'Which of the following is a good role prompt?', options: ['Write a story.', 'You are a pirate. Write a short story about finding treasure.', 'Tell me about history.', 'What is AI?'], correctAnswer: '1', explanation: 'The second option clearly defines a role and a task.', points: 10, order: 2 },
+      { id: 'q-1012-3', quizId: 'quiz-101-2', type: 'true_false', question: "Role prompting can help set the tone and focus of the AI's response.", options: ['True', 'False'], correctAnswer: '0', explanation: 'True. By adopting a role, the AI aligns its language and knowledge with that persona.', points: 10, order: 3 },
+      { id: 'q-1012-4', quizId: 'quiz-101-2', type: 'multiple_choice', question: 'What should you be cautious about when using role prompting?', options: ['Using too many words', 'Asking the AI to impersonate regulated professionals without verification', 'Forgetting to add a question mark', 'Using emojis'], correctAnswer: '1', explanation: 'Impersonating professionals can lead to misleading or dangerous advice.', points: 10, order: 4 },
+    ],
+  },
+  {
+    id: 'quiz-101-3',
+    lessonId: 'lesson-101-8',
+    title: 'Quiz: Iterative Refinement',
+    description: 'Test your understanding of the iterative refinement process.',
+    passingScore: 70,
+    questions: [
+      { id: 'q-1013-1', quizId: 'quiz-101-3', type: 'multiple_choice', question: 'What is iterative refinement in prompt engineering?', options: ['Asking the AI to refine its own response', 'Gradually improving prompts based on outputs', 'Using a single perfect prompt from the start', 'Refining the AI model itself'], correctAnswer: '1', explanation: 'Iterative refinement means testing prompts, analyzing results, and tweaking them.', points: 10, order: 1 },
+      { id: 'q-1013-2', quizId: 'quiz-101-3', type: 'multiple_choice', question: 'If an AI output is too vague, what refinement might help?', options: ['Add more ambiguity', 'Make the prompt shorter', 'Add specificity and constraints', 'Remove examples'], correctAnswer: '2', explanation: 'Adding specificity helps narrow down the response.', points: 10, order: 2 },
+      { id: 'q-1013-3', quizId: 'quiz-101-3', type: 'true_false', question: 'Iterative refinement usually achieves perfection on the first try.', options: ['True', 'False'], correctAnswer: '1', explanation: 'False. Multiple iterations are normal.', points: 10, order: 3 },
+      { id: 'q-1013-4', quizId: 'quiz-101-3', type: 'multiple_choice', question: 'Why is it helpful to track prompt versions?', options: ['To show off your work', 'To learn what changes improve outputs', 'To make the prompt longer', 'To confuse the AI'], correctAnswer: '1', explanation: 'Tracking helps you understand which refinements lead to better results.', points: 10, order: 4 },
+    ],
+  },
+  {
+    id: 'quiz-101-4',
+    lessonId: 'lesson-101-12',
+    title: 'Quiz: Course Wrap-up',
+    description: 'Final quiz covering key concepts from the entire course.',
+    passingScore: 70,
+    questions: [
+      { id: 'q-1014-1', quizId: 'quiz-101-4', type: 'multiple_choice', question: 'Which technique involves showing the AI examples of desired input-output pairs?', options: ['Chain-of-thought', 'Role prompting', 'Few-shot prompting', 'Iterative refinement'], correctAnswer: '2', explanation: "Few-shot prompting uses examples to guide the AI's responses.", points: 10, order: 1 },
+      { id: 'q-1014-2', quizId: 'quiz-101-4', type: 'multiple_choice', question: 'What is the primary benefit of chain-of-thought prompting?', options: ['It makes responses shorter', 'It forces the AI to show step-by-step reasoning', 'It uses fewer tokens', 'It guarantees correct answers'], correctAnswer: '1', explanation: 'Chain-of-thought encourages step-by-step reasoning, improving accuracy.', points: 10, order: 2 },
+      { id: 'q-1014-3', quizId: 'quiz-101-4', type: 'true_false', question: 'AI models always provide factually correct information.', options: ['True', 'False'], correctAnswer: '1', explanation: 'False. AI can hallucinate or produce incorrect information.', points: 10, order: 3 },
+      { id: 'q-1014-4', quizId: 'quiz-101-4', type: 'multiple_choice', question: 'Which of the following is an ethical consideration in prompt engineering?', options: ['Using as many tokens as possible', 'Ignoring bias in outputs', 'Protecting user privacy by not sharing sensitive data in prompts', 'Always using the highest temperature setting'], correctAnswer: '2', explanation: 'Protecting privacy is crucial.', points: 10, order: 4 },
     ],
   },
 ];
