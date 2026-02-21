@@ -31,7 +31,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useAuthStore } from '@/stores/authStore';
-import { mockCourses } from '@/data/mockData';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { dbCourseToCardProps, type DbCourse } from '@/hooks/useCourses';
 import {
   EnrollmentChart,
   RevenueChart,
@@ -44,8 +46,21 @@ export default function InstructorDashboard() {
   useDocumentTitle('Instructor Dashboard - Masashi LMS');
   const { user } = useAuthStore();
 
-  // Get instructor's courses
-  const instructorCourses = mockCourses.filter(c => c.instructorId === user?.id || c.instructorId === 'user-2');
+  // Fetch instructor's courses from database
+  const { data: dbInstructorCourses = [] } = useQuery({
+    queryKey: ['instructor-courses', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*, instructor:profiles!courses_instructor_id_fkey(*), sections(*, lessons(*))')
+        .eq('instructor_id', user.id);
+      if (error) throw error;
+      return (data ?? []).map((c) => dbCourseToCardProps(c as DbCourse));
+    },
+    enabled: !!user,
+  });
+  const instructorCourses = dbInstructorCourses;
 
   // Calculate real stats from courses
   const totalStudents = instructorCourses.reduce((acc, c) => acc + (c.enrollmentCount || c.enrolledCount || 0), 0);

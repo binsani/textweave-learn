@@ -4,7 +4,9 @@ import { ArrowLeft, ArrowRight, Clock, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { mockCourses, mockQuizzes } from '@/data/mockData';
+import { useCourseById, dbCourseToCardProps } from '@/hooks/useCourses';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { QuizQuestion, QuizProgress, QuizResults } from '@/components/quiz';
 import { Quiz, Course, Lesson, Section } from '@/types';
 
@@ -39,9 +41,45 @@ export default function QuizInterface() {
   const [quizState, setQuizState] = useState<QuizState>('taking');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Find course, lesson, and quiz
-  const course: Course | undefined = mockCourses.find((c) => c.id === courseId);
-  const quiz: Quiz | undefined = mockQuizzes.find((q) => q.id === quizId);
+  // Fetch course and quiz from database
+  const { data: dbCourse } = useCourseById(courseId);
+  const course: Course | undefined = useMemo(() => dbCourse ? dbCourseToCardProps(dbCourse) : undefined, [dbCourse]);
+
+  const { data: quizData } = useQuery({
+    queryKey: ['quiz', quizId],
+    queryFn: async () => {
+      if (!quizId) return null;
+      const { data: quiz, error } = await supabase
+        .from('quizzes')
+        .select('*, questions(*)')
+        .eq('id', quizId)
+        .single();
+      if (error) return null;
+      return {
+        id: quiz.id,
+        lessonId: quiz.lesson_id,
+        title: quiz.title,
+        description: quiz.description ?? undefined,
+        passingScore: quiz.passing_score,
+        timeLimit: quiz.time_limit ?? undefined,
+        questions: (quiz.questions ?? [])
+          .sort((a: any, b: any) => a.order - b.order)
+          .map((q: any) => ({
+            id: q.id,
+            quizId: q.quiz_id,
+            type: q.type,
+            question: q.question,
+            options: q.options ?? undefined,
+            correctAnswer: q.correct_answer,
+            explanation: q.explanation ?? undefined,
+            points: q.points,
+            order: q.order,
+          })),
+      } as Quiz;
+    },
+    enabled: !!quizId,
+  });
+  const quiz = quizData ?? undefined;
 
   const findLesson = useCallback((): { lesson: Lesson | null; section: Section | null } => {
     if (!course) return { lesson: null, section: null };

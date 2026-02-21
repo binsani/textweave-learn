@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CourseProgress, LessonProgress } from '@/types';
-import { mockCourseProgress } from '@/data/mockData';
 
 interface ProgressState {
   courseProgress: Record<string, CourseProgress>;
@@ -30,10 +29,7 @@ interface ProgressState {
 export const useProgressStore = create<ProgressState>()(
   persist(
     (set, get) => ({
-      courseProgress: mockCourseProgress.reduce((acc, cp) => {
-        acc[cp.courseId] = cp;
-        return acc;
-      }, {} as Record<string, CourseProgress>),
+      courseProgress: {},
       lessonProgress: {},
       notes: {},
       bookmarks: {},
@@ -43,7 +39,7 @@ export const useProgressStore = create<ProgressState>()(
         if (!courseProgress[courseId]) {
           const newProgress: CourseProgress = {
             courseId,
-            userId: 'user-1', // Mock user
+            userId: '',
             enrolledAt: new Date().toISOString(),
             completedLessons: [],
             totalLessons,
@@ -51,34 +47,26 @@ export const useProgressStore = create<ProgressState>()(
             lastAccessedAt: new Date().toISOString(),
             certificateEarned: false,
           };
-          set({ 
-            courseProgress: { 
-              ...courseProgress, 
-              [courseId]: newProgress 
-            } 
-          });
+          set({ courseProgress: { ...courseProgress, [courseId]: newProgress } });
         }
       },
 
       markLessonComplete: (courseId: string, lessonId: string) => {
         const { courseProgress } = get();
         const progress = courseProgress[courseId];
-        
         if (progress && !progress.completedLessons.includes(lessonId)) {
           const updatedLessons = [...progress.completedLessons, lessonId];
-          const updatedProgress: CourseProgress = {
-            ...progress,
-            completedLessons: updatedLessons,
-            progressPercentage: Math.round((updatedLessons.length / progress.totalLessons) * 100),
-            lastAccessedAt: new Date().toISOString(),
-            lastLessonId: lessonId,
-            certificateEarned: updatedLessons.length === progress.totalLessons,
-          };
-          
           set({
             courseProgress: {
               ...courseProgress,
-              [courseId]: updatedProgress,
+              [courseId]: {
+                ...progress,
+                completedLessons: updatedLessons,
+                progressPercentage: Math.round((updatedLessons.length / progress.totalLessons) * 100),
+                lastAccessedAt: new Date().toISOString(),
+                lastLessonId: lessonId,
+                certificateEarned: updatedLessons.length === progress.totalLessons,
+              },
             },
           });
         }
@@ -87,20 +75,17 @@ export const useProgressStore = create<ProgressState>()(
       markLessonIncomplete: (courseId: string, lessonId: string) => {
         const { courseProgress } = get();
         const progress = courseProgress[courseId];
-        
         if (progress) {
           const updatedLessons = progress.completedLessons.filter(id => id !== lessonId);
-          const updatedProgress: CourseProgress = {
-            ...progress,
-            completedLessons: updatedLessons,
-            progressPercentage: Math.round((updatedLessons.length / progress.totalLessons) * 100),
-            certificateEarned: false,
-          };
-          
           set({
             courseProgress: {
               ...courseProgress,
-              [courseId]: updatedProgress,
+              [courseId]: {
+                ...progress,
+                completedLessons: updatedLessons,
+                progressPercentage: Math.round((updatedLessons.length / progress.totalLessons) * 100),
+                certificateEarned: false,
+              },
             },
           });
         }
@@ -109,96 +94,52 @@ export const useProgressStore = create<ProgressState>()(
       updateLastAccessed: (courseId: string, lessonId: string) => {
         const { courseProgress } = get();
         const progress = courseProgress[courseId];
-        
         if (progress) {
           set({
             courseProgress: {
               ...courseProgress,
-              [courseId]: {
-                ...progress,
-                lastAccessedAt: new Date().toISOString(),
-                lastLessonId: lessonId,
-              },
+              [courseId]: { ...progress, lastAccessedAt: new Date().toISOString(), lastLessonId: lessonId },
             },
           });
         }
       },
 
-      getCourseProgress: (courseId: string) => {
-        return get().courseProgress[courseId];
-      },
+      getCourseProgress: (courseId: string) => get().courseProgress[courseId],
 
-      // Notes
       addNote: (courseId: string, lessonId: string, content: string) => {
         const { notes } = get();
-        set({
-          notes: {
-            ...notes,
-            [courseId]: {
-              ...(notes[courseId] || {}),
-              [lessonId]: content,
-            },
-          },
-        });
+        set({ notes: { ...notes, [courseId]: { ...(notes[courseId] || {}), [lessonId]: content } } });
       },
 
       updateNote: (courseId: string, lessonId: string, content: string) => {
         const { notes } = get();
-        set({
-          notes: {
-            ...notes,
-            [courseId]: {
-              ...(notes[courseId] || {}),
-              [lessonId]: content,
-            },
-          },
-        });
+        set({ notes: { ...notes, [courseId]: { ...(notes[courseId] || {}), [lessonId]: content } } });
       },
 
       removeNote: (courseId: string, lessonId: string) => {
         const { notes } = get();
         const courseNotes = { ...(notes[courseId] || {}) };
         delete courseNotes[lessonId];
-        set({
-          notes: {
-            ...notes,
-            [courseId]: courseNotes,
-          },
-        });
+        set({ notes: { ...notes, [courseId]: courseNotes } });
       },
 
-      // Bookmarks
       addBookmark: (courseId: string, lessonId: string) => {
         const { bookmarks } = get();
         const courseBookmarks = bookmarks[courseId] || [];
         if (!courseBookmarks.includes(lessonId)) {
-          set({
-            bookmarks: {
-              ...bookmarks,
-              [courseId]: [...courseBookmarks, lessonId],
-            },
-          });
+          set({ bookmarks: { ...bookmarks, [courseId]: [...courseBookmarks, lessonId] } });
         }
       },
 
       removeBookmark: (courseId: string, lessonId: string) => {
         const { bookmarks } = get();
-        const courseBookmarks = bookmarks[courseId] || [];
-        set({
-          bookmarks: {
-            ...bookmarks,
-            [courseId]: courseBookmarks.filter(id => id !== lessonId),
-          },
-        });
+        set({ bookmarks: { ...bookmarks, [courseId]: (bookmarks[courseId] || []).filter(id => id !== lessonId) } });
       },
 
       isLessonBookmarked: (courseId: string, lessonId: string) => {
-        const { bookmarks } = get();
-        return (bookmarks[courseId] || []).includes(lessonId);
+        return (get().bookmarks[courseId] || []).includes(lessonId);
       },
     }),
-    {
-      name: 'masashi-progress',
-    }
+    { name: 'masashi-progress' }
   )
 );

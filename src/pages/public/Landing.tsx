@@ -3,8 +3,10 @@ import { BookOpen, Users, Award, Clock, ArrowRight, CheckCircle } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCourses } from '@/data/mockData';
+import { Skeleton } from '@/components/ui/skeleton';
+import { usePublishedCourses, dbCourseToCardProps } from '@/hooks/useCourses';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useMemo } from 'react';
 
 const stats = [
   { label: 'Active Learners', value: '12,000+', icon: Users },
@@ -23,14 +25,18 @@ const features = [
 ];
 
 export default function Landing() {
-  const featuredCourses = mockCourses.filter(c => c.status === 'published').slice(0, 3);
   useDocumentTitle('Masashi LMS - Text-First Learning Platform');
+  const { data: dbCourses, isLoading } = usePublishedCourses();
+  const featuredCourses = useMemo(
+    () => (dbCourses ?? []).slice(0, 3).map(dbCourseToCardProps),
+    [dbCourses]
+  );
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        {/* Animated background elements */}
         <div className="absolute top-20 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-pulse-soft" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }} />
         
@@ -73,11 +79,7 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div 
-                key={stat.label} 
-                className="text-center animate-fade-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+              <div key={stat.label} className="text-center animate-fade-up" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="flex justify-center mb-3">
                   <div className="p-3 rounded-xl bg-primary/10 hover-scale transition-transform">
                     <stat.icon className="h-6 w-6 text-primary" />
@@ -125,7 +127,6 @@ export default function Landing() {
                   </div>
                 </div>
               </div>
-              {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 w-20 h-20 bg-accent/20 rounded-full blur-2xl" />
               <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-primary/20 rounded-full blur-2xl" />
             </div>
@@ -147,42 +148,46 @@ export default function Landing() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
-            {featuredCourses.map((course, index) => (
-              <Card 
-                key={course.id} 
-                className="group card-hover overflow-hidden animate-fade-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 relative overflow-hidden">
-                  {course.thumbnail && (
-                    <img 
-                      src={course.thumbnail} 
-                      alt={course.title}
-                      loading="lazy"
-                      onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  )}
-                  <Badge className="absolute top-3 left-3">{course.category}</Badge>
-                </div>
-                <CardContent className="p-5">
-                  <h3 className="font-serif text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {course.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {course.description}
-                  </p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {course.sections.reduce((acc, s) => acc + s.lessons.length, 0)} lessons
-                    </span>
-                    <span className="font-semibold text-primary">
-                      {course.price === 0 ? 'Free' : `$${course.price}`}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <Skeleton className="aspect-video w-full" />
+                  <CardContent className="p-5 space-y-3">
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </CardContent>
+                </Card>
+              ))
+            ) : featuredCourses.length === 0 ? (
+              <div className="col-span-3 text-center py-12 text-muted-foreground">
+                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                <p>Courses coming soon! Check back later.</p>
+              </div>
+            ) : (
+              featuredCourses.map((course, index) => (
+                <Link to={`/courses/${course.id}`} key={course.id}>
+                  <Card className="group card-hover overflow-hidden animate-fade-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                    <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 relative overflow-hidden">
+                      {course.thumbnail && (
+                        <img src={course.thumbnail} alt={course.title} loading="lazy" onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      )}
+                      <Badge className="absolute top-3 left-3">{course.category}</Badge>
+                    </div>
+                    <CardContent className="p-5">
+                      <h3 className="font-serif text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                        {course.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{course.description}</p>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{course.totalLessons} lessons</span>
+                        <span className="font-semibold text-primary">{course.price === 0 ? 'Free' : `$${course.price}`}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))
+            )}
           </div>
 
           <div className="text-center mt-10">
