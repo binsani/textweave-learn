@@ -1,9 +1,14 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Course } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { BookOpen, Clock, Award, CheckCircle, ShieldCheck, Infinity } from 'lucide-react';
+import { BookOpen, Clock, Award, CheckCircle, ShieldCheck, Infinity, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuthStore } from '@/stores/authStore';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface EnrollmentCardProps {
   course: Course;
@@ -12,6 +17,56 @@ interface EnrollmentCardProps {
 
 export function EnrollmentCard({ course, variant = 'desktop' }: EnrollmentCardProps) {
   const totalLessons = course.sections.reduce((acc, s) => acc + s.lessons.length, 0);
+  const user = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [isEnrolling, setIsEnrolling] = useState(false);
+
+  const handleEnroll = async () => {
+    if (!user) {
+      toast.info('Please log in to enroll in this course.');
+      navigate('/login');
+      return;
+    }
+
+    setIsEnrolling(true);
+    try {
+      // Check if already enrolled
+      const { data: existing } = await supabase
+        .from('enrollments')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('course_id', course.id)
+        .maybeSingle();
+
+      if (existing) {
+        toast.info('You are already enrolled in this course!');
+        navigate('/student/courses');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('enrollments')
+        .insert({ user_id: user.id, course_id: course.id });
+
+      if (error) {
+        console.error('Enrollment error:', error);
+        toast.error(`Enrollment failed: ${error.message}`);
+        return;
+      }
+
+      toast.success('Successfully enrolled! Start learning now.');
+      queryClient.invalidateQueries({ queryKey: ['enrollments'] });
+      navigate('/student/courses');
+    } catch (error) {
+      console.error('Unexpected enrollment error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsEnrolling(false);
+    }
+  };
+
+  const enrollLabel = course.price === 0 ? 'Enroll for Free' : 'Buy Now';
 
   if (variant === 'mobile') {
     return (
@@ -25,8 +80,8 @@ export function EnrollmentCard({ course, variant = 'desktop' }: EnrollmentCardPr
               <span className="text-sm text-muted-foreground line-through ml-2">$199</span>
             )}
           </div>
-          <Button size="lg" className="flex-1 max-w-[200px]">
-            {course.price === 0 ? 'Enroll Free' : 'Buy Now'}
+          <Button size="lg" className="flex-1 max-w-[200px]" onClick={handleEnroll} disabled={isEnrolling}>
+            {isEnrolling ? <Loader2 className="h-4 w-4 animate-spin" /> : enrollLabel}
           </Button>
         </div>
       </div>
@@ -73,8 +128,9 @@ export function EnrollmentCard({ course, variant = 'desktop' }: EnrollmentCardPr
         )}
 
         {/* CTA Buttons */}
-        <Button className="w-full mb-3" size="lg">
-          {course.price === 0 ? 'Enroll for Free' : 'Buy Now'}
+        <Button className="w-full mb-3" size="lg" onClick={handleEnroll} disabled={isEnrolling}>
+          {isEnrolling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+          {isEnrolling ? 'Enrolling...' : enrollLabel}
         </Button>
         
         {course.price > 0 && (
