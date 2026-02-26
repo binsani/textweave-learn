@@ -24,9 +24,12 @@ async function fetchUserRole(userId: string): Promise<UserRole> {
   const { data } = await supabase
     .from('user_roles')
     .select('role')
-    .eq('user_id', userId)
-    .single();
-  return (data?.role as UserRole) || 'student';
+    .eq('user_id', userId);
+  // Prioritize admin > instructor > student when user has multiple roles
+  const roles = (data ?? []).map(r => r.role as UserRole);
+  if (roles.includes('admin')) return 'admin';
+  if (roles.includes('instructor')) return 'instructor';
+  return 'student';
 }
 
 async function mapSupabaseUser(su: SupabaseUser): Promise<AppUser> {
