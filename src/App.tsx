@@ -103,7 +103,7 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/cookies" element={<Cookies />} />
                 <Route path="/verify" element={<CertificateVerify />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/portal/secure-access-9x4k" element={<AdminLogin />} />
                 <Route path="/student/login" element={<StudentLogin />} />
                 <Route path="/instructor/login" element={<InstructorLogin />} />
               </Route>
