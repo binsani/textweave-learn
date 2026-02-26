@@ -25,16 +25,26 @@ export default function AdminLogin() {
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      setTimeout(() => {
-        const role = useAuthStore.getState().user?.role;
-        if (role !== 'admin') {
-          toast({ title: 'Access denied', description: 'This login is for administrators only.', variant: 'destructive' });
-          useAuthStore.getState().logout();
-        } else {
-          toast({ title: 'Welcome, Admin!', description: 'You have successfully logged in.' });
-          navigate('/admin/dashboard');
-        }
-      }, 200);
+      // Wait for auth store to finish mapping the user (role fetch is async)
+      const waitForRole = () =>
+        new Promise<string | undefined>((resolve) => {
+          const check = (attempts = 0) => {
+            const state = useAuthStore.getState();
+            if (state.user?.role) return resolve(state.user.role);
+            if (attempts > 20) return resolve(undefined);
+            setTimeout(() => check(attempts + 1), 200);
+          };
+          check();
+        });
+
+      const role = await waitForRole();
+      if (role !== 'admin') {
+        toast({ title: 'Access denied', description: 'This login is for administrators only.', variant: 'destructive' });
+        useAuthStore.getState().logout();
+      } else {
+        toast({ title: 'Welcome, Admin!', description: 'You have successfully logged in.' });
+        navigate('/admin/dashboard');
+      }
     } else {
       toast({ title: 'Login failed', description: result.error || 'Invalid email or password.', variant: 'destructive' });
     }
