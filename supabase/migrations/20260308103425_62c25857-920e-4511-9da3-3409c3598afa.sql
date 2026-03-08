@@ -1,0 +1,1 @@
+ALTER TABLE public.vendors ADD COLUMN certificate_template text NOT NULL DEFAULT 'classic';
