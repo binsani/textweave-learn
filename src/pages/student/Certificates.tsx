@@ -20,6 +20,7 @@ interface CertificateData {
   templateId?: string;
   customBgUrl?: string;
   customText?: CertificateCustomText;
+  signatureUrl?: string;
 }
 
 export default function StudentCertificates() {
