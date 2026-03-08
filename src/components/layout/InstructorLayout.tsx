@@ -36,7 +36,7 @@ const sidebarLinks = [
   { to: '/instructor/courses', label: 'My Courses', icon: BookPlus },
   { to: '/instructor/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/instructor/students', label: 'Students', icon: Users },
-  { to: '/instructor/vendor', label: 'My School', icon: Store },
+  { to: '/instructor/school', label: 'My School', icon: Store },
   { to: '/instructor/settings', label: 'Settings', icon: Settings },
 ];
 
