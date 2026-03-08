@@ -437,16 +437,16 @@ export default function AdminSettings() {
 
         {/* Certificates Tab */}
         <TabsContent value="certificates" className="space-y-6">
-          {/* Vendor Usage Stats */}
-          {vendorStats && vendorStats.total > 0 && (
+          {/* School Certificate Usage Stats */}
+          {schoolStats && schoolStats.total > 0 && (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
-                  Vendor Certificate Usage
+                  School Certificate Usage
                 </CardTitle>
                 <CardDescription>
-                  How approved vendors are using certificate settings
+                  How instructors with schools are using certificate settings
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -455,21 +455,21 @@ export default function AdminSettings() {
                     className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
                     onClick={() => { setVendorDialogFilter('all'); setVendorDialogOpen(true); }}
                   >
-                    <p className="text-2xl font-bold text-foreground">{vendorStats.total}</p>
-                    <p className="text-xs text-muted-foreground">Total Vendors</p>
+                    <p className="text-2xl font-bold text-foreground">{schoolStats.total}</p>
+                    <p className="text-xs text-muted-foreground">Total Schools</p>
                   </button>
                   <button
                     className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
                     onClick={() => { setVendorDialogFilter('defaults'); setVendorDialogOpen(true); }}
                   >
-                    <p className="text-2xl font-bold text-primary">{vendorStats.usingDefaults}</p>
+                    <p className="text-2xl font-bold text-primary">{schoolStats.usingDefaults}</p>
                     <p className="text-xs text-muted-foreground">Using Defaults</p>
                   </button>
                   <button
                     className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
                     onClick={() => { setVendorDialogFilter('custom'); setVendorDialogOpen(true); }}
                   >
-                    <p className="text-2xl font-bold text-foreground">{vendorStats.custom}</p>
+                    <p className="text-2xl font-bold text-foreground">{schoolStats.custom}</p>
                     <p className="text-xs text-muted-foreground">Custom Design</p>
                   </button>
                 </div>
@@ -479,24 +479,24 @@ export default function AdminSettings() {
                       <PaintBucket className="h-3 w-3" />
                       Platform defaults
                     </span>
-                    <span>{vendorStats.total > 0 ? Math.round((vendorStats.usingDefaults / vendorStats.total) * 100) : 0}%</span>
+                    <span>{schoolStats.total > 0 ? Math.round((schoolStats.usingDefaults / schoolStats.total) * 100) : 0}%</span>
                   </div>
-                  <Progress value={vendorStats.total > 0 ? (vendorStats.usingDefaults / vendorStats.total) * 100 : 0} className="h-2" />
+                  <Progress value={schoolStats.total > 0 ? (schoolStats.usingDefaults / schoolStats.total) * 100 : 0} className="h-2" />
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Vendor Details Dialog */}
+          {/* School Details Dialog */}
           <Dialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen}>
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
-                  {vendorDialogFilter === 'defaults' ? 'Vendors Using Platform Defaults' : vendorDialogFilter === 'custom' ? 'Vendors with Custom Design' : 'All Vendors'}
+                  {vendorDialogFilter === 'defaults' ? 'Schools Using Platform Defaults' : vendorDialogFilter === 'custom' ? 'Schools with Custom Design' : 'All Schools'}
                 </DialogTitle>
                 <DialogDescription>
-                  {filteredVendors.length} vendor{filteredVendors.length !== 1 ? 's' : ''}
+                  {filteredSchools.length} school{filteredSchools.length !== 1 ? 's' : ''}
                 </DialogDescription>
               </DialogHeader>
               <div className="flex gap-2 mb-2">
@@ -512,22 +512,22 @@ export default function AdminSettings() {
                 ))}
               </div>
               <ScrollArea className="max-h-[400px]">
-                {filteredVendors.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No vendors in this category</p>
+                {filteredSchools.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">No schools in this category</p>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Vendor</TableHead>
+                        <TableHead>School</TableHead>
                         <TableHead>Template</TableHead>
                         <TableHead>Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredVendors.map(v => (
+                      {filteredSchools.map(v => (
                         <TableRow key={v.id}>
                           <TableCell className="font-medium">{v.name}</TableCell>
-                          <TableCell className="text-muted-foreground text-xs capitalize">{v.certificate_template}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs capitalize">{v.certificate_template || 'classic'}</TableCell>
                           <TableCell>
                             <Badge variant={v.isCustom ? 'secondary' : 'outline'} className="text-xs">
                               {v.isCustom ? 'Custom' : 'Default'}
