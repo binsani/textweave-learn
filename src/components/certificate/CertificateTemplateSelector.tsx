@@ -244,8 +244,17 @@ export function CertificateTemplateSelector({
   onBgUpload,
   onBgRemove,
   bgUploading,
+  customText,
+  onCustomTextChange,
 }: CertificateTemplateSelectorProps) {
   const bgInputRef = useRef<HTMLInputElement>(null);
+  const mergedText = { ...DEFAULT_CERT_TEXT, ...customText };
+
+  const updateTextField = (key: keyof CertificateCustomText, val: string) => {
+    if (onCustomTextChange) {
+      onCustomTextChange({ ...customText, [key]: val });
+    }
+  };
 
   return (
     <Card>
@@ -328,7 +337,117 @@ export function CertificateTemplateSelector({
           </>
         )}
 
-        <LivePreview templateId={value} customBgUrl={customBgUrl} />
+        {/* Certificate Text Customization */}
+        {onCustomTextChange && (
+          <>
+            <Separator className="my-6" />
+            <div className="space-y-4">
+              <Label className="flex items-center gap-2 text-base font-semibold">
+                <Type className="h-4 w-4" />
+                Customize Certificate Text
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Personalize the wording on your certificates. Use <code className="text-xs bg-muted px-1 py-0.5 rounded">{'{hours}'}</code> in the closing text to insert course hours automatically.
+              </p>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cert-heading">Heading</Label>
+                  <Input
+                    id="cert-heading"
+                    value={mergedText.heading}
+                    onChange={e => updateTextField('heading', e.target.value)}
+                    placeholder="CERTIFICATE"
+                    maxLength={50}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cert-subheading">Subheading</Label>
+                  <Input
+                    id="cert-subheading"
+                    value={mergedText.subheading}
+                    onChange={e => updateTextField('subheading', e.target.value)}
+                    placeholder="OF COMPLETION"
+                    maxLength={50}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cert-presented">Presented To Line</Label>
+                <Input
+                  id="cert-presented"
+                  value={mergedText.presentedTo}
+                  onChange={e => updateTextField('presentedTo', e.target.value)}
+                  placeholder="This is to certify that"
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cert-body">Body Text</Label>
+                <Input
+                  id="cert-body"
+                  value={mergedText.bodyText}
+                  onChange={e => updateTextField('bodyText', e.target.value)}
+                  placeholder="has successfully completed the course"
+                  maxLength={150}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cert-closing">Closing Text</Label>
+                <Input
+                  id="cert-closing"
+                  value={mergedText.closingText}
+                  onChange={e => updateTextField('closingText', e.target.value)}
+                  placeholder="comprising {hours} hours of instruction"
+                  maxLength={150}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use <code className="bg-muted px-1 py-0.5 rounded">{'{hours}'}</code> to insert the course duration
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cert-congrats">Congratulations Message (optional)</Label>
+                <Textarea
+                  id="cert-congrats"
+                  value={mergedText.congratsMessage}
+                  onChange={e => updateTextField('congratsMessage', e.target.value)}
+                  placeholder="e.g. Congratulations on your achievement! We're proud of your dedication."
+                  rows={2}
+                  maxLength={200}
+                />
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cert-signer">Signer Title</Label>
+                  <Input
+                    id="cert-signer"
+                    value={mergedText.signerTitle}
+                    onChange={e => updateTextField('signerTitle', e.target.value)}
+                    placeholder="Course Instructor"
+                    maxLength={50}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cert-footer">Date Label</Label>
+                  <Input
+                    id="cert-footer"
+                    value={mergedText.footerLabel}
+                    onChange={e => updateTextField('footerLabel', e.target.value)}
+                    placeholder="Date of Completion"
+                    maxLength={50}
+                  />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        <LivePreview templateId={value} customBgUrl={customBgUrl} customText={mergedText} />
       </CardContent>
     </Card>
   );
