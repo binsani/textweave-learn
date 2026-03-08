@@ -62,6 +62,7 @@ const AdminCourses = lazy(() => import("@/pages/admin/Courses"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/Analytics"));
 const AdminSettings = lazy(() => import("@/pages/admin/Settings"));
 const AdminVendors = lazy(() => import("@/pages/admin/Vendors"));
+const AdminPurchaseCodes = lazy(() => import("@/pages/admin/PurchaseCodes"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -158,6 +159,7 @@ const App = () => (
                   <Route path="analytics" element={<AdminAnalytics />} />
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="vendors" element={<AdminVendors />} />
+                  <Route path="purchase-codes" element={<AdminPurchaseCodes />} />
                 </Route>
               </Route>
 
