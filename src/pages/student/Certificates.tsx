@@ -63,7 +63,7 @@ export default function StudentCertificates() {
 
       // Fetch vendor info for courses that have vendor_id
       const vendorIds = [...new Set((courses ?? []).map(c => c.vendor_id).filter(Boolean))];
-      let vendorMap: Record<string, { name: string; logo_url: string | null }> = {};
+      let vendorMap: Record<string, { name: string; logo_url: string | null; certificate_template: string }> = {};
       if (vendorIds.length > 0) {
         const { data: vendorsData } = await supabase
           .from('vendors')
