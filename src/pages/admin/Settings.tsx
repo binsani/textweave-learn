@@ -455,7 +455,7 @@ export default function AdminSettings() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <button
                     className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
-                    onClick={() => { setVendorDialogFilter('all'); setVendorDialogOpen(true); }}
+                    onClick={() => { setSchoolDialogFilter('all'); setSchoolDialogOpen(true); }}
                   >
                     <p className="text-2xl font-bold text-foreground">{schoolStats.total}</p>
                     <p className="text-xs text-muted-foreground">Total Schools</p>
