@@ -26,6 +26,7 @@ const Contact = lazy(() => import("@/pages/public/Contact"));
 const Pricing = lazy(() => import("@/pages/public/Pricing"));
 const Instructors = lazy(() => import("@/pages/public/Instructors"));
 const CertificateVerify = lazy(() => import("@/pages/public/CertificateVerify"));
+const VendorStorefront = lazy(() => import("@/pages/public/VendorStorefront"));
 const Help = lazy(() => import("@/pages/public/Help"));
 const Blog = lazy(() => import("@/pages/public/Blog"));
 const Community = lazy(() => import("@/pages/public/Community"));
