@@ -52,16 +52,13 @@ const InstructorCourses = lazy(() => import("@/pages/instructor/Courses"));
 const InstructorAnalytics = lazy(() => import("@/pages/instructor/Analytics"));
 const InstructorStudents = lazy(() => import("@/pages/instructor/Students"));
 const InstructorSettings = lazy(() => import("@/pages/instructor/Settings"));
-const VendorApplication = lazy(() => import("@/pages/instructor/VendorApplication"));
-const VendorSettings = lazy(() => import("@/pages/instructor/VendorSettings"));
-const VendorAnalytics = lazy(() => import("@/pages/instructor/VendorAnalytics"));
+const SchoolSettings = lazy(() => import("@/pages/instructor/VendorSettings"));
 
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminUsers = lazy(() => import("@/pages/admin/Users"));
 const AdminCourses = lazy(() => import("@/pages/admin/Courses"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/Analytics"));
 const AdminSettings = lazy(() => import("@/pages/admin/Settings"));
-const AdminVendors = lazy(() => import("@/pages/admin/Vendors"));
 const AdminPurchaseCodes = lazy(() => import("@/pages/admin/PurchaseCodes"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -144,9 +141,7 @@ const App = () => (
                   <Route path="analytics" element={<InstructorAnalytics />} />
                   <Route path="students" element={<InstructorStudents />} />
                   <Route path="settings" element={<InstructorSettings />} />
-                  <Route path="vendor" element={<VendorApplication />} />
-                  <Route path="vendor/settings" element={<VendorSettings />} />
-                  <Route path="vendor/analytics" element={<VendorAnalytics />} />
+                  <Route path="school" element={<SchoolSettings />} />
                 </Route>
               </Route>
 
@@ -158,7 +153,6 @@ const App = () => (
                   <Route path="courses" element={<AdminCourses />} />
                   <Route path="analytics" element={<AdminAnalytics />} />
                   <Route path="settings" element={<AdminSettings />} />
-                  <Route path="vendors" element={<AdminVendors />} />
                   <Route path="purchase-codes" element={<AdminPurchaseCodes />} />
                 </Route>
               </Route>

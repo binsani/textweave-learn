@@ -33,7 +33,6 @@ export default function StudentCertificates() {
     queryFn: async (): Promise<CertificateData[]> => {
       if (!user) return [];
 
-      // Get all courses where user has completed every lesson
       const { data: progress, error: pErr } = await supabase
         .from('course_progress')
         .select('course_id, lesson_id, is_completed, completed_at')
@@ -43,7 +42,6 @@ export default function StudentCertificates() {
 
       if (!progress?.length) return [];
 
-      // Group completed lessons by course
       const completedByCourse: Record<string, { count: number; lastDate: string }> = {};
       for (const row of progress) {
         if (!completedByCourse[row.course_id]) {
@@ -58,10 +56,10 @@ export default function StudentCertificates() {
       const courseIds = Object.keys(completedByCourse);
       if (!courseIds.length) return [];
 
-      // Fetch courses with their sections/lessons counts and instructor
+      // Fetch courses with instructor profile (which now has school branding)
       const { data: courses, error: cErr } = await supabase
         .from('courses')
-        .select('id, title, estimated_hours, vendor_id, instructor:profiles!courses_instructor_id_fkey(first_name, last_name), sections(lessons(id))')
+        .select('id, title, estimated_hours, instructor_id, instructor:profiles!courses_instructor_id_fkey(first_name, last_name, school_name, logo_url, certificate_template, certificate_bg_url, certificate_custom_text, certificate_signature_url), sections(lessons(id))')
         .in('id', courseIds);
       if (cErr) throw cErr;
 
@@ -73,31 +71,20 @@ export default function StudentCertificates() {
         .single();
       const platformCert = (platformRow?.value as any) ?? {};
 
-      // Fetch vendor info for courses that have vendor_id
-      const vendorIds = [...new Set((courses ?? []).map(c => c.vendor_id).filter(Boolean))];
-      let vendorMap: Record<string, { name: string; logo_url: string | null; certificate_template: string; certificate_bg_url: string | null; certificate_custom_text: any; certificate_signature_url: string | null }> = {};
-      if (vendorIds.length > 0) {
-        const { data: vendorsData } = await supabase
-          .from('vendors')
-          .select('id, name, logo_url, certificate_template, certificate_bg_url, certificate_custom_text, certificate_signature_url')
-          .in('id', vendorIds);
-        for (const v of vendorsData ?? []) {
-          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url, certificate_template: v.certificate_template, certificate_bg_url: v.certificate_bg_url, certificate_custom_text: v.certificate_custom_text, certificate_signature_url: v.certificate_signature_url };
-        }
-      }
-
       const certs: CertificateData[] = [];
       for (const course of courses ?? []) {
-        const totalLessons = (course.sections ?? []).reduce((acc: number, s: any) => acc + (s.lessons?.length || 0), 0);
+        const totalLessons = ((course as any).sections ?? []).reduce((acc: number, s: any) => acc + (s.lessons?.length || 0), 0);
         const completed = completedByCourse[course.id];
         if (completed && completed.count >= totalLessons && totalLessons > 0) {
-          const instructor = course.instructor as any;
+          const instructor = (course as any).instructor as any;
           const instructorName = instructor
             ? [instructor.first_name, instructor.last_name].filter(Boolean).join(' ')
             : 'Instructor';
-          const vendor = course.vendor_id ? vendorMap[course.vendor_id] : null;
-          const hasVendorTemplate = vendor && vendor.certificate_template !== 'classic';
-          const hasVendorText = vendor && Object.keys(vendor.certificate_custom_text ?? {}).length > 0;
+          
+          // Use instructor's school branding for certificates
+          const hasSchoolTemplate = instructor?.certificate_template && instructor.certificate_template !== 'classic';
+          const hasSchoolText = instructor?.certificate_custom_text && typeof instructor.certificate_custom_text === 'object' && Object.keys(instructor.certificate_custom_text as Record<string, unknown>).length > 0;
+          
           certs.push({
             id: `CERT-${course.id.slice(0, 8).toUpperCase()}`,
             studentName: user.name,
@@ -105,12 +92,12 @@ export default function StudentCertificates() {
             instructorName,
             completionDate: completed.lastDate,
             courseHours: Number(course.estimated_hours),
-            vendorName: vendor?.name,
-            vendorLogo: vendor?.logo_url || undefined,
-            templateId: (hasVendorTemplate ? vendor.certificate_template : null) || platformCert.template || 'classic',
-            customBgUrl: vendor?.certificate_bg_url || platformCert.bg_url || undefined,
-            customText: (hasVendorText ? vendor.certificate_custom_text as CertificateCustomText : null) || (Object.keys(platformCert.custom_text ?? {}).length > 0 ? platformCert.custom_text : undefined),
-            signatureUrl: vendor?.certificate_signature_url || platformCert.signature_url || undefined,
+            vendorName: instructor?.school_name || undefined,
+            vendorLogo: instructor?.logo_url || undefined,
+            templateId: (hasSchoolTemplate ? instructor.certificate_template : null) || platformCert.template || 'classic',
+            customBgUrl: instructor?.certificate_bg_url || platformCert.bg_url || undefined,
+            customText: (hasSchoolText ? instructor.certificate_custom_text as CertificateCustomText : null) || (Object.keys(platformCert.custom_text ?? {}).length > 0 ? platformCert.custom_text : undefined),
+            signatureUrl: instructor?.certificate_signature_url || platformCert.signature_url || undefined,
           });
         }
       }

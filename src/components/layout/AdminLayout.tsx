@@ -36,7 +36,7 @@ const sidebarLinks = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/courses', label: 'Course Moderation', icon: BookCheck },
-  { to: '/admin/vendors', label: 'Vendors', icon: Store },
+  
   { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/admin/purchase-codes', label: 'Purchase Codes', icon: Ticket },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
