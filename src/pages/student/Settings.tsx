@@ -214,7 +214,7 @@ export default function StudentSettings() {
 
         {/* Set Up Credentials (purchase code users only) */}
         {isPurchaseCodeUser && (
-          <Card className="border-primary/30 bg-primary/5">
+          <Card id="setup-email-login" className="border-primary/30 bg-primary/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-primary" />
