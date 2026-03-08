@@ -106,7 +106,7 @@ function TemplateThumb({ template, selected }: { template: CertificateTemplate; 
   );
 }
 
-function LivePreview({ templateId, customBgUrl, customText }: { templateId: string; customBgUrl?: string; customText?: CertificateCustomText }) {
+function LivePreview({ templateId, customBgUrl, customText, signatureUrl }: { templateId: string; customBgUrl?: string; customText?: CertificateCustomText; signatureUrl?: string }) {
   const template = getTemplate(templateId);
   const today = format(new Date(), 'MMMM d, yyyy');
   const t = { ...DEFAULT_CERT_TEXT, ...customText };
