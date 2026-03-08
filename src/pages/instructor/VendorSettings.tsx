@@ -477,6 +477,10 @@ export default function VendorSettings() {
         bgUploading={uploading === 'certificate_bg'}
         customText={certText ?? (vendor.certificate_custom_text as CertificateCustomText) ?? {}}
         onCustomTextChange={setCertText}
+        signatureUrl={vendor.certificate_signature_url || undefined}
+        onSignatureUpload={(file) => handleImageUpload('certificate_signature', file)}
+        onSignatureRemove={() => handleRemoveImage('certificate_signature')}
+        signatureUploading={uploading === 'certificate_signature'}
       />
 
       {/* Save */}

@@ -220,6 +220,9 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
               {/* Footer */}
               <div className="w-full flex justify-between px-4 md:px-12">
                 <div className="text-center">
+                  {certificate.signatureUrl && (
+                    <img src={certificate.signatureUrl} alt="Signature" className="h-8 md:h-12 mx-auto mb-1 object-contain" />
+                  )}
                   <div className="w-32 md:w-48 mb-2" style={{ borderTop: `1px solid ${template.accentColor}` }} />
                   <p className="text-xs md:text-sm font-medium" style={{ color: template.titleColor }}>
                     {certificate.instructorName}
