@@ -25,35 +25,6 @@ const values = [
   },
 ];
 
-const stats = [
-  { value: '50K+', label: 'Active Learners' },
-  { value: '500+', label: 'Expert Instructors' },
-  { value: '1,200+', label: 'Courses Available' },
-  { value: '95%', label: 'Completion Rate' },
-];
-
-const team = [
-  {
-    name: 'Dr. Sarah Chen',
-    role: 'Founder & CEO',
-    bio: 'Former professor with 15 years in educational technology.',
-  },
-  {
-    name: 'Marcus Johnson',
-    role: 'Head of Product',
-    bio: 'Previously led product at major EdTech companies.',
-  },
-  {
-    name: 'Elena Rodriguez',
-    role: 'Head of Content',
-    bio: 'Curriculum designer passionate about accessible learning.',
-  },
-  {
-    name: 'David Park',
-    role: 'CTO',
-    bio: 'Engineering leader focused on scalable learning platforms.',
-  },
-];
 
 export default function About() {
   useDocumentTitle('About - MasashiLearn');
@@ -92,19 +63,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-4xl font-bold text-primary mb-2">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Values Section */}
       <section className="py-16">
@@ -126,28 +84,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* Team Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center text-3xl font-bold font-serif">Our Team</h2>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {team.map((member) => (
-              <Card key={member.name} className="text-center hover:shadow-lg transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/60">
-                    <span className="text-2xl font-bold text-primary-foreground">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
-                  <h3 className="font-semibold">{member.name}</h3>
-                  <p className="text-sm text-primary mb-2">{member.role}</p>
-                  <p className="text-sm text-muted-foreground">{member.bio}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-20">
