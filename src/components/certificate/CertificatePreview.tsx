@@ -193,7 +193,7 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
               {/* Main content */}
               <div className="flex-1 flex flex-col justify-center">
                 <p className="text-xs md:text-sm mb-2" style={{ color: template.textColor }}>
-                  This is to certify that
+                  {t.presentedTo}
                 </p>
                 <p
                   className="text-xl md:text-3xl italic my-4"
@@ -202,13 +202,18 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                   {certificate.studentName}
                 </p>
                 <p className="text-sm md:text-base leading-relaxed max-w-lg" style={{ color: template.textColor }}>
-                  has successfully completed the course<br />
+                  {t.bodyText}<br />
                   <span className="font-semibold" style={{ color: template.titleColor }}>
                     "{certificate.courseName}"
                   </span>
                   <br />
-                  comprising {certificate.courseHours} hours of instruction
+                  {t.closingText?.replace('{hours}', String(certificate.courseHours))}
                 </p>
+                {t.congratsMessage && (
+                  <p className="text-xs md:text-sm mt-3 italic max-w-md mx-auto" style={{ color: template.accentColor }}>
+                    {t.congratsMessage}
+                  </p>
+                )}
               </div>
 
               {/* Footer */}
