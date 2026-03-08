@@ -77,6 +77,7 @@ export default function VendorSettings() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!vendor) throw new Error('No vendor');
+      const currentCertText = certText ?? (vendor.certificate_custom_text as CertificateCustomText) ?? {};
       const { error } = await supabase
         .from('vendors')
         .update({
@@ -88,6 +89,7 @@ export default function VendorSettings() {
           primary_color: currentForm.primary_color,
           accent_color: currentForm.accent_color,
           certificate_template: currentForm.certificate_template,
+          certificate_custom_text: currentCertText as any,
         })
         .eq('id', vendor.id);
       if (error) throw error;
