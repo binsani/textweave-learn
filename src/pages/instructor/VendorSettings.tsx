@@ -157,7 +157,8 @@ export default function VendorSettings() {
       return;
     }
     queryClient.invalidateQueries({ queryKey: ['my-vendor-settings'] });
-    toast({ title: `${type === 'logo' ? 'Logo' : 'Banner'} removed` });
+    const label = type === 'logo' ? 'Logo' : type === 'banner' ? 'Banner' : 'Certificate background';
+    toast({ title: `${label} removed` });
   };
 
   if (isLoading) {
