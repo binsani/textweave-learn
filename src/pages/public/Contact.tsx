@@ -28,13 +28,13 @@ const contactMethods = [
     icon: Phone,
     title: 'Call Us',
     description: 'Mon-Fri, 9am-6pm EST',
-    value: '+1 (555) 123-4567',
+    value: '+234 903 794 6881',
   },
   {
     icon: MapPin,
     title: 'Visit Us',
     description: 'Our headquarters',
-    value: 'San Francisco, CA',
+    value: 'Shuaibu Gani Street, Gwarinpa Third Avenue, Abuja',
   },
 ];
 
