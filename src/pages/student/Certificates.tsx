@@ -93,6 +93,7 @@ export default function StudentCertificates() {
             courseHours: Number(course.estimated_hours),
             vendorName: vendor?.name,
             vendorLogo: vendor?.logo_url || undefined,
+            templateId: vendor?.certificate_template || 'classic',
           });
         }
       }
