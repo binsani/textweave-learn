@@ -358,16 +358,17 @@ export default function PurchaseCodes() {
             <ScrollArea className="max-h-[500px]">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Courses</TableHead>
-                    <TableHead>Uses</TableHead>
-                    <TableHead>Expires</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  </TableRow>
+                   <TableRow>
+                     <TableHead>Student</TableHead>
+                     <TableHead>Code</TableHead>
+                     <TableHead>Email</TableHead>
+                     <TableHead>Password</TableHead>
+                     <TableHead>Courses</TableHead>
+                     <TableHead>Uses</TableHead>
+                     <TableHead>Expires</TableHead>
+                     <TableHead>Status</TableHead>
+                     <TableHead className="w-[100px]">Actions</TableHead>
+                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {codes.map((pc: any) => {
