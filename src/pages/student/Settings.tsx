@@ -105,12 +105,16 @@ export default function StudentSettings() {
                 />
               </div>
               {isPurchaseCodeUser ? (
-                <div className="rounded-md border border-primary/20 bg-primary/5 p-3">
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('setup-email-login')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                  className="w-full rounded-md border border-primary/20 bg-primary/5 p-3 text-left hover:bg-primary/10 transition-colors cursor-pointer"
+                >
                   <p className="text-sm font-medium text-foreground">No email linked yet</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    You're using a purchase code account. Scroll down to <strong>Set Up Email Login</strong> to add a real email and password — you'll still be able to log in with your code too!
+                    You're using a purchase code account. Tap here to set up a real email and password — you'll still be able to log in with your code too!
                   </p>
-                </div>
+                </button>
               ) : (
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
@@ -210,7 +214,7 @@ export default function StudentSettings() {
 
         {/* Set Up Credentials (purchase code users only) */}
         {isPurchaseCodeUser && (
-          <Card className="border-primary/30 bg-primary/5">
+          <Card id="setup-email-login" className="border-primary/30 bg-primary/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-primary" />
