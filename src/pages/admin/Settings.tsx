@@ -267,6 +267,20 @@ export default function AdminSettings() {
           </Card>
         </TabsContent>
 
+        {/* Certificates Tab */}
+        <TabsContent value="certificates" className="space-y-6">
+          <CertificateTemplateSelector
+            value={defaultCertTemplate}
+            onChange={setDefaultCertTemplate}
+          />
+          <div className="flex justify-end">
+            <Button onClick={() => toast({ title: 'Default certificate template saved!' })}>
+              <Save className="mr-2 h-4 w-4" />
+              Save Template
+            </Button>
+          </div>
+        </TabsContent>
+
         {/* Security Tab */}
         <TabsContent value="security" className="space-y-6">
           <Card>
