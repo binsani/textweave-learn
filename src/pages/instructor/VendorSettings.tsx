@@ -141,7 +141,8 @@ export default function VendorSettings() {
     }
 
     queryClient.invalidateQueries({ queryKey: ['my-vendor-settings'] });
-    toast({ title: `${type === 'logo' ? 'Logo' : 'Banner'} updated!` });
+    const label = type === 'logo' ? 'Logo' : type === 'banner' ? 'Banner' : 'Certificate background';
+    toast({ title: `${label} updated!` });
   };
 
   const handleRemoveImage = async (type: 'logo' | 'banner' | 'certificate_bg') => {
