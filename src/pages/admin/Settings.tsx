@@ -409,6 +409,46 @@ export default function AdminSettings() {
 
         {/* Certificates Tab */}
         <TabsContent value="certificates" className="space-y-6">
+          {/* Vendor Usage Stats */}
+          {vendorStats && vendorStats.total > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Vendor Certificate Usage
+                </CardTitle>
+                <CardDescription>
+                  How approved vendors are using certificate settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="rounded-lg border bg-muted/40 p-3">
+                    <p className="text-2xl font-bold text-foreground">{vendorStats.total}</p>
+                    <p className="text-xs text-muted-foreground">Total Vendors</p>
+                  </div>
+                  <div className="rounded-lg border bg-muted/40 p-3">
+                    <p className="text-2xl font-bold text-primary">{vendorStats.usingDefaults}</p>
+                    <p className="text-xs text-muted-foreground">Using Defaults</p>
+                  </div>
+                  <div className="rounded-lg border bg-muted/40 p-3">
+                    <p className="text-2xl font-bold text-foreground">{vendorStats.custom}</p>
+                    <p className="text-xs text-muted-foreground">Custom Design</p>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <PaintBucket className="h-3 w-3" />
+                      Platform defaults
+                    </span>
+                    <span>{vendorStats.total > 0 ? Math.round((vendorStats.usingDefaults / vendorStats.total) * 100) : 0}%</span>
+                  </div>
+                  <Progress value={vendorStats.total > 0 ? (vendorStats.usingDefaults / vendorStats.total) * 100 : 0} className="h-2" />
+                </div>
+              </CardContent>
+            </Card>
+          )}
           <CertificateTemplateSelector
             value={defaultCertTemplate}
             onChange={setDefaultCertTemplate}
