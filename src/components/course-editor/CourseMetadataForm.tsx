@@ -74,25 +74,9 @@ const levels: { value: CourseLevel; label: string }[] = [
 ];
 
 export function CourseMetadataForm({ initialData, onSave }: CourseMetadataFormProps) {
-  const { user } = useAuthStore();
   const [newObjective, setNewObjective] = useState('');
   const [newRequirement, setNewRequirement] = useState('');
   const [newTag, setNewTag] = useState('');
-
-  // Fetch instructor's approved vendors
-  const { data: myVendors = [] } = useQuery({
-    queryKey: ['my-approved-vendors', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      const { data } = await supabase
-        .from('vendors')
-        .select('id, name, slug, logo_url')
-        .eq('owner_id', user.id)
-        .eq('status', 'approved');
-      return data ?? [];
-    },
-    enabled: !!user,
-  });
 
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseFormSchema),
