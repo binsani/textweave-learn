@@ -67,10 +67,10 @@ export default function StudentCertificates() {
       if (vendorIds.length > 0) {
         const { data: vendorsData } = await supabase
           .from('vendors')
-          .select('id, name, logo_url')
+          .select('id, name, logo_url, certificate_template')
           .in('id', vendorIds);
         for (const v of vendorsData ?? []) {
-          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url };
+          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url, certificate_template: v.certificate_template };
         }
       }
 
