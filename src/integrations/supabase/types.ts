@@ -406,6 +406,77 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_code_redemptions: {
+        Row: {
+          code_id: string
+          generated_email: string
+          id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          generated_email: string
+          id?: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          generated_email?: string
+          id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_code_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_codes: {
+        Row: {
+          code: string
+          course_ids: string[]
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number
+          notes: string | null
+          used_count: number
+        }
+        Insert: {
+          code: string
+          course_ids?: string[]
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          notes?: string | null
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          course_ids?: string[]
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          notes?: string | null
+          used_count?: number
+        }
+        Relationships: []
+      }
       questions: {
         Row: {
           correct_answer: string
