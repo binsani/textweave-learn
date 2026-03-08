@@ -28,7 +28,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';
-import { X, Plus, Store } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { ImageUpload } from '@/components/ui/image-upload';
 import type { CourseCategory, CourseLevel } from '@/types';
 
