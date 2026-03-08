@@ -64,14 +64,14 @@ export default function StudentCertificates() {
 
       // Fetch vendor info for courses that have vendor_id
       const vendorIds = [...new Set((courses ?? []).map(c => c.vendor_id).filter(Boolean))];
-      let vendorMap: Record<string, { name: string; logo_url: string | null; certificate_template: string }> = {};
+      let vendorMap: Record<string, { name: string; logo_url: string | null; certificate_template: string; certificate_bg_url: string | null }> = {};
       if (vendorIds.length > 0) {
         const { data: vendorsData } = await supabase
           .from('vendors')
-          .select('id, name, logo_url, certificate_template')
+          .select('id, name, logo_url, certificate_template, certificate_bg_url')
           .in('id', vendorIds);
         for (const v of vendorsData ?? []) {
-          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url, certificate_template: v.certificate_template };
+          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url, certificate_template: v.certificate_template, certificate_bg_url: v.certificate_bg_url };
         }
       }
 
