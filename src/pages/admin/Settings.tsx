@@ -398,8 +398,12 @@ export default function AdminSettings() {
             signatureUploading={adminSignatureUploading}
           />
           <div className="flex justify-end">
-            <Button onClick={() => toast({ title: 'Default certificate template saved!' })}>
-              <Save className="mr-2 h-4 w-4" />
+            <Button onClick={saveCertConfig} disabled={certSaving || certLoading}>
+              {certSaving ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
               Save Template
             </Button>
           </div>
