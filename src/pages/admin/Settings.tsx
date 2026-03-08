@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { CertificateTemplateSelector } from '@/components/certificate/CertificateTemplateSelector';
+import { useState, useRef } from 'react';
+import { CertificateTemplateSelector, type CertificateCustomText } from '@/components/certificate/CertificateTemplateSelector';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
