@@ -117,9 +117,14 @@ export default function VendorApplication() {
               Your school "<strong>{existingVendor.name}</strong>" application is currently {existingVendor.status}.
             </p>
             {existingVendor.status === 'approved' && (
-              <Button asChild>
-                <a href={`/school/${existingVendor.slug}`}>View Your School Page</a>
-              </Button>
+              <div className="flex gap-3 justify-center">
+                <Button variant="outline" asChild>
+                  <a href={`/school/${existingVendor.slug}`} target="_blank" rel="noopener noreferrer">View Your School Page</a>
+                </Button>
+                <Button asChild>
+                  <a href="/instructor/vendor/settings">School Settings</a>
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
