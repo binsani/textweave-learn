@@ -468,6 +468,10 @@ export default function VendorSettings() {
       <CertificateTemplateSelector
         value={currentForm.certificate_template || 'classic'}
         onChange={(id) => updateField('certificate_template', id)}
+        customBgUrl={vendor.certificate_bg_url || undefined}
+        onBgUpload={(file) => handleImageUpload('certificate_bg', file)}
+        onBgRemove={() => handleRemoveImage('certificate_bg')}
+        bgUploading={uploading === 'certificate_bg'}
       />
 
       {/* Save */}
