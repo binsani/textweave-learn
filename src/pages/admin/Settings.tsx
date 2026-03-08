@@ -495,7 +495,7 @@ export default function AdminSettings() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
-                  {vendorDialogFilter === 'defaults' ? 'Schools Using Platform Defaults' : vendorDialogFilter === 'custom' ? 'Schools with Custom Design' : 'All Schools'}
+                  {schoolDialogFilter === 'defaults' ? 'Schools Using Platform Defaults' : schoolDialogFilter === 'custom' ? 'Schools with Custom Design' : 'All Schools'}
                 </DialogTitle>
                 <DialogDescription>
                   {filteredSchools.length} school{filteredSchools.length !== 1 ? 's' : ''}
