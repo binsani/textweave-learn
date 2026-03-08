@@ -495,7 +495,7 @@ export default function Instructors() {
           </h2>
           <p className="mx-auto mb-8 max-w-xl text-muted-foreground">
             Join thousands of instructors who are sharing their knowledge and 
-            earning income on Masashi LMS.
+            earning income on MasashiLearn.
           </p>
           <Button size="lg" asChild>
             <a href="#apply">Start Your Application</a>

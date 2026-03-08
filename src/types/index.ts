@@ -1,5 +1,5 @@
 // ============================================
-// Masashi LMS - Core Type Definitions
+// MasashiLearn - Core Type Definitions
 // ============================================
 
 // User & Authentication Types
