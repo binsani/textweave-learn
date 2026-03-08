@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Bell, Shield, Palette, Camera } from 'lucide-react';
+import { User, Bell, Shield, Palette, Camera, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function StudentSettings() {
   const { user, updateUser } = useAuthStore();
