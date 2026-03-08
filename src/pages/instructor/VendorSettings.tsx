@@ -100,7 +100,7 @@ export default function VendorSettings() {
     },
   });
 
-  const handleImageUpload = async (type: 'logo' | 'banner', file: File) => {
+  const handleImageUpload = async (type: 'logo' | 'banner' | 'certificate_bg', file: File) => {
     if (!vendor) return;
     if (!file.type.startsWith('image/')) {
       toast({ title: 'Please select an image file', variant: 'destructive' });
