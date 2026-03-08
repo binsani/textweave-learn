@@ -355,9 +355,9 @@ export default function CourseEditor() {
   const getStatusBadge = () => {
     switch (course.status) {
       case 'published':
-        return <Badge className="bg-green-500/10 text-green-600 border-0">Published</Badge>;
+        return <Badge className="bg-accent/10 text-accent-foreground border-0">Published</Badge>;
       case 'pending_review':
-        return <Badge className="bg-amber-500/10 text-amber-600 border-0">Under Review</Badge>;
+        return <Badge className="bg-primary/10 text-primary border-0">Under Review</Badge>;
       case 'draft':
       default:
         return <Badge variant="secondary">Draft</Badge>;
