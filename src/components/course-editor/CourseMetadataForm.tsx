@@ -89,7 +89,6 @@ export function CourseMetadataForm({ initialData, onSave }: CourseMetadataFormPr
       price: initialData?.price || 0,
       isFree: initialData?.isFree ?? true,
       thumbnail: initialData?.thumbnail || '',
-      vendorId: initialData?.vendorId || '',
       learningObjectives: initialData?.learningObjectives || [],
       requirements: initialData?.requirements || [],
       tags: initialData?.tags || [],
