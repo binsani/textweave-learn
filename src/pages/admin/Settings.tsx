@@ -75,6 +75,8 @@ export default function AdminSettings() {
   const [adminCertBgUrl, setAdminCertBgUrl] = useState<string | undefined>(undefined);
   const [adminCertBgUploading, setAdminCertBgUploading] = useState(false);
   const [adminCertText, setAdminCertText] = useState<CertificateCustomText>({});
+  const [adminSignatureUrl, setAdminSignatureUrl] = useState<string | undefined>(undefined);
+  const [adminSignatureUploading, setAdminSignatureUploading] = useState(false);
 
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
