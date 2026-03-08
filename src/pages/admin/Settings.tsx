@@ -87,6 +87,27 @@ export default function AdminSettings() {
 
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
+  // Fetch vendor certificate usage stats
+  const { data: vendorStats } = useQuery({
+    queryKey: ['vendor-cert-stats'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('vendors')
+        .select('id, certificate_template, certificate_bg_url, certificate_custom_text, certificate_signature_url')
+        .eq('status', 'approved');
+      if (error) throw error;
+      const total = data?.length ?? 0;
+      const custom = (data ?? []).filter(v => {
+        const hasTemplate = v.certificate_template && v.certificate_template !== 'classic';
+        const hasBg = !!v.certificate_bg_url;
+        const hasSig = !!v.certificate_signature_url;
+        const hasText = v.certificate_custom_text && typeof v.certificate_custom_text === 'object' && Object.keys(v.certificate_custom_text as Record<string, unknown>).length > 0;
+        return hasTemplate || hasBg || hasSig || hasText;
+      }).length;
+      return { total, custom, usingDefaults: total - custom };
+    },
+  });
+
   // Load persisted certificate settings on mount
   useEffect(() => {
     const loadCertConfig = async () => {
