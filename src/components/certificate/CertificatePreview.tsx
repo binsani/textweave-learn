@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { getTemplate } from './certificateTemplates';
+import { type CertificateCustomText, DEFAULT_CERT_TEXT } from './CertificateTemplateSelector';
 
 interface CertificateData {
   id: string;
@@ -19,6 +20,7 @@ interface CertificateData {
   vendorLogo?: string;
   templateId?: string;
   customBgUrl?: string;
+  customText?: CertificateCustomText;
 }
 
 interface CertificatePreviewProps {
@@ -33,6 +35,7 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
   if (!certificate) return null;
 
   const template = getTemplate(certificate.templateId || 'classic');
+  const t = { ...DEFAULT_CERT_TEXT, ...certificate.customText };
   const verificationUrl = `${window.location.origin}/verify?id=${encodeURIComponent(certificate.id)}`;
   const isDark = ['midnight', 'tech'].includes(template.id);
 
@@ -180,17 +183,17 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                   className="text-2xl md:text-4xl tracking-widest"
                   style={{ color: template.titleColor, fontFamily: template.titleFont }}
                 >
-                  CERTIFICATE
+                  {t.heading}
                 </h1>
                 <p className="text-xs md:text-sm tracking-wider mt-2" style={{ color: template.textColor }}>
-                  OF COMPLETION
+                  {t.subheading}
                 </p>
               </div>
 
               {/* Main content */}
               <div className="flex-1 flex flex-col justify-center">
                 <p className="text-xs md:text-sm mb-2" style={{ color: template.textColor }}>
-                  This is to certify that
+                  {t.presentedTo}
                 </p>
                 <p
                   className="text-xl md:text-3xl italic my-4"
@@ -199,13 +202,18 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                   {certificate.studentName}
                 </p>
                 <p className="text-sm md:text-base leading-relaxed max-w-lg" style={{ color: template.textColor }}>
-                  has successfully completed the course<br />
+                  {t.bodyText}<br />
                   <span className="font-semibold" style={{ color: template.titleColor }}>
                     "{certificate.courseName}"
                   </span>
                   <br />
-                  comprising {certificate.courseHours} hours of instruction
+                  {t.closingText?.replace('{hours}', String(certificate.courseHours))}
                 </p>
+                {t.congratsMessage && (
+                  <p className="text-xs md:text-sm mt-3 italic max-w-md mx-auto" style={{ color: template.accentColor }}>
+                    {t.congratsMessage}
+                  </p>
+                )}
               </div>
 
               {/* Footer */}
@@ -215,14 +223,14 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                   <p className="text-xs md:text-sm font-medium" style={{ color: template.titleColor }}>
                     {certificate.instructorName}
                   </p>
-                  <p className="text-xs" style={{ color: template.textColor }}>Course Instructor</p>
+                  <p className="text-xs" style={{ color: template.textColor }}>{t.signerTitle}</p>
                 </div>
                 <div className="text-center">
                   <div className="w-32 md:w-48 mb-2" style={{ borderTop: `1px solid ${template.accentColor}` }} />
                   <p className="text-xs md:text-sm font-medium" style={{ color: template.titleColor }}>
                     {format(new Date(certificate.completionDate), 'MMMM d, yyyy')}
                   </p>
-                  <p className="text-xs" style={{ color: template.textColor }}>Date of Completion</p>
+                  <p className="text-xs" style={{ color: template.textColor }}>{t.footerLabel}</p>
                 </div>
               </div>
 

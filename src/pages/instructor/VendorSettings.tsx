@@ -14,7 +14,7 @@ import {
   Store, Upload, Trash2, Loader2, ExternalLink, Palette,
   Globe, Mail, Image as ImageIcon, LinkIcon,
 } from 'lucide-react';
-import { CertificateTemplateSelector } from '@/components/certificate/CertificateTemplateSelector';
+import { CertificateTemplateSelector, type CertificateCustomText } from '@/components/certificate/CertificateTemplateSelector';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 
@@ -48,6 +48,7 @@ export default function VendorSettings() {
   });
 
   const [form, setForm] = useState<Record<string, string>>({});
+  const [certText, setCertText] = useState<CertificateCustomText | null>(null);
   const [uploading, setUploading] = useState<'logo' | 'banner' | 'certificate_bg' | null>(null);
   const certBgInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,6 +77,7 @@ export default function VendorSettings() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!vendor) throw new Error('No vendor');
+      const currentCertText = certText ?? (vendor.certificate_custom_text as CertificateCustomText) ?? {};
       const { error } = await supabase
         .from('vendors')
         .update({
@@ -87,6 +89,7 @@ export default function VendorSettings() {
           primary_color: currentForm.primary_color,
           accent_color: currentForm.accent_color,
           certificate_template: currentForm.certificate_template,
+          certificate_custom_text: currentCertText as any,
         })
         .eq('id', vendor.id);
       if (error) throw error;
@@ -472,6 +475,8 @@ export default function VendorSettings() {
         onBgUpload={(file) => handleImageUpload('certificate_bg', file)}
         onBgRemove={() => handleRemoveImage('certificate_bg')}
         bgUploading={uploading === 'certificate_bg'}
+        customText={certText ?? (vendor.certificate_custom_text as CertificateCustomText) ?? {}}
+        onCustomTextChange={setCertText}
       />
 
       {/* Save */}

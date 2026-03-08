@@ -621,6 +621,7 @@ export type Database = {
           approved_at: string | null
           banner_url: string | null
           certificate_bg_url: string | null
+          certificate_custom_text: Json
           certificate_template: string
           contact_email: string | null
           created_at: string
@@ -643,6 +644,7 @@ export type Database = {
           approved_at?: string | null
           banner_url?: string | null
           certificate_bg_url?: string | null
+          certificate_custom_text?: Json
           certificate_template?: string
           contact_email?: string | null
           created_at?: string
@@ -665,6 +667,7 @@ export type Database = {
           approved_at?: string | null
           banner_url?: string | null
           certificate_bg_url?: string | null
+          certificate_custom_text?: Json
           certificate_template?: string
           contact_email?: string | null
           created_at?: string

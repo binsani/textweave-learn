@@ -6,6 +6,7 @@ import { CertificateCard, CertificatePreview } from '@/components/certificate';
 import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { CertificateCustomText } from '@/components/certificate/CertificateTemplateSelector';
 
 interface CertificateData {
   id: string;
@@ -18,6 +19,7 @@ interface CertificateData {
   vendorLogo?: string;
   templateId?: string;
   customBgUrl?: string;
+  customText?: CertificateCustomText;
 }
 
 export default function StudentCertificates() {
@@ -64,14 +66,14 @@ export default function StudentCertificates() {
 
       // Fetch vendor info for courses that have vendor_id
       const vendorIds = [...new Set((courses ?? []).map(c => c.vendor_id).filter(Boolean))];
-      let vendorMap: Record<string, { name: string; logo_url: string | null; certificate_template: string; certificate_bg_url: string | null }> = {};
+      let vendorMap: Record<string, { name: string; logo_url: string | null; certificate_template: string; certificate_bg_url: string | null; certificate_custom_text: any }> = {};
       if (vendorIds.length > 0) {
         const { data: vendorsData } = await supabase
           .from('vendors')
-          .select('id, name, logo_url, certificate_template, certificate_bg_url')
+          .select('id, name, logo_url, certificate_template, certificate_bg_url, certificate_custom_text')
           .in('id', vendorIds);
         for (const v of vendorsData ?? []) {
-          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url, certificate_template: v.certificate_template, certificate_bg_url: v.certificate_bg_url };
+          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url, certificate_template: v.certificate_template, certificate_bg_url: v.certificate_bg_url, certificate_custom_text: v.certificate_custom_text };
         }
       }
 
@@ -96,6 +98,7 @@ export default function StudentCertificates() {
             vendorLogo: vendor?.logo_url || undefined,
             templateId: vendor?.certificate_template || 'classic',
             customBgUrl: vendor?.certificate_bg_url || undefined,
+            customText: (vendor?.certificate_custom_text as CertificateCustomText) || undefined,
           });
         }
       }

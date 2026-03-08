@@ -1,12 +1,36 @@
 import { useRef } from 'react';
-import { Check, Award, Upload, Trash2, Loader2, ImageIcon } from 'lucide-react';
+import { Check, Award, Upload, Trash2, Loader2, ImageIcon, Type } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { CERTIFICATE_TEMPLATES, getTemplate, type CertificateTemplate } from './certificateTemplates';
 import { format } from 'date-fns';
+
+export interface CertificateCustomText {
+  heading?: string;         // e.g. "CERTIFICATE" 
+  subheading?: string;      // e.g. "OF COMPLETION"
+  presentedTo?: string;     // e.g. "This is to certify that"
+  bodyText?: string;        // e.g. "has successfully completed the course"
+  closingText?: string;     // e.g. "comprising {hours} hours of instruction"
+  signerTitle?: string;     // e.g. "Course Instructor"
+  footerLabel?: string;     // e.g. "Date of Completion"
+  congratsMessage?: string; // extra message below body
+}
+
+export const DEFAULT_CERT_TEXT: CertificateCustomText = {
+  heading: 'CERTIFICATE',
+  subheading: 'OF COMPLETION',
+  presentedTo: 'This is to certify that',
+  bodyText: 'has successfully completed the course',
+  closingText: 'comprising {hours} hours of instruction',
+  signerTitle: 'Course Instructor',
+  footerLabel: 'Date of Completion',
+  congratsMessage: '',
+};
 
 interface CertificateTemplateSelectorProps {
   value: string;
@@ -15,6 +39,8 @@ interface CertificateTemplateSelectorProps {
   onBgUpload?: (file: File) => void;
   onBgRemove?: () => void;
   bgUploading?: boolean;
+  customText?: CertificateCustomText;
+  onCustomTextChange?: (text: CertificateCustomText) => void;
 }
 
 function TemplateThumb({ template, selected }: { template: CertificateTemplate; selected: boolean }) {
@@ -76,9 +102,10 @@ function TemplateThumb({ template, selected }: { template: CertificateTemplate; 
   );
 }
 
-function LivePreview({ templateId, customBgUrl }: { templateId: string; customBgUrl?: string }) {
+function LivePreview({ templateId, customBgUrl, customText }: { templateId: string; customBgUrl?: string; customText?: CertificateCustomText }) {
   const template = getTemplate(templateId);
   const today = format(new Date(), 'MMMM d, yyyy');
+  const t = { ...DEFAULT_CERT_TEXT, ...customText };
   const bgStyle = customBgUrl
     ? { backgroundImage: `url(${customBgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : { background: template.bgGradient };
@@ -140,17 +167,17 @@ function LivePreview({ templateId, customBgUrl }: { templateId: string; customBg
                 className="text-lg sm:text-xl md:text-3xl tracking-widest"
                 style={{ color: template.titleColor, fontFamily: template.titleFont }}
               >
-                CERTIFICATE
+                {t.heading}
               </h1>
               <p className="text-[10px] sm:text-xs tracking-wider mt-1" style={{ color: template.textColor }}>
-                OF COMPLETION
+                {t.subheading}
               </p>
             </div>
 
             {/* Main content */}
             <div className="flex-1 flex flex-col justify-center py-2">
               <p className="text-[10px] sm:text-xs mb-1" style={{ color: template.textColor }}>
-                This is to certify that
+                {t.presentedTo}
               </p>
               <p
                 className="text-base sm:text-xl md:text-2xl italic my-2"
@@ -159,13 +186,18 @@ function LivePreview({ templateId, customBgUrl }: { templateId: string; customBg
                 Jane Doe
               </p>
               <p className="text-[10px] sm:text-xs leading-relaxed max-w-md mx-auto" style={{ color: template.textColor }}>
-                has successfully completed the course<br />
+                {t.bodyText}<br />
                 <span className="font-semibold" style={{ color: template.titleColor }}>
                   "Introduction to Web Development"
                 </span>
                 <br />
-                comprising 24 hours of instruction
+                {t.closingText?.replace('{hours}', '24')}
               </p>
+              {t.congratsMessage && (
+                <p className="text-[9px] sm:text-[10px] mt-2 italic max-w-sm mx-auto" style={{ color: template.accentColor }}>
+                  {t.congratsMessage}
+                </p>
+              )}
             </div>
 
             {/* Footer */}
@@ -175,14 +207,14 @@ function LivePreview({ templateId, customBgUrl }: { templateId: string; customBg
                 <p className="text-[9px] sm:text-xs font-medium" style={{ color: template.titleColor }}>
                   John Smith
                 </p>
-                <p className="text-[8px] sm:text-[10px]" style={{ color: template.textColor }}>Course Instructor</p>
+                <p className="text-[8px] sm:text-[10px]" style={{ color: template.textColor }}>{t.signerTitle}</p>
               </div>
               <div className="text-center">
                 <div className="w-20 sm:w-28 md:w-36 mb-1" style={{ borderTop: `1px solid ${template.accentColor}` }} />
                 <p className="text-[9px] sm:text-xs font-medium" style={{ color: template.titleColor }}>
                   {today}
                 </p>
-                <p className="text-[8px] sm:text-[10px]" style={{ color: template.textColor }}>Date of Completion</p>
+                <p className="text-[8px] sm:text-[10px]" style={{ color: template.textColor }}>{t.footerLabel}</p>
               </div>
             </div>
 
@@ -212,8 +244,17 @@ export function CertificateTemplateSelector({
   onBgUpload,
   onBgRemove,
   bgUploading,
+  customText,
+  onCustomTextChange,
 }: CertificateTemplateSelectorProps) {
   const bgInputRef = useRef<HTMLInputElement>(null);
+  const mergedText = { ...DEFAULT_CERT_TEXT, ...customText };
+
+  const updateTextField = (key: keyof CertificateCustomText, val: string) => {
+    if (onCustomTextChange) {
+      onCustomTextChange({ ...customText, [key]: val });
+    }
+  };
 
   return (
     <Card>
@@ -296,7 +337,117 @@ export function CertificateTemplateSelector({
           </>
         )}
 
-        <LivePreview templateId={value} customBgUrl={customBgUrl} />
+        {/* Certificate Text Customization */}
+        {onCustomTextChange && (
+          <>
+            <Separator className="my-6" />
+            <div className="space-y-4">
+              <Label className="flex items-center gap-2 text-base font-semibold">
+                <Type className="h-4 w-4" />
+                Customize Certificate Text
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Personalize the wording on your certificates. Use <code className="text-xs bg-muted px-1 py-0.5 rounded">{'{hours}'}</code> in the closing text to insert course hours automatically.
+              </p>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cert-heading">Heading</Label>
+                  <Input
+                    id="cert-heading"
+                    value={mergedText.heading}
+                    onChange={e => updateTextField('heading', e.target.value)}
+                    placeholder="CERTIFICATE"
+                    maxLength={50}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cert-subheading">Subheading</Label>
+                  <Input
+                    id="cert-subheading"
+                    value={mergedText.subheading}
+                    onChange={e => updateTextField('subheading', e.target.value)}
+                    placeholder="OF COMPLETION"
+                    maxLength={50}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cert-presented">Presented To Line</Label>
+                <Input
+                  id="cert-presented"
+                  value={mergedText.presentedTo}
+                  onChange={e => updateTextField('presentedTo', e.target.value)}
+                  placeholder="This is to certify that"
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cert-body">Body Text</Label>
+                <Input
+                  id="cert-body"
+                  value={mergedText.bodyText}
+                  onChange={e => updateTextField('bodyText', e.target.value)}
+                  placeholder="has successfully completed the course"
+                  maxLength={150}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cert-closing">Closing Text</Label>
+                <Input
+                  id="cert-closing"
+                  value={mergedText.closingText}
+                  onChange={e => updateTextField('closingText', e.target.value)}
+                  placeholder="comprising {hours} hours of instruction"
+                  maxLength={150}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use <code className="bg-muted px-1 py-0.5 rounded">{'{hours}'}</code> to insert the course duration
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cert-congrats">Congratulations Message (optional)</Label>
+                <Textarea
+                  id="cert-congrats"
+                  value={mergedText.congratsMessage}
+                  onChange={e => updateTextField('congratsMessage', e.target.value)}
+                  placeholder="e.g. Congratulations on your achievement! We're proud of your dedication."
+                  rows={2}
+                  maxLength={200}
+                />
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cert-signer">Signer Title</Label>
+                  <Input
+                    id="cert-signer"
+                    value={mergedText.signerTitle}
+                    onChange={e => updateTextField('signerTitle', e.target.value)}
+                    placeholder="Course Instructor"
+                    maxLength={50}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cert-footer">Date Label</Label>
+                  <Input
+                    id="cert-footer"
+                    value={mergedText.footerLabel}
+                    onChange={e => updateTextField('footerLabel', e.target.value)}
+                    placeholder="Date of Completion"
+                    maxLength={50}
+                  />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        <LivePreview templateId={value} customBgUrl={customBgUrl} customText={mergedText} />
       </CardContent>
     </Card>
   );
