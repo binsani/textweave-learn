@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { getTemplate } from './certificateTemplates';
+import { type CertificateCustomText, DEFAULT_CERT_TEXT } from './CertificateTemplateSelector';
 
 interface CertificateData {
   id: string;
@@ -19,6 +20,7 @@ interface CertificateData {
   vendorLogo?: string;
   templateId?: string;
   customBgUrl?: string;
+  customText?: CertificateCustomText;
 }
 
 interface CertificatePreviewProps {

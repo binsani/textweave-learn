@@ -1,12 +1,36 @@
 import { useRef } from 'react';
-import { Check, Award, Upload, Trash2, Loader2, ImageIcon } from 'lucide-react';
+import { Check, Award, Upload, Trash2, Loader2, ImageIcon, Type } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { CERTIFICATE_TEMPLATES, getTemplate, type CertificateTemplate } from './certificateTemplates';
 import { format } from 'date-fns';
+
+export interface CertificateCustomText {
+  heading?: string;         // e.g. "CERTIFICATE" 
+  subheading?: string;      // e.g. "OF COMPLETION"
+  presentedTo?: string;     // e.g. "This is to certify that"
+  bodyText?: string;        // e.g. "has successfully completed the course"
+  closingText?: string;     // e.g. "comprising {hours} hours of instruction"
+  signerTitle?: string;     // e.g. "Course Instructor"
+  footerLabel?: string;     // e.g. "Date of Completion"
+  congratsMessage?: string; // extra message below body
+}
+
+export const DEFAULT_CERT_TEXT: CertificateCustomText = {
+  heading: 'CERTIFICATE',
+  subheading: 'OF COMPLETION',
+  presentedTo: 'This is to certify that',
+  bodyText: 'has successfully completed the course',
+  closingText: 'comprising {hours} hours of instruction',
+  signerTitle: 'Course Instructor',
+  footerLabel: 'Date of Completion',
+  congratsMessage: '',
+};
 
 interface CertificateTemplateSelectorProps {
   value: string;
@@ -15,6 +39,8 @@ interface CertificateTemplateSelectorProps {
   onBgUpload?: (file: File) => void;
   onBgRemove?: () => void;
   bgUploading?: boolean;
+  customText?: CertificateCustomText;
+  onCustomTextChange?: (text: CertificateCustomText) => void;
 }
 
 function TemplateThumb({ template, selected }: { template: CertificateTemplate; selected: boolean }) {
