@@ -145,7 +145,8 @@ export function dbCourseToCardProps(course: DbCourse): Course {
     createdAt: course.created_at,
     updatedAt: course.updated_at,
     publishedAt: course.published_at ?? undefined,
-  };
+    vendorId: course.vendor_id ?? undefined,
+  } as Course & { vendorId?: string };
 }
 
 /** Map DB review to app Review */
