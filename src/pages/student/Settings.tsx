@@ -33,6 +33,12 @@ export default function StudentSettings() {
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [tempAvatar, setTempAvatar] = useState(user?.avatar || '');
 
+  // Purchase code user detection & credentials setup
+  const isPurchaseCodeUser = user?.email?.endsWith('@platform.masashilearn.local') ?? false;
+  const [credentialsForm, setCredentialsForm] = useState({ email: '', password: '', confirmPassword: '' });
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isSettingCredentials, setIsSettingCredentials] = useState(false);
+
   const handleSaveProfile = () => {
     updateUser({ name: formData.name });
     toast({
