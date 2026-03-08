@@ -8,13 +8,6 @@ import { usePublishedCourses, dbCourseToCardProps } from '@/hooks/useCourses';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useMemo } from 'react';
 
-const stats = [
-  { label: 'Active Learners', value: '12,000+', icon: Users },
-  { label: 'Expert Courses', value: '500+', icon: BookOpen },
-  { label: 'Certifications', value: '2,500+', icon: Award },
-  { label: 'Hours of Content', value: '10,000+', icon: Clock },
-];
-
 const features = [
   'Text-first learning optimized for deep understanding',
   'Learn at your own pace with structured lessons',
