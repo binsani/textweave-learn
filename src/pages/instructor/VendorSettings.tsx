@@ -14,6 +14,7 @@ import {
   Store, Upload, Trash2, Loader2, ExternalLink, Palette,
   Globe, Mail, Image as ImageIcon, LinkIcon,
 } from 'lucide-react';
+import { CertificateTemplateSelector } from '@/components/certificate/CertificateTemplateSelector';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 
