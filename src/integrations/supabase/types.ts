@@ -139,7 +139,6 @@ export type Database = {
           thumbnail: string | null
           title: string
           updated_at: string
-          vendor_id: string | null
         }
         Insert: {
           category?: Database["public"]["Enums"]["course_category"]
@@ -164,7 +163,6 @@ export type Database = {
           thumbnail?: string | null
           title: string
           updated_at?: string
-          vendor_id?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["course_category"]
@@ -189,7 +187,6 @@ export type Database = {
           thumbnail?: string | null
           title?: string
           updated_at?: string
-          vendor_id?: string | null
         }
         Relationships: [
           {
@@ -197,13 +194,6 @@ export type Database = {
             columns: ["instructor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "courses_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
         ]
@@ -375,34 +365,79 @@ export type Database = {
       }
       profiles: {
         Row: {
+          about_html: string | null
+          accent_color: string | null
           avatar_url: string | null
+          banner_url: string | null
           bio: string | null
+          certificate_bg_url: string | null
+          certificate_custom_text: Json | null
+          certificate_signature_url: string | null
+          certificate_template: string | null
+          contact_email: string | null
           created_at: string
           email: string
           first_name: string | null
           id: string
           last_name: string | null
+          logo_url: string | null
+          primary_color: string | null
+          school_description: string | null
+          school_name: string | null
+          school_slug: string | null
+          social_links: Json | null
           updated_at: string
+          website: string | null
         }
         Insert: {
+          about_html?: string | null
+          accent_color?: string | null
           avatar_url?: string | null
+          banner_url?: string | null
           bio?: string | null
+          certificate_bg_url?: string | null
+          certificate_custom_text?: Json | null
+          certificate_signature_url?: string | null
+          certificate_template?: string | null
+          contact_email?: string | null
           created_at?: string
           email: string
           first_name?: string | null
           id: string
           last_name?: string | null
+          logo_url?: string | null
+          primary_color?: string | null
+          school_description?: string | null
+          school_name?: string | null
+          school_slug?: string | null
+          social_links?: Json | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
+          about_html?: string | null
+          accent_color?: string | null
           avatar_url?: string | null
+          banner_url?: string | null
           bio?: string | null
+          certificate_bg_url?: string | null
+          certificate_custom_text?: Json | null
+          certificate_signature_url?: string | null
+          certificate_template?: string | null
+          contact_email?: string | null
           created_at?: string
           email?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
+          logo_url?: string | null
+          primary_color?: string | null
+          school_description?: string | null
+          school_name?: string | null
+          school_slug?: string | null
+          social_links?: Json | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -711,81 +746,6 @@ export type Database = {
         }
         Relationships: []
       }
-      vendors: {
-        Row: {
-          about_html: string | null
-          accent_color: string | null
-          applied_at: string
-          approved_at: string | null
-          banner_url: string | null
-          certificate_bg_url: string | null
-          certificate_custom_text: Json
-          certificate_signature_url: string | null
-          certificate_template: string
-          contact_email: string | null
-          created_at: string
-          description: string | null
-          id: string
-          logo_url: string | null
-          name: string
-          owner_id: string
-          primary_color: string | null
-          slug: string
-          social_links: Json | null
-          status: Database["public"]["Enums"]["vendor_status"]
-          updated_at: string
-          website: string | null
-        }
-        Insert: {
-          about_html?: string | null
-          accent_color?: string | null
-          applied_at?: string
-          approved_at?: string | null
-          banner_url?: string | null
-          certificate_bg_url?: string | null
-          certificate_custom_text?: Json
-          certificate_signature_url?: string | null
-          certificate_template?: string
-          contact_email?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          logo_url?: string | null
-          name: string
-          owner_id: string
-          primary_color?: string | null
-          slug: string
-          social_links?: Json | null
-          status?: Database["public"]["Enums"]["vendor_status"]
-          updated_at?: string
-          website?: string | null
-        }
-        Update: {
-          about_html?: string | null
-          accent_color?: string | null
-          applied_at?: string
-          approved_at?: string | null
-          banner_url?: string | null
-          certificate_bg_url?: string | null
-          certificate_custom_text?: Json
-          certificate_signature_url?: string | null
-          certificate_template?: string
-          contact_email?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          logo_url?: string | null
-          name?: string
-          owner_id?: string
-          primary_color?: string | null
-          slug?: string
-          social_links?: Json | null
-          status?: Database["public"]["Enums"]["vendor_status"]
-          updated_at?: string
-          website?: string | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -836,7 +796,6 @@ export type Database = {
       course_status: "draft" | "pending_review" | "published" | "archived"
       enrollment_status: "active" | "completed" | "expired"
       question_type: "multiple_choice" | "true_false" | "short_answer"
-      vendor_status: "pending" | "approved" | "rejected" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -981,7 +940,6 @@ export const Constants = {
       course_status: ["draft", "pending_review", "published", "archived"],
       enrollment_status: ["active", "completed", "expired"],
       question_type: ["multiple_choice", "true_false", "short_answer"],
-      vendor_status: ["pending", "approved", "rejected", "suspended"],
     },
   },
 } as const
