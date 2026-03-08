@@ -102,9 +102,10 @@ function TemplateThumb({ template, selected }: { template: CertificateTemplate; 
   );
 }
 
-function LivePreview({ templateId, customBgUrl }: { templateId: string; customBgUrl?: string }) {
+function LivePreview({ templateId, customBgUrl, customText }: { templateId: string; customBgUrl?: string; customText?: CertificateCustomText }) {
   const template = getTemplate(templateId);
   const today = format(new Date(), 'MMMM d, yyyy');
+  const t = { ...DEFAULT_CERT_TEXT, ...customText };
   const bgStyle = customBgUrl
     ? { backgroundImage: `url(${customBgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : { background: template.bgGradient };
