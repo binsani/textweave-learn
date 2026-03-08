@@ -461,6 +461,12 @@ export default function VendorSettings() {
         </CardContent>
       </Card>
 
+      {/* Certificate Template */}
+      <CertificateTemplateSelector
+        value={currentForm.certificate_template || 'classic'}
+        onChange={(id) => updateField('certificate_template', id)}
+      />
+
       {/* Save */}
       <div className="flex justify-end gap-3">
         <Button variant="outline" onClick={() => setForm({})}>
