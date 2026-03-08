@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Ticket, Plus, Copy, Trash2, Users, Calendar, BookOpen, Mail, Key } from 'lucide-react';
+import { Ticket, Plus, Copy, Trash2, Users, Calendar, BookOpen, Mail, Key, ClipboardList } from 'lucide-react';
 import { format } from 'date-fns';
 
 const DOMAIN = 'masashilearn.com.ng';
