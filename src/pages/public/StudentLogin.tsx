@@ -173,26 +173,6 @@ export default function StudentLogin() {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="pc-first-name">First Name</Label>
-                    <Input
-                      id="pc-first-name"
-                      placeholder="John"
-                      value={pcFirstName}
-                      onChange={(e) => setPcFirstName(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="pc-last-name">Last Name</Label>
-                    <Input
-                      id="pc-last-name"
-                      placeholder="Doe"
-                      value={pcLastName}
-                      onChange={(e) => setPcLastName(e.target.value)}
-                    />
-                  </div>
-                </div>
                 <Button type="submit" className="w-full" size="lg" disabled={isPcLoading}>
                   {isPcLoading ? 'Verifying...' : 'Access with Purchase Code'}
                 </Button>
