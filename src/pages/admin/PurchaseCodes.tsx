@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -12,8 +12,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Ticket, Plus, Copy, Trash2, Users, Calendar, BookOpen } from 'lucide-react';
+import { Ticket, Plus, Copy, Trash2, Users, Calendar, BookOpen, Mail, Key } from 'lucide-react';
 import { format } from 'date-fns';
+
+const DOMAIN = 'masashilearn.com.ng';
 
 function generateCode(length = 8): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -22,6 +24,17 @@ function generateCode(length = 8): string {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code;
+}
+
+function buildEmail(firstName: string, lastName: string): string {
+  const f = firstName.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const l = lastName.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!f) return '';
+  return l ? `${f}.${l}@${DOMAIN}` : `${f}@${DOMAIN}`;
+}
+
+function buildPassword(code: string): string {
+  return `Masashi_${code}!`;
 }
 
 export default function PurchaseCodes() {
@@ -34,6 +47,11 @@ export default function PurchaseCodes() {
   const [expiresAt, setExpiresAt] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
+  const generatedEmail = useMemo(() => buildEmail(firstName, lastName), [firstName, lastName]);
+  const generatedPassword = useMemo(() => buildPassword(newCode), [newCode]);
 
   // Fetch purchase codes
   const { data: codes = [], isLoading } = useQuery({
@@ -88,6 +106,8 @@ export default function PurchaseCodes() {
         expires_at: expiresAt || null,
         notes,
         created_by: user.id,
+        student_first_name: firstName.trim(),
+        student_last_name: lastName.trim(),
       });
       if (error) throw error;
     },
@@ -100,6 +120,8 @@ export default function PurchaseCodes() {
       setExpiresAt('');
       setNotes('');
       setSelectedCourses([]);
+      setFirstName('');
+      setLastName('');
     },
     onError: (err: any) => {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
@@ -132,9 +154,9 @@ export default function PurchaseCodes() {
     },
   });
 
-  const copyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    toast({ title: 'Copied!', description: 'Purchase code copied to clipboard.' });
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: 'Copied!', description: `${label} copied to clipboard.` });
   };
 
   const toggleCourse = (courseId: string) => {
@@ -164,6 +186,19 @@ export default function PurchaseCodes() {
               <DialogDescription>Create a new purchase code for direct-payment students</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
+              {/* Student name */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Student First Name <span className="text-destructive">*</span></Label>
+                  <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="John" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Student Last Name <span className="text-destructive">*</span></Label>
+                  <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
+                </div>
+              </div>
+
+              {/* Code */}
               <div className="space-y-2">
                 <Label>Code</Label>
                 <div className="flex gap-2">
@@ -173,6 +208,28 @@ export default function PurchaseCodes() {
                   </Button>
                 </div>
               </div>
+
+              {/* Generated credentials preview */}
+              {firstName.trim() && lastName.trim() && (
+                <div className="rounded-md border border-primary/20 bg-primary/5 p-3 space-y-2">
+                  <p className="text-xs font-semibold text-primary uppercase tracking-wider">Auto-Generated Credentials</p>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-sm font-mono truncate">{generatedEmail}</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(generatedEmail, 'Email')}>
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Key className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-sm font-mono">{generatedPassword}</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(generatedPassword, 'Password')}>
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Share these credentials with the student so they can log in.</p>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -187,7 +244,7 @@ export default function PurchaseCodes() {
 
               <div className="space-y-2">
                 <Label>Notes (optional)</Label>
-                <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. Student name, payment ref..." />
+                <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. Payment ref..." />
               </div>
 
               <div className="space-y-2">
@@ -234,7 +291,7 @@ export default function PurchaseCodes() {
               <Button
                 className="w-full"
                 onClick={() => createMutation.mutate()}
-                disabled={createMutation.isPending || !newCode.trim()}
+                disabled={createMutation.isPending || !newCode.trim() || !firstName.trim() || !lastName.trim()}
               >
                 {createMutation.isPending ? 'Creating...' : 'Create Purchase Code'}
               </Button>
@@ -302,61 +359,78 @@ export default function PurchaseCodes() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Student</TableHead>
                     <TableHead>Code</TableHead>
+                    <TableHead>Email</TableHead>
                     <TableHead>Courses</TableHead>
                     <TableHead>Uses</TableHead>
                     <TableHead>Expires</TableHead>
-                    <TableHead>Notes</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {codes.map((pc) => (
-                    <TableRow key={pc.id}>
-                      <TableCell>
-                        <button onClick={() => copyCode(pc.code)} className="font-mono text-sm tracking-wider hover:text-primary transition-colors flex items-center gap-1.5" title="Click to copy">
-                          {pc.code}
-                          <Copy className="h-3 w-3 opacity-50" />
-                        </button>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-sm">{(pc.course_ids as string[])?.length || 0}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm">{getRedemptionCount(pc.id)} / {pc.max_uses}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
-                          {pc.expires_at ? format(new Date(pc.expires_at), 'MMM d, yyyy') : '—'}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground truncate max-w-[150px] block">{pc.notes || '—'}</span>
-                      </TableCell>
-                      <TableCell>
-                        <Switch
-                          checked={pc.is_active}
-                          onCheckedChange={(checked) => toggleMutation.mutate({ id: pc.id, is_active: checked })}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => {
-                            if (confirm('Delete this purchase code?')) deleteMutation.mutate(pc.id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {codes.map((pc: any) => {
+                    const email = buildEmail(pc.student_first_name || '', pc.student_last_name || '');
+                    const password = buildPassword(pc.code);
+                    return (
+                      <TableRow key={pc.id}>
+                        <TableCell>
+                          <span className="text-sm font-medium">
+                            {pc.student_first_name || ''} {pc.student_last_name || ''}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <button onClick={() => copyToClipboard(pc.code, 'Code')} className="font-mono text-sm tracking-wider hover:text-primary transition-colors flex items-center gap-1.5" title="Click to copy">
+                            {pc.code}
+                            <Copy className="h-3 w-3 opacity-50" />
+                          </button>
+                        </TableCell>
+                        <TableCell>
+                          {email ? (
+                            <button onClick={() => copyToClipboard(email, 'Email')} className="font-mono text-xs hover:text-primary transition-colors flex items-center gap-1.5" title="Click to copy email">
+                              {email}
+                              <Copy className="h-3 w-3 opacity-50" />
+                            </button>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-sm">{(pc.course_ids as string[])?.length || 0}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm">{getRedemptionCount(pc.id)} / {pc.max_uses}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm text-muted-foreground">
+                            {pc.expires_at ? format(new Date(pc.expires_at), 'MMM d, yyyy') : '—'}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={pc.is_active}
+                            onCheckedChange={(checked) => toggleMutation.mutate({ id: pc.id, is_active: checked })}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => {
+                              if (confirm('Delete this purchase code?')) deleteMutation.mutate(pc.id);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </ScrollArea>
