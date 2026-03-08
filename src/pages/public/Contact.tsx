@@ -34,7 +34,7 @@ const contactMethods = [
     icon: MapPin,
     title: 'Visit Us',
     description: 'Our headquarters',
-    value: 'San Francisco, CA',
+    value: 'Shuaibu Gani Street, Gwarinpa Third Avenue, Abuja',
   },
 ];
 
