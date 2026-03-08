@@ -207,14 +207,14 @@ function LivePreview({ templateId, customBgUrl, customText }: { templateId: stri
                 <p className="text-[9px] sm:text-xs font-medium" style={{ color: template.titleColor }}>
                   John Smith
                 </p>
-                <p className="text-[8px] sm:text-[10px]" style={{ color: template.textColor }}>Course Instructor</p>
+                <p className="text-[8px] sm:text-[10px]" style={{ color: template.textColor }}>{t.signerTitle}</p>
               </div>
               <div className="text-center">
                 <div className="w-20 sm:w-28 md:w-36 mb-1" style={{ borderTop: `1px solid ${template.accentColor}` }} />
                 <p className="text-[9px] sm:text-xs font-medium" style={{ color: template.titleColor }}>
                   {today}
                 </p>
-                <p className="text-[8px] sm:text-[10px]" style={{ color: template.textColor }}>Date of Completion</p>
+                <p className="text-[8px] sm:text-[10px]" style={{ color: template.textColor }}>{t.footerLabel}</p>
               </div>
             </div>
 
