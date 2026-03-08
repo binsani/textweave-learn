@@ -17,6 +17,7 @@ interface CertificateData {
   vendorName?: string;
   vendorLogo?: string;
   templateId?: string;
+  customBgUrl?: string;
 }
 
 export default function StudentCertificates() {
