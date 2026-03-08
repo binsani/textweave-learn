@@ -1,92 +1,81 @@
 
 
-# Deploy-Readiness: Pending Tasks
+# Pending Tasks for Deploy Readiness
 
-Here is a complete list of everything that still needs to be done before the app is production-ready, organized by priority.
-
----
-
-## Critical (Must Fix)
-
-### 1. Real Authentication (Replace Mock Auth)
-The `authStore.ts` still authenticates against `mockUsers` -- no real passwords are checked and no sessions are created. The `Signup.tsx` page fakes account creation. Both Login and Signup must be rewritten to use the real authentication system (Supabase Auth) so users can actually register and sign in.
-
-- Rewrite `authStore.ts` to use `supabase.auth.signInWithPassword` / `signUp` / `signOut` / `onAuthStateChange`
-- Update `Login.tsx` to call real sign-in
-- Update `Signup.tsx` to call real sign-up (with first_name/last_name metadata so the `handle_new_user` trigger populates profiles)
-- Update `ForgotPassword.tsx` and `ResetPassword.tsx` to use `supabase.auth.resetPasswordForEmail` / `updateUser`
-- Update role-specific login pages (`StudentLogin`, `InstructorLogin`, `AdminLogin`) similarly
-- Remove the `switchRole` dev bypass from authStore
-
-### 2. Migrate All Pages Off Mock Data (17 files remaining)
-These files still import from `mockData.ts` and must be converted to fetch from the database:
-
-| Area | Files |
-|------|-------|
-| **Student pages** | Dashboard, Courses, Bookmarks, Notes, LearningInterface, QuizInterface |
-| **Instructor pages** | Dashboard, CourseEditor |
-| **Admin pages** | Dashboard |
-| **Admin components** | PlatformAnalytics, CourseApprovalList, UserManagementTable |
-| **Public pages** | Landing, CoursePreview |
-| **Stores** | progressStore (uses mockCourseProgress) |
-| **Components** | SearchCommandPalette |
-
-### 3. Seed the Database
-All database tables are currently empty. At minimum, seed one or two courses with sections, lessons, and quiz data so the app has content to display after launch.
+Based on a thorough audit of the current codebase and database, here is the updated status of all tasks. Several items from the original plan have already been completed.
 
 ---
 
-## High Priority
+## Already Completed (No Action Needed)
 
-### 4. Wire Up Progress Tracking to Database
-The `progressStore` currently persists to `localStorage` via Zustand. Progress, notes, and bookmarks should read/write to the `course_progress`, `notes`, and `bookmarks` database tables so data persists across devices.
-
-### 5. Wire Up Certificates
-`Certificates.tsx` uses hardcoded mock data. It needs a `certificates` table (or derive from `course_progress` where `is_completed = true`) and fetch real completion data.
-
----
-
-## Medium Priority
-
-### 6. Image Fallbacks on Remaining Pages
-`CoursePreview`, `Help`, and `Instructors` pages render external images without `onError` fallback handlers. Add `onError={(e) => { e.currentTarget.src = '/placeholder.svg' }}`.
-
-### 7. Accessibility Pass
-- Add `aria-label` to icon-only buttons across layouts
-- Verify keyboard navigation on course sidebar and quiz interface
-- Improve `alt` text on blog/help page images
+| Task | Status |
+|------|--------|
+| Real Authentication (Supabase Auth) | Done — `authStore.ts` uses real Supabase Auth with `signInWithPassword`, `signUp`, `signOut`, `onAuthStateChange` |
+| Remove `mockData.ts` | Done — file no longer exists, no imports found |
+| Migrate most pages off mock data | Done — Landing, CoursePreview, Admin Dashboard, Student Dashboard/Courses/Certificates, Instructor Dashboard all fetch from database |
+| Progress/notes/bookmarks to DB | Done — `progressStore.ts` reads/writes to `course_progress`, `bookmarks`, `notes` tables |
+| Certificates from DB | Done — `Certificates.tsx` queries `course_progress` for completed courses |
+| Database seeded | Partially done — 5 courses, 12 sections, 15 lessons exist. No quizzes seeded yet. |
 
 ---
 
-## Low Priority
+## Still Pending
 
-### 8. Remove `mockData.ts`
-Once all imports are migrated, delete `src/data/mockData.ts` entirely.
+### Critical
 
-### 9. Environment Cleanup
-Ensure no dev-only code (console.logs, test credentials) remains in production builds.
+**1. Seed Quiz Data**
+- 0 quizzes exist in the database. The quiz interface will show nothing.
+- Need to create quizzes and quiz questions for at least some of the existing courses.
+- Effort: Medium
+
+**2. CertificateVerify page still uses hardcoded mock data**
+- `src/pages/public/CertificateVerify.tsx` has a hardcoded `certificateDatabase` object with fake certificate entries instead of querying the database.
+- Needs to query `course_progress` (or a certificates table) to verify real certificates.
+- Effort: Small
+
+### High Priority
+
+**3. Rename "Masashi LMS" across the entire app**
+- 269 occurrences of "Masashi" across 30 files (page titles, headers, footer, legal pages, metadata).
+- Once a new name is chosen, a global find-and-replace is needed.
+- Effort: Medium
+
+**4. Image fallbacks on CoursePreview page**
+- `CoursePreview.tsx` renders images without `onError` fallback handlers. Blog and Landing pages already have them.
+- Help and Instructors pages don't render `<img>` tags, so they're fine.
+- Effort: Trivial
+
+### Medium Priority
+
+**5. Accessibility pass**
+- Add `aria-label` to icon-only buttons in layout components (MobileSidebar, AdminLayout, InstructorLayout, StudentLayout).
+- Verify keyboard navigation on course sidebar and quiz interface.
+- Effort: Medium
+
+### Low Priority
+
+**6. Environment cleanup**
+- No `console.log` statements found — this is largely clean already.
+- Verify no test credentials are hardcoded (the admin edge function exists but is behind an edge function, not client-side).
+- Effort: Trivial
 
 ---
 
 ## Summary
 
-| # | Task | Priority | Effort |
-|---|------|----------|--------|
-| 1 | Real authentication (Supabase Auth) | Critical | Large |
-| 2 | Migrate 17 files off mock data | Critical | Large |
-| 3 | Seed database with content | Critical | Medium |
-| 4 | Progress/notes/bookmarks to DB | High | Medium |
-| 5 | Certificates from DB | High | Small |
-| 6 | Image fallbacks on remaining pages | Medium | Small |
-| 7 | Accessibility pass | Medium | Medium |
-| 8 | Delete mockData.ts | Low | Trivial |
-| 9 | Environment cleanup | Low | Trivial |
+| # | Task | Priority | Effort | Status |
+|---|------|----------|--------|--------|
+| 1 | Seed quiz data | Critical | Medium | Pending |
+| 2 | Wire CertificateVerify to DB | Critical | Small | Pending |
+| 3 | Rename platform (choose name) | High | Medium | Pending — awaiting name choice |
+| 4 | Image fallbacks on CoursePreview | High | Trivial | Pending |
+| 5 | Accessibility pass | Medium | Medium | Pending |
+| 6 | Environment cleanup | Low | Trivial | Mostly done |
 
----
-
-## Technical Notes
-
-- **Auth migration**: The existing `ProtectedRoute` reads from `useAuthStore`. Once the store is backed by Supabase Auth sessions, route protection will work automatically with real users.
-- **Data migration order**: Start with authentication (task 1), then seed data (task 3), then migrate pages in this order: public-facing pages (Landing, CoursePreview, Catalog) -> student pages -> instructor pages -> admin pages.
-- **The `handle_new_user` trigger** already creates a profile and assigns the `student` role on signup, so the Signup page just needs to pass `first_name` and `last_name` as user metadata.
+## Recommended Order
+1. Choose a platform name and rename globally
+2. Seed quiz data
+3. Wire CertificateVerify to database
+4. Add image fallbacks on CoursePreview
+5. Accessibility pass
 
