@@ -490,7 +490,7 @@ export default function AdminSettings() {
           )}
 
           {/* School Details Dialog */}
-          <Dialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen}>
+          <Dialog open={schoolDialogOpen} onOpenChange={setSchoolDialogOpen}>
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
