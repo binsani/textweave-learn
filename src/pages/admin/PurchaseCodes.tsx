@@ -358,20 +358,23 @@ export default function PurchaseCodes() {
             <ScrollArea className="max-h-[500px]">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Courses</TableHead>
-                    <TableHead>Uses</TableHead>
-                    <TableHead>Expires</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  </TableRow>
+                   <TableRow>
+                     <TableHead>Student</TableHead>
+                     <TableHead>Code</TableHead>
+                     <TableHead>Email</TableHead>
+                     <TableHead>Password</TableHead>
+                     <TableHead>Courses</TableHead>
+                     <TableHead>Uses</TableHead>
+                     <TableHead>Expires</TableHead>
+                     <TableHead>Status</TableHead>
+                     <TableHead className="w-[100px]">Actions</TableHead>
+                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {codes.map((pc: any) => {
+                 {codes.map((pc: any) => {
                     const email = buildEmail(pc.student_first_name || '', pc.student_last_name || '');
+                    const redeemedEmail = redemptions.find((r) => r.code_id === pc.id)?.generated_email;
+                    const displayEmail = redeemedEmail || email;
                     const password = buildPassword(pc.code);
                     return (
                       <TableRow key={pc.id}>
@@ -387,14 +390,20 @@ export default function PurchaseCodes() {
                           </button>
                         </TableCell>
                         <TableCell>
-                          {email ? (
-                            <button onClick={() => copyToClipboard(email, 'Email')} className="font-mono text-xs hover:text-primary transition-colors flex items-center gap-1.5" title="Click to copy email">
-                              {email}
+                          {displayEmail ? (
+                            <button onClick={() => copyToClipboard(displayEmail, 'Email')} className="font-mono text-xs hover:text-primary transition-colors flex items-center gap-1.5" title="Click to copy email">
+                              {displayEmail}
                               <Copy className="h-3 w-3 opacity-50" />
                             </button>
                           ) : (
                             <span className="text-xs text-muted-foreground">—</span>
                           )}
+                        </TableCell>
+                        <TableCell>
+                          <button onClick={() => copyToClipboard(password, 'Password')} className="font-mono text-xs hover:text-primary transition-colors flex items-center gap-1.5" title="Click to copy password">
+                            {password}
+                            <Copy className="h-3 w-3 opacity-50" />
+                          </button>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
