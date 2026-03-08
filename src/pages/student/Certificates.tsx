@@ -95,6 +95,7 @@ export default function StudentCertificates() {
             vendorName: vendor?.name,
             vendorLogo: vendor?.logo_url || undefined,
             templateId: vendor?.certificate_template || 'classic',
+            customBgUrl: vendor?.certificate_bg_url || undefined,
           });
         }
       }
