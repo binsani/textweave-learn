@@ -453,18 +453,27 @@ export default function AdminSettings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="rounded-lg border bg-muted/40 p-3">
+                  <button
+                    className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
+                    onClick={() => { setVendorDialogFilter('all'); setVendorDialogOpen(true); }}
+                  >
                     <p className="text-2xl font-bold text-foreground">{vendorStats.total}</p>
                     <p className="text-xs text-muted-foreground">Total Vendors</p>
-                  </div>
-                  <div className="rounded-lg border bg-muted/40 p-3">
+                  </button>
+                  <button
+                    className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
+                    onClick={() => { setVendorDialogFilter('defaults'); setVendorDialogOpen(true); }}
+                  >
                     <p className="text-2xl font-bold text-primary">{vendorStats.usingDefaults}</p>
                     <p className="text-xs text-muted-foreground">Using Defaults</p>
-                  </div>
-                  <div className="rounded-lg border bg-muted/40 p-3">
+                  </button>
+                  <button
+                    className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
+                    onClick={() => { setVendorDialogFilter('custom'); setVendorDialogOpen(true); }}
+                  >
                     <p className="text-2xl font-bold text-foreground">{vendorStats.custom}</p>
                     <p className="text-xs text-muted-foreground">Custom Design</p>
-                  </div>
+                  </button>
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs text-muted-foreground">
@@ -479,6 +488,61 @@ export default function AdminSettings() {
               </CardContent>
             </Card>
           )}
+
+          {/* Vendor Details Dialog */}
+          <Dialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  {vendorDialogFilter === 'defaults' ? 'Vendors Using Platform Defaults' : vendorDialogFilter === 'custom' ? 'Vendors with Custom Design' : 'All Vendors'}
+                </DialogTitle>
+                <DialogDescription>
+                  {filteredVendors.length} vendor{filteredVendors.length !== 1 ? 's' : ''}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex gap-2 mb-2">
+                {(['all', 'defaults', 'custom'] as const).map(f => (
+                  <Badge
+                    key={f}
+                    variant={vendorDialogFilter === f ? 'default' : 'outline'}
+                    className="cursor-pointer"
+                    onClick={() => setVendorDialogFilter(f)}
+                  >
+                    {f === 'all' ? 'All' : f === 'defaults' ? 'Defaults' : 'Custom'}
+                  </Badge>
+                ))}
+              </div>
+              <ScrollArea className="max-h-[400px]">
+                {filteredVendors.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">No vendors in this category</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Vendor</TableHead>
+                        <TableHead>Template</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredVendors.map(v => (
+                        <TableRow key={v.id}>
+                          <TableCell className="font-medium">{v.name}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs capitalize">{v.certificate_template}</TableCell>
+                          <TableCell>
+                            <Badge variant={v.isCustom ? 'secondary' : 'outline'} className="text-xs">
+                              {v.isCustom ? 'Custom' : 'Default'}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
           <CertificateTemplateSelector
             value={defaultCertTemplate}
             onChange={setDefaultCertTemplate}
