@@ -35,6 +35,7 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
   if (!certificate) return null;
 
   const template = getTemplate(certificate.templateId || 'classic');
+  const t = { ...DEFAULT_CERT_TEXT, ...certificate.customText };
   const verificationUrl = `${window.location.origin}/verify?id=${encodeURIComponent(certificate.id)}`;
   const isDark = ['midnight', 'tech'].includes(template.id);
 
