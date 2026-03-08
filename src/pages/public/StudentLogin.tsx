@@ -58,8 +58,6 @@ export default function StudentLogin() {
       const { data, error } = await supabase.functions.invoke('redeem-purchase-code', {
         body: {
           code: purchaseCode.trim().toUpperCase(),
-          first_name: pcFirstName.trim(),
-          last_name: pcLastName.trim(),
         },
       });
 
