@@ -16,6 +16,7 @@ interface CertificateData {
   courseHours: number;
   vendorName?: string;
   vendorLogo?: string;
+  templateId?: string;
 }
 
 export default function StudentCertificates() {
