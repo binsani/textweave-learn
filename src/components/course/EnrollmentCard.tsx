@@ -97,6 +97,7 @@ export function EnrollmentCard({ course, variant = 'desktop' }: EnrollmentCardPr
             src={course.thumbnail}
             alt={course.title}
             className="w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
