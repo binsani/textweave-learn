@@ -22,8 +22,6 @@ export default function StudentLogin() {
 
   // Purchase code state
   const [purchaseCode, setPurchaseCode] = useState('');
-  const [pcFirstName, setPcFirstName] = useState('');
-  const [pcLastName, setPcLastName] = useState('');
   const [isPcLoading, setIsPcLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,8 +58,6 @@ export default function StudentLogin() {
       const { data, error } = await supabase.functions.invoke('redeem-purchase-code', {
         body: {
           code: purchaseCode.trim().toUpperCase(),
-          first_name: pcFirstName.trim(),
-          last_name: pcLastName.trim(),
         },
       });
 
