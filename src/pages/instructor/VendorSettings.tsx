@@ -48,7 +48,8 @@ export default function VendorSettings() {
   });
 
   const [form, setForm] = useState<Record<string, string>>({});
-  const [uploading, setUploading] = useState<'logo' | 'banner' | null>(null);
+  const [uploading, setUploading] = useState<'logo' | 'banner' | 'certificate_bg' | null>(null);
+  const certBgInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize form from vendor data
   const initForm = useCallback(() => {
