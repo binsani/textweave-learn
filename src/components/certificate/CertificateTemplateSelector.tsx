@@ -167,10 +167,10 @@ function LivePreview({ templateId, customBgUrl, customText }: { templateId: stri
                 className="text-lg sm:text-xl md:text-3xl tracking-widest"
                 style={{ color: template.titleColor, fontFamily: template.titleFont }}
               >
-                CERTIFICATE
+                {t.heading}
               </h1>
               <p className="text-[10px] sm:text-xs tracking-wider mt-1" style={{ color: template.textColor }}>
-                OF COMPLETION
+                {t.subheading}
               </p>
             </div>
 
