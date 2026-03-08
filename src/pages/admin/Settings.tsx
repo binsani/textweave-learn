@@ -75,6 +75,8 @@ export default function AdminSettings() {
   const [adminCertBgUrl, setAdminCertBgUrl] = useState<string | undefined>(undefined);
   const [adminCertBgUploading, setAdminCertBgUploading] = useState(false);
   const [adminCertText, setAdminCertText] = useState<CertificateCustomText>({});
+  const [adminSignatureUrl, setAdminSignatureUrl] = useState<string | undefined>(undefined);
+  const [adminSignatureUploading, setAdminSignatureUploading] = useState(false);
 
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -106,6 +108,36 @@ export default function AdminSettings() {
   const handleAdminBgRemove = () => {
     setAdminCertBgUrl(undefined);
     toast({ title: 'Certificate background removed' });
+  };
+
+  const handleAdminSignatureUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Please select an image file', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Image must be under 5MB', variant: 'destructive' });
+      return;
+    }
+    setAdminSignatureUploading(true);
+    const ext = file.name.split('.').pop() || 'png';
+    const path = `platform/certificate-signature.${ext}`;
+    const { error: uploadErr } = await supabase.storage
+      .from('vendor-assets')
+      .upload(path, file, { upsert: true, contentType: file.type });
+    setAdminSignatureUploading(false);
+    if (uploadErr) {
+      toast({ title: 'Upload failed', description: uploadErr.message, variant: 'destructive' });
+      return;
+    }
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/vendor-assets/${path}`;
+    setAdminSignatureUrl(publicUrl);
+    toast({ title: 'Signature image uploaded!' });
+  };
+
+  const handleAdminSignatureRemove = () => {
+    setAdminSignatureUrl(undefined);
+    toast({ title: 'Signature image removed' });
   };
 
   const form = useForm<GeneralFormValues>({
@@ -315,6 +347,10 @@ export default function AdminSettings() {
             bgUploading={adminCertBgUploading}
             customText={adminCertText}
             onCustomTextChange={setAdminCertText}
+            signatureUrl={adminSignatureUrl}
+            onSignatureUpload={handleAdminSignatureUpload}
+            onSignatureRemove={handleAdminSignatureRemove}
+            signatureUploading={adminSignatureUploading}
           />
           <div className="flex justify-end">
             <Button onClick={() => toast({ title: 'Default certificate template saved!' })}>
