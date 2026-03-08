@@ -114,33 +114,30 @@ export default function CourseEditor() {
       newStatus?: 'draft' | 'pending_review';
     }) => {
       const slug = courseData.slug || generateSlug(courseData.title || 'untitled');
-      const status = newStatus || courseData.status || 'draft';
+      const status = newStatus || (courseData.status as 'draft' | 'pending_review' | 'published' | 'archived') || 'draft';
       
-      // Prepare course record
-      const courseRecord = {
-        title: courseData.title || 'Untitled Course',
-        slug,
-        description: courseData.description || '',
-        short_description: courseData.shortDescription || '',
-        instructor_id: user?.id,
-        category: courseData.category || 'programming',
-        level: courseData.level || 'beginner',
-        status,
-        tags: courseData.tags || [],
-        learning_objectives: courseData.learningObjectives || [],
-        requirements: courseData.requirements || [],
-        price: courseData.price || 0,
-        is_free: courseData.isFree ?? true,
-        estimated_hours: courseData.estimatedHours || 0,
-      };
-
       let savedCourseId = courseDbId;
 
       if (!savedCourseId) {
         // Create new course
         const { data: newCourse, error: courseError } = await supabase
           .from('courses')
-          .insert(courseRecord)
+          .insert({
+            title: courseData.title || 'Untitled Course',
+            slug,
+            description: courseData.description || '',
+            short_description: courseData.shortDescription || '',
+            instructor_id: user?.id!,
+            category: courseData.category || 'programming',
+            level: courseData.level || 'beginner',
+            status: status as 'draft' | 'pending_review' | 'published' | 'archived',
+            tags: courseData.tags || [],
+            learning_objectives: courseData.learningObjectives || [],
+            requirements: courseData.requirements || [],
+            price: courseData.price || 0,
+            is_free: courseData.isFree ?? true,
+            estimated_hours: courseData.estimatedHours || 0,
+          })
           .select()
           .single();
 
@@ -150,7 +147,22 @@ export default function CourseEditor() {
         // Update existing course
         const { error: courseError } = await supabase
           .from('courses')
-          .update({ ...courseRecord, updated_at: new Date().toISOString() })
+          .update({
+            title: courseData.title || 'Untitled Course',
+            slug,
+            description: courseData.description || '',
+            short_description: courseData.shortDescription || '',
+            category: courseData.category || 'programming',
+            level: courseData.level || 'beginner',
+            status: status as 'draft' | 'pending_review' | 'published' | 'archived',
+            tags: courseData.tags || [],
+            learning_objectives: courseData.learningObjectives || [],
+            requirements: courseData.requirements || [],
+            price: courseData.price || 0,
+            is_free: courseData.isFree ?? true,
+            estimated_hours: courseData.estimatedHours || 0,
+            updated_at: new Date().toISOString(),
+          })
           .eq('id', savedCourseId);
 
         if (courseError) throw courseError;
