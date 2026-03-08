@@ -195,21 +195,39 @@ export default function PurchaseCodes() {
                 {courses.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No published courses available.</p>
                 ) : (
-                  <ScrollArea className="h-40 border rounded-md p-2">
-                    <div className="space-y-2">
-                      {courses.map((course) => (
-                        <label key={course.id} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-muted/50 rounded px-2 py-1.5">
-                          <input
-                            type="checkbox"
-                            checked={selectedCourses.includes(course.id)}
-                            onChange={() => toggleCourse(course.id)}
-                            className="rounded border-input"
-                          />
-                          {course.title}
-                        </label>
-                      ))}
-                    </div>
-                  </ScrollArea>
+                  <>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm font-medium hover:bg-muted/50 rounded px-2 py-1.5 border-b border-border pb-2">
+                      <input
+                        type="checkbox"
+                        checked={courses.length > 0 && selectedCourses.length === courses.length}
+                        ref={(el) => { if (el) el.indeterminate = selectedCourses.length > 0 && selectedCourses.length < courses.length; }}
+                        onChange={() => {
+                          if (selectedCourses.length === courses.length) {
+                            setSelectedCourses([]);
+                          } else {
+                            setSelectedCourses(courses.map((c) => c.id));
+                          }
+                        }}
+                        className="rounded border-input"
+                      />
+                      Select All ({courses.length} courses)
+                    </label>
+                    <ScrollArea className="h-40 border rounded-md p-2">
+                      <div className="space-y-2">
+                        {courses.map((course) => (
+                          <label key={course.id} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-muted/50 rounded px-2 py-1.5">
+                            <input
+                              type="checkbox"
+                              checked={selectedCourses.includes(course.id)}
+                              onChange={() => toggleCourse(course.id)}
+                              className="rounded border-input"
+                            />
+                            {course.title}
+                          </label>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </>
                 )}
               </div>
 
