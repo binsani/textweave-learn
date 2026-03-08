@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +23,7 @@ import {
   Trash2,
   Settings,
   BookOpen,
+  Loader2,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCourseById, dbCourseToCardProps } from '@/hooks/useCourses';
@@ -36,9 +38,18 @@ import type { Course, Section, Lesson, Quiz } from '@/types';
 
 type EditorView = 'details' | 'curriculum' | 'lesson' | 'quiz';
 
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    || `course-${Date.now()}`;
+}
+
 export default function CourseEditor() {
   const { courseId } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const isNewCourse = courseId === 'new';
 
@@ -48,7 +59,6 @@ export default function CourseEditor() {
   const [course, setCourse] = useState<Partial<Course>>(() => {
     if (isNewCourse) {
       return {
-        id: `course-${Date.now()}`,
         title: '',
         slug: '',
         description: '',
@@ -69,8 +79,6 @@ export default function CourseEditor() {
         reviewCount: 0,
         price: 0,
         isFree: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       };
     }
     return {};
@@ -82,6 +90,7 @@ export default function CourseEditor() {
   const [editingLesson, setEditingLesson] = useState<{ sectionId: string; lesson: Lesson } | null>(null);
   const [editingQuiz, setEditingQuiz] = useState<{ lessonId: string; lessonTitle: string; quiz: Quiz | null } | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [courseDbId, setCourseDbId] = useState<string | null>(isNewCourse ? null : courseId || null);
 
   // Populate from DB when loaded
   useEffect(() => {
@@ -89,6 +98,7 @@ export default function CourseEditor() {
       const mapped = dbCourseToCardProps(dbCourse);
       setCourse(mapped);
       setSections(mapped.sections || []);
+      setCourseDbId(dbCourse.id);
     }
   }, [dbCourse, isNewCourse]);
 
@@ -96,11 +106,154 @@ export default function CourseEditor() {
     setHasChanges(true);
   }, [course, sections]);
 
+  // Save course mutation
+  const saveMutation = useMutation({
+    mutationFn: async ({ courseData, sectionsData, newStatus }: { 
+      courseData: Partial<Course>; 
+      sectionsData: Section[];
+      newStatus?: 'draft' | 'pending_review';
+    }) => {
+      const slug = courseData.slug || generateSlug(courseData.title || 'untitled');
+      const status = newStatus || courseData.status || 'draft';
+      
+      // Prepare course record
+      const courseRecord = {
+        title: courseData.title || 'Untitled Course',
+        slug,
+        description: courseData.description || '',
+        short_description: courseData.shortDescription || '',
+        instructor_id: user?.id,
+        category: courseData.category || 'programming',
+        level: courseData.level || 'beginner',
+        status,
+        tags: courseData.tags || [],
+        learning_objectives: courseData.learningObjectives || [],
+        requirements: courseData.requirements || [],
+        price: courseData.price || 0,
+        is_free: courseData.isFree ?? true,
+        estimated_hours: courseData.estimatedHours || 0,
+      };
+
+      let savedCourseId = courseDbId;
+
+      if (!savedCourseId) {
+        // Create new course
+        const { data: newCourse, error: courseError } = await supabase
+          .from('courses')
+          .insert(courseRecord)
+          .select()
+          .single();
+
+        if (courseError) throw courseError;
+        savedCourseId = newCourse.id;
+      } else {
+        // Update existing course
+        const { error: courseError } = await supabase
+          .from('courses')
+          .update({ ...courseRecord, updated_at: new Date().toISOString() })
+          .eq('id', savedCourseId);
+
+        if (courseError) throw courseError;
+      }
+
+      // Save sections and lessons
+      for (let sIdx = 0; sIdx < sectionsData.length; sIdx++) {
+        const section = sectionsData[sIdx];
+        const isNewSection = section.id.startsWith('section-') && section.id.includes('-');
+        
+        let sectionId = section.id;
+
+        if (isNewSection) {
+          // Create new section
+          const { data: newSection, error: sectionError } = await supabase
+            .from('sections')
+            .insert({
+              course_id: savedCourseId,
+              title: section.title,
+              description: section.description || null,
+              order: sIdx,
+            })
+            .select()
+            .single();
+
+          if (sectionError) throw sectionError;
+          sectionId = newSection.id;
+        } else {
+          // Update existing section
+          const { error: sectionError } = await supabase
+            .from('sections')
+            .update({
+              title: section.title,
+              description: section.description || null,
+              order: sIdx,
+            })
+            .eq('id', sectionId);
+
+          if (sectionError) throw sectionError;
+        }
+
+        // Save lessons
+        for (let lIdx = 0; lIdx < section.lessons.length; lIdx++) {
+          const lesson = section.lessons[lIdx];
+          const isNewLesson = lesson.id.startsWith('lesson-') && lesson.id.includes('-');
+
+          if (isNewLesson) {
+            // Create new lesson
+            const { error: lessonError } = await supabase
+              .from('lessons')
+              .insert({
+                section_id: sectionId,
+                title: lesson.title,
+                slug: lesson.slug || generateSlug(lesson.title),
+                content: lesson.content || '',
+                order: lIdx,
+                reading_time: lesson.readingTime || 5,
+                is_free: lesson.isFree || false,
+                has_quiz: lesson.hasQuiz || false,
+              });
+
+            if (lessonError) throw lessonError;
+          } else {
+            // Update existing lesson
+            const { error: lessonError } = await supabase
+              .from('lessons')
+              .update({
+                section_id: sectionId,
+                title: lesson.title,
+                slug: lesson.slug || generateSlug(lesson.title),
+                content: lesson.content || '',
+                order: lIdx,
+                reading_time: lesson.readingTime || 5,
+                is_free: lesson.isFree || false,
+                has_quiz: lesson.hasQuiz || false,
+              })
+              .eq('id', lesson.id);
+
+            if (lessonError) throw lessonError;
+          }
+        }
+      }
+
+      return { courseId: savedCourseId, status };
+    },
+    onSuccess: ({ courseId: savedId, status }) => {
+      setCourseDbId(savedId);
+      setCourse(prev => ({ ...prev, status }));
+      setHasChanges(false);
+      queryClient.invalidateQueries({ queryKey: ['course', savedId] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      
+      if (isNewCourse && savedId) {
+        navigate(`/instructor/courses/${savedId}/edit`, { replace: true });
+      }
+    },
+  });
+
   if (!isNewCourse && isLoading) return <PageLoader />;
 
   const handleSaveDetails = async (data: any) => {
-    setCourse({ ...course, ...data, updatedAt: new Date().toISOString() });
-    toast.success('Course details saved');
+    setCourse({ ...course, ...data });
+    toast.success('Course details updated locally. Click Save to persist.');
   };
 
   const handleSectionsChange = (newSections: Section[]) => {
@@ -127,7 +280,7 @@ export default function CourseEditor() {
     );
     setEditingLesson(null);
     setEditorView('curriculum');
-    toast.success('Lesson saved');
+    toast.success('Lesson saved locally. Click Save to persist.');
   };
 
   const handleEditQuiz = (lessonId: string, quizId?: string) => {
@@ -159,15 +312,32 @@ export default function CourseEditor() {
     toast.success('Quiz saved');
   };
 
-  const handlePublish = () => {
-    setCourse({ ...course, status: 'pending_review' });
-    toast.success('Course submitted for review');
+  const handleSubmitForReview = () => {
+    saveMutation.mutate(
+      { courseData: course, sectionsData: sections, newStatus: 'pending_review' },
+      {
+        onSuccess: () => {
+          toast.success('Course submitted for review! An admin will review it shortly.');
+        },
+        onError: (error) => {
+          toast.error(`Failed to submit: ${error.message}`);
+        },
+      }
+    );
   };
 
   const handleSaveAll = () => {
-    setCourse({ ...course, sections, updatedAt: new Date().toISOString() });
-    setHasChanges(false);
-    toast.success('All changes saved');
+    saveMutation.mutate(
+      { courseData: course, sectionsData: sections },
+      {
+        onSuccess: () => {
+          toast.success('All changes saved');
+        },
+        onError: (error) => {
+          toast.error(`Failed to save: ${error.message}`);
+        },
+      }
+    );
   };
 
   const getStatusBadge = () => {
@@ -179,6 +349,18 @@ export default function CourseEditor() {
       case 'draft':
       default:
         return <Badge variant="secondary">Draft</Badge>;
+    }
+  };
+
+  const getStatusMessage = () => {
+    switch (course.status) {
+      case 'published':
+        return 'This course is live and visible to students.';
+      case 'pending_review':
+        return 'This course is awaiting admin approval. You can still make edits.';
+      case 'draft':
+      default:
+        return 'This course is a draft. Submit for review when ready to publish.';
     }
   };
 
@@ -211,10 +393,10 @@ export default function CourseEditor() {
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-8">
+      <div className="flex items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link to="/instructor/dashboard">
+            <Link to="/instructor/courses">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -232,16 +414,20 @@ export default function CourseEditor() {
         </div>
 
         <div className="flex items-center gap-2">
-          {!isNewCourse && (
+          {!isNewCourse && courseDbId && (
             <Button variant="outline" asChild>
-              <Link to={`/courses/${courseId}`}>
+              <Link to={`/courses/${courseDbId}`}>
                 <Eye className="h-4 w-4 mr-2" />
                 Preview
               </Link>
             </Button>
           )}
-          <Button onClick={handleSaveAll} disabled={!hasChanges}>
-            <Save className="h-4 w-4 mr-2" />
+          <Button onClick={handleSaveAll} disabled={!hasChanges || saveMutation.isPending}>
+            {saveMutation.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
             Save
           </Button>
           <DropdownMenu>
@@ -251,10 +437,16 @@ export default function CourseEditor() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {course.status === 'draft' && (
-                <DropdownMenuItem onClick={handlePublish}>
+              {(course.status === 'draft' || course.status === undefined) && (
+                <DropdownMenuItem onClick={handleSubmitForReview} disabled={saveMutation.isPending}>
                   <Send className="h-4 w-4 mr-2" />
                   Submit for Review
+                </DropdownMenuItem>
+              )}
+              {course.status === 'pending_review' && (
+                <DropdownMenuItem disabled>
+                  <Send className="h-4 w-4 mr-2" />
+                  Awaiting Review...
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem>
@@ -269,6 +461,11 @@ export default function CourseEditor() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </div>
+
+      {/* Status message */}
+      <div className="mb-6 p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+        {getStatusMessage()}
       </div>
 
       {/* Tabs */}
