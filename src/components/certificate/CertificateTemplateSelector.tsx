@@ -41,6 +41,10 @@ interface CertificateTemplateSelectorProps {
   bgUploading?: boolean;
   customText?: CertificateCustomText;
   onCustomTextChange?: (text: CertificateCustomText) => void;
+  signatureUrl?: string;
+  onSignatureUpload?: (file: File) => void;
+  onSignatureRemove?: () => void;
+  signatureUploading?: boolean;
 }
 
 function TemplateThumb({ template, selected }: { template: CertificateTemplate; selected: boolean }) {
