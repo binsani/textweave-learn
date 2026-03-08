@@ -56,9 +56,22 @@ export default function StudentCertificates() {
       // Fetch courses with their sections/lessons counts and instructor
       const { data: courses, error: cErr } = await supabase
         .from('courses')
-        .select('id, title, estimated_hours, instructor:profiles!courses_instructor_id_fkey(first_name, last_name), sections(lessons(id))')
+        .select('id, title, estimated_hours, vendor_id, instructor:profiles!courses_instructor_id_fkey(first_name, last_name), sections(lessons(id))')
         .in('id', courseIds);
       if (cErr) throw cErr;
+
+      // Fetch vendor info for courses that have vendor_id
+      const vendorIds = [...new Set((courses ?? []).map(c => c.vendor_id).filter(Boolean))];
+      let vendorMap: Record<string, { name: string; logo_url: string | null }> = {};
+      if (vendorIds.length > 0) {
+        const { data: vendorsData } = await supabase
+          .from('vendors')
+          .select('id, name, logo_url')
+          .in('id', vendorIds);
+        for (const v of vendorsData ?? []) {
+          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url };
+        }
+      }
 
       const certs: CertificateData[] = [];
       for (const course of courses ?? []) {
