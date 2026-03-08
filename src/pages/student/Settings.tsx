@@ -199,6 +199,103 @@ export default function StudentSettings() {
           </CardContent>
         </Card>
 
+        {/* Set Up Credentials (purchase code users only) */}
+        {isPurchaseCodeUser && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                Set Up Email Login
+              </CardTitle>
+              <CardDescription>
+                You signed in with a purchase code. Set an email and password so you can also log in with email in the future. Your purchase code will still work.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (credentialsForm.password !== credentialsForm.confirmPassword) {
+                    toast({ title: 'Passwords do not match', variant: 'destructive' });
+                    return;
+                  }
+                  if (credentialsForm.password.length < 6) {
+                    toast({ title: 'Password must be at least 6 characters', variant: 'destructive' });
+                    return;
+                  }
+                  setIsSettingCredentials(true);
+                  const { error } = await supabase.auth.updateUser({
+                    email: credentialsForm.email,
+                    password: credentialsForm.password,
+                  });
+                  setIsSettingCredentials(false);
+                  if (error) {
+                    toast({ title: 'Error', description: error.message, variant: 'destructive' });
+                  } else {
+                    toast({
+                      title: 'Credentials set!',
+                      description: 'Check your new email for a confirmation link. Once confirmed, you can log in with email & password.',
+                    });
+                  }
+                }}
+                className="space-y-4"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="new-email">New Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="new-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      className="pl-10"
+                      value={credentialsForm.email}
+                      onChange={(e) => setCredentialsForm({ ...credentialsForm, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="new-password"
+                      type={showNewPassword ? 'text' : 'password'}
+                      placeholder="Min. 6 characters"
+                      className="pl-10 pr-10"
+                      value={credentialsForm.password}
+                      onChange={(e) => setCredentialsForm({ ...credentialsForm, password: e.target.value })}
+                      required
+                    />
+                    <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      placeholder="Re-enter password"
+                      className="pl-10"
+                      value={credentialsForm.confirmPassword}
+                      onChange={(e) => setCredentialsForm({ ...credentialsForm, confirmPassword: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <Button type="submit" disabled={isSettingCredentials}>
+                  {isSettingCredentials ? 'Saving...' : 'Set Up Email Login'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Security */}
         <Card>
           <CardHeader>
