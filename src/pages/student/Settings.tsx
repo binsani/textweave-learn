@@ -104,7 +104,14 @@ export default function StudentSettings() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
-              {!isPurchaseCodeUser && (
+              {isPurchaseCodeUser ? (
+                <div className="rounded-md border border-primary/20 bg-primary/5 p-3">
+                  <p className="text-sm font-medium text-foreground">No email linked yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    You're using a purchase code account. Scroll down to <strong>Set Up Email Login</strong> to add a real email and password — you'll still be able to log in with your code too!
+                  </p>
+                </div>
+              ) : (
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
