@@ -65,11 +65,16 @@ export default function Login() {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center space-y-3">
+        <div className="mt-8 text-center space-y-2">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{' '}
             <Link to="/signup" className="text-primary font-medium hover:underline">
               Sign up
+            </Link>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <Link to="/forgot-password" className="text-primary font-medium hover:underline">
+              Forgot your password?
             </Link>
           </p>
         </div>
