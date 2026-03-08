@@ -100,16 +100,6 @@ export default function CourseEditor() {
 
   const handleSaveDetails = async (data: any) => {
     setCourse({ ...course, ...data, updatedAt: new Date().toISOString() });
-
-    // Persist vendor_id to DB if editing existing course
-    if (!isNewCourse && courseId) {
-      const vendorId = data.vendorId || null;
-      await supabase
-        .from('courses')
-        .update({ vendor_id: vendorId })
-        .eq('id', courseId);
-    }
-
     toast.success('Course details saved');
   };
 
