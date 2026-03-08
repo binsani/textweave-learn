@@ -110,6 +110,36 @@ export default function AdminSettings() {
     toast({ title: 'Certificate background removed' });
   };
 
+  const handleAdminSignatureUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Please select an image file', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Image must be under 5MB', variant: 'destructive' });
+      return;
+    }
+    setAdminSignatureUploading(true);
+    const ext = file.name.split('.').pop() || 'png';
+    const path = `platform/certificate-signature.${ext}`;
+    const { error: uploadErr } = await supabase.storage
+      .from('vendor-assets')
+      .upload(path, file, { upsert: true, contentType: file.type });
+    setAdminSignatureUploading(false);
+    if (uploadErr) {
+      toast({ title: 'Upload failed', description: uploadErr.message, variant: 'destructive' });
+      return;
+    }
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/vendor-assets/${path}`;
+    setAdminSignatureUrl(publicUrl);
+    toast({ title: 'Signature image uploaded!' });
+  };
+
+  const handleAdminSignatureRemove = () => {
+    setAdminSignatureUrl(undefined);
+    toast({ title: 'Signature image removed' });
+  };
+
   const form = useForm<GeneralFormValues>({
     resolver: zodResolver(generalSchema),
     defaultValues: {
