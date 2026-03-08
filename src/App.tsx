@@ -59,6 +59,7 @@ const AdminUsers = lazy(() => import("@/pages/admin/Users"));
 const AdminCourses = lazy(() => import("@/pages/admin/Courses"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/Analytics"));
 const AdminSettings = lazy(() => import("@/pages/admin/Settings"));
+const AdminVendors = lazy(() => import("@/pages/admin/Vendors"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
