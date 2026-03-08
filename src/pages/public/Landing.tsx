@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Users, Award, Clock, ArrowRight, CheckCircle } from 'lucide-react';
+import { BookOpen, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,13 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { usePublishedCourses, dbCourseToCardProps } from '@/hooks/useCourses';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useMemo } from 'react';
-
-const stats = [
-  { label: 'Active Learners', value: '12,000+', icon: Users },
-  { label: 'Expert Courses', value: '500+', icon: BookOpen },
-  { label: 'Certifications', value: '2,500+', icon: Award },
-  { label: 'Hours of Content', value: '10,000+', icon: Clock },
-];
 
 const features = [
   'Text-first learning optimized for deep understanding',
@@ -70,25 +63,6 @@ export default function Landing() {
                 <Link to="/signup">Start Learning Free</Link>
               </Button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-16 bg-muted/30 border-y border-border">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={stat.label} className="text-center animate-fade-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="flex justify-center mb-3">
-                  <div className="p-3 rounded-xl bg-primary/10 hover-scale transition-transform">
-                    <stat.icon className="h-6 w-6 text-primary" />
-                  </div>
-                </div>
-                <p className="font-serif text-3xl font-bold text-foreground mb-1">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
