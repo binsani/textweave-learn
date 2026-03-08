@@ -100,13 +100,10 @@ export default function AdminSettings() {
   const [adminSignatureUploading, setAdminSignatureUploading] = useState(false);
   const [certSaving, setCertSaving] = useState(false);
   const [certLoading, setCertLoading] = useState(true);
-  const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
-  const [vendorDialogFilter, setVendorDialogFilter] = useState<'all' | 'defaults' | 'custom'>('all');
-
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
-  // Fetch vendor certificate usage stats
-  const isVendorCustom = (v: { certificate_template: string; certificate_bg_url: string | null; certificate_signature_url: string | null; certificate_custom_text: unknown }) => {
+  // Fetch instructor certificate usage stats
+  const isInstructorCustom = (v: { certificate_template: string | null; certificate_bg_url: string | null; certificate_signature_url: string | null; certificate_custom_text: unknown }) => {
     const hasTemplate = v.certificate_template && v.certificate_template !== 'classic';
     const hasBg = !!v.certificate_bg_url;
     const hasSig = !!v.certificate_signature_url;
@@ -114,25 +111,26 @@ export default function AdminSettings() {
     return !!(hasTemplate || hasBg || hasSig || hasText);
   };
 
-  const { data: vendorCertData } = useQuery({
-    queryKey: ['vendor-cert-stats'],
+  const { data: instructorCertData } = useQuery({
+    queryKey: ['instructor-cert-stats'],
     queryFn: async () => {
+      // Get instructors who have school_name set
       const { data, error } = await supabase
-        .from('vendors')
-        .select('id, name, slug, certificate_template, certificate_bg_url, certificate_custom_text, certificate_signature_url')
-        .eq('status', 'approved');
+        .from('profiles')
+        .select('id, first_name, last_name, school_name, school_slug, certificate_template, certificate_bg_url, certificate_custom_text, certificate_signature_url')
+        .not('school_name', 'is', null);
       if (error) throw error;
-      return (data ?? []).map(v => ({ ...v, isCustom: isVendorCustom(v) }));
+      return (data ?? []).map(v => ({ ...v, name: v.school_name || [v.first_name, v.last_name].filter(Boolean).join(' '), isCustom: isInstructorCustom(v) }));
     },
   });
 
-  const vendorStats = vendorCertData ? {
-    total: vendorCertData.length,
-    custom: vendorCertData.filter(v => v.isCustom).length,
-    usingDefaults: vendorCertData.filter(v => !v.isCustom).length,
+  const schoolStats = instructorCertData ? {
+    total: instructorCertData.length,
+    custom: instructorCertData.filter(v => v.isCustom).length,
+    usingDefaults: instructorCertData.filter(v => !v.isCustom).length,
   } : undefined;
 
-  const filteredVendors = (vendorCertData ?? []).filter(v => {
+  const filteredSchools = (instructorCertData ?? []).filter(v => {
     if (vendorDialogFilter === 'defaults') return !v.isCustom;
     if (vendorDialogFilter === 'custom') return v.isCustom;
     return true;
