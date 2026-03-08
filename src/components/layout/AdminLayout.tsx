@@ -13,6 +13,7 @@ import {
   ChevronRight,
   BarChart3,
   Store,
+  Ticket,
   X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
