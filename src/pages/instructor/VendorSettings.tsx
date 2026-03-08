@@ -61,6 +61,7 @@ export default function VendorSettings() {
       about_html: vendor.about_html || '',
       primary_color: vendor.primary_color || '#6366f1',
       accent_color: vendor.accent_color || '#8b5cf6',
+      certificate_template: vendor.certificate_template || 'classic',
     };
   }, [vendor]);
 
