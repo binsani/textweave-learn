@@ -1,0 +1,1 @@
+ALTER TABLE public.vendors ADD COLUMN certificate_custom_text jsonb DEFAULT '{}' NOT NULL;
