@@ -50,7 +50,7 @@ const courseFormSchema = z.object({
 type CourseFormData = z.infer<typeof courseFormSchema>;
 
 interface CourseMetadataFormProps {
-  initialData?: Partial<CourseFormData> & { thumbnail?: string; vendorId?: string };
+  initialData?: Partial<CourseFormData> & { thumbnail?: string };
   onSave: (data: CourseFormData) => void;
 }
 
