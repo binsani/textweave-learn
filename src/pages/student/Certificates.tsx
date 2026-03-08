@@ -65,16 +65,24 @@ export default function StudentCertificates() {
         .in('id', courseIds);
       if (cErr) throw cErr;
 
+      // Fetch platform certificate defaults
+      const { data: platformRow } = await supabase
+        .from('platform_settings')
+        .select('value')
+        .eq('key', 'certificate_config')
+        .single();
+      const platformCert = (platformRow?.value as any) ?? {};
+
       // Fetch vendor info for courses that have vendor_id
       const vendorIds = [...new Set((courses ?? []).map(c => c.vendor_id).filter(Boolean))];
-      let vendorMap: Record<string, { name: string; logo_url: string | null; certificate_template: string; certificate_bg_url: string | null; certificate_custom_text: any }> = {};
+      let vendorMap: Record<string, { name: string; logo_url: string | null; certificate_template: string; certificate_bg_url: string | null; certificate_custom_text: any; certificate_signature_url: string | null }> = {};
       if (vendorIds.length > 0) {
         const { data: vendorsData } = await supabase
           .from('vendors')
-          .select('id, name, logo_url, certificate_template, certificate_bg_url, certificate_custom_text')
+          .select('id, name, logo_url, certificate_template, certificate_bg_url, certificate_custom_text, certificate_signature_url')
           .in('id', vendorIds);
         for (const v of vendorsData ?? []) {
-          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url, certificate_template: v.certificate_template, certificate_bg_url: v.certificate_bg_url, certificate_custom_text: v.certificate_custom_text };
+          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url, certificate_template: v.certificate_template, certificate_bg_url: v.certificate_bg_url, certificate_custom_text: v.certificate_custom_text, certificate_signature_url: v.certificate_signature_url };
         }
       }
 
@@ -88,6 +96,8 @@ export default function StudentCertificates() {
             ? [instructor.first_name, instructor.last_name].filter(Boolean).join(' ')
             : 'Instructor';
           const vendor = course.vendor_id ? vendorMap[course.vendor_id] : null;
+          const hasVendorTemplate = vendor && vendor.certificate_template !== 'classic';
+          const hasVendorText = vendor && Object.keys(vendor.certificate_custom_text ?? {}).length > 0;
           certs.push({
             id: `CERT-${course.id.slice(0, 8).toUpperCase()}`,
             studentName: user.name,
@@ -97,10 +107,10 @@ export default function StudentCertificates() {
             courseHours: Number(course.estimated_hours),
             vendorName: vendor?.name,
             vendorLogo: vendor?.logo_url || undefined,
-            templateId: vendor?.certificate_template || 'classic',
-            customBgUrl: vendor?.certificate_bg_url || undefined,
-            customText: (vendor?.certificate_custom_text as CertificateCustomText) || undefined,
-            signatureUrl: (vendor as any)?.certificate_signature_url || undefined,
+            templateId: (hasVendorTemplate ? vendor.certificate_template : null) || platformCert.template || 'classic',
+            customBgUrl: vendor?.certificate_bg_url || platformCert.bg_url || undefined,
+            customText: (hasVendorText ? vendor.certificate_custom_text as CertificateCustomText : null) || (Object.keys(platformCert.custom_text ?? {}).length > 0 ? platformCert.custom_text : undefined),
+            signatureUrl: vendor?.certificate_signature_url || platformCert.signature_url || undefined,
           });
         }
       }
