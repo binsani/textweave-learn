@@ -16,6 +16,7 @@ interface CertificateData {
   courseHours: number;
   vendorName?: string;
   vendorLogo?: string;
+  templateId?: string;
 }
 
 export default function StudentCertificates() {
@@ -62,14 +63,14 @@ export default function StudentCertificates() {
 
       // Fetch vendor info for courses that have vendor_id
       const vendorIds = [...new Set((courses ?? []).map(c => c.vendor_id).filter(Boolean))];
-      let vendorMap: Record<string, { name: string; logo_url: string | null }> = {};
+      let vendorMap: Record<string, { name: string; logo_url: string | null; certificate_template: string }> = {};
       if (vendorIds.length > 0) {
         const { data: vendorsData } = await supabase
           .from('vendors')
-          .select('id, name, logo_url')
+          .select('id, name, logo_url, certificate_template')
           .in('id', vendorIds);
         for (const v of vendorsData ?? []) {
-          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url };
+          vendorMap[v.id] = { name: v.name, logo_url: v.logo_url, certificate_template: v.certificate_template };
         }
       }
 
@@ -92,6 +93,7 @@ export default function StudentCertificates() {
             courseHours: Number(course.estimated_hours),
             vendorName: vendor?.name,
             vendorLogo: vendor?.logo_url || undefined,
+            templateId: vendor?.certificate_template || 'classic',
           });
         }
       }

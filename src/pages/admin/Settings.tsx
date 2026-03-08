@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CertificateTemplateSelector } from '@/components/certificate/CertificateTemplateSelector';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -68,6 +69,7 @@ export default function AdminSettings() {
   const [instructorSignup, setInstructorSignup] = useState(true);
   const [emailVerification, setEmailVerification] = useState(true);
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+  const [defaultCertTemplate, setDefaultCertTemplate] = useState('classic');
 
   const form = useForm<GeneralFormValues>({
     resolver: zodResolver(generalSchema),
@@ -96,8 +98,9 @@ export default function AdminSettings() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="certificates">Certificates</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
           <TabsTrigger value="advanced">Advanced</TabsTrigger>
@@ -262,6 +265,20 @@ export default function AdminSettings() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Certificates Tab */}
+        <TabsContent value="certificates" className="space-y-6">
+          <CertificateTemplateSelector
+            value={defaultCertTemplate}
+            onChange={setDefaultCertTemplate}
+          />
+          <div className="flex justify-end">
+            <Button onClick={() => toast({ title: 'Default certificate template saved!' })}>
+              <Save className="mr-2 h-4 w-4" />
+              Save Template
+            </Button>
+          </div>
         </TabsContent>
 
         {/* Security Tab */}

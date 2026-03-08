@@ -14,6 +14,7 @@ import {
   Store, Upload, Trash2, Loader2, ExternalLink, Palette,
   Globe, Mail, Image as ImageIcon, LinkIcon,
 } from 'lucide-react';
+import { CertificateTemplateSelector } from '@/components/certificate/CertificateTemplateSelector';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 
@@ -60,6 +61,7 @@ export default function VendorSettings() {
       about_html: vendor.about_html || '',
       primary_color: vendor.primary_color || '#6366f1',
       accent_color: vendor.accent_color || '#8b5cf6',
+      certificate_template: vendor.certificate_template || 'classic',
     };
   }, [vendor]);
 
@@ -83,6 +85,7 @@ export default function VendorSettings() {
           about_html: currentForm.about_html,
           primary_color: currentForm.primary_color,
           accent_color: currentForm.accent_color,
+          certificate_template: currentForm.certificate_template,
         })
         .eq('id', vendor.id);
       if (error) throw error;
@@ -457,6 +460,12 @@ export default function VendorSettings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Certificate Template */}
+      <CertificateTemplateSelector
+        value={currentForm.certificate_template || 'classic'}
+        onChange={(id) => updateField('certificate_template', id)}
+      />
 
       {/* Save */}
       <div className="flex justify-end gap-3">
