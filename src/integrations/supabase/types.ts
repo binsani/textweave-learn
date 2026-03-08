@@ -799,6 +799,10 @@ export type Database = {
         Args: { _section_id: string }
         Returns: string
       }
+      grade_quiz: {
+        Args: { p_answers: Json; p_quiz_id: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -5,12 +5,31 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCourseById, dbCourseToCardProps } from '@/hooks/useCourses';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { QuizQuestion, QuizProgress, QuizResults } from '@/components/quiz';
-import { Quiz, Course, Lesson, Section } from '@/types';
+import { Quiz, Course, Lesson, Section, Question } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 
 type QuizState = 'taking' | 'results' | 'review';
+
+interface GradeResult {
+  score: number;
+  totalPoints: number;
+  correctCount: number;
+  totalQuestions: number;
+  percentage: number;
+  passed: boolean;
+  passingScore: number;
+  questionResults: Array<{
+    questionId: string;
+    correctAnswer: string;
+    explanation: string | null;
+    isCorrect: boolean;
+    userAnswer: string | null;
+    points: number;
+  }>;
+}
 
 function QuizSkeleton() {
   return (
@@ -35,23 +54,25 @@ export default function QuizInterface() {
     quizId: string;
   }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [quizState, setQuizState] = useState<QuizState>('taking');
-  const [isLoading, setIsLoading] = useState(false);
+  const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
 
   // Fetch course and quiz from database
   const { data: dbCourse } = useCourseById(courseId);
   const course: Course | undefined = useMemo(() => dbCourse ? dbCourseToCardProps(dbCourse) : undefined, [dbCourse]);
 
+  // Fetch quiz questions WITHOUT correct_answer/explanation (server-side grading)
   const { data: quizData } = useQuery({
     queryKey: ['quiz', quizId],
     queryFn: async () => {
       if (!quizId) return null;
       const { data: quiz, error } = await supabase
         .from('quizzes')
-        .select('*, questions(*)')
+        .select('*, questions(id, quiz_id, type, question, options, points, order)')
         .eq('id', quizId)
         .single();
       if (error) return null;
@@ -70,8 +91,8 @@ export default function QuizInterface() {
             type: q.type,
             question: q.question,
             options: q.options ?? undefined,
-            correctAnswer: q.correct_answer,
-            explanation: q.explanation ?? undefined,
+            correctAnswer: '', // Not fetched - graded server-side
+            explanation: undefined,
             points: q.points,
             order: q.order,
           })),
@@ -80,6 +101,31 @@ export default function QuizInterface() {
     enabled: !!quizId,
   });
   const quiz = quizData ?? undefined;
+
+  // Server-side grading mutation
+  const gradeMutation = useMutation({
+    mutationFn: async () => {
+      if (!quizId) throw new Error('No quiz ID');
+      const { data, error } = await supabase.rpc('grade_quiz', {
+        p_quiz_id: quizId,
+        p_answers: answers,
+      });
+      if (error) throw error;
+      return data as unknown as GradeResult;
+    },
+    onSuccess: (result) => {
+      setGradeResult(result);
+      // Merge correct answers back into quiz questions for review mode
+      setQuizState('results');
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error submitting quiz',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 
   const findLesson = useCallback((): { lesson: Lesson | null; section: Section | null } => {
     if (!course) return { lesson: null, section: null };
@@ -98,31 +144,29 @@ export default function QuizInterface() {
     [answers, quiz]
   );
 
-  const calculateResults = useMemo(() => {
-    if (!quiz) return { score: 0, totalPoints: 0, correctCount: 0, correctAnswers: new Set<number>() };
-
-    let score = 0;
-    let correctCount = 0;
+  // Build review data from grade result
+  const reviewData = useMemo(() => {
+    if (!gradeResult) return { correctAnswers: new Set<number>() };
     const correctAnswers = new Set<number>();
-
-    quiz.questions.forEach((question, index) => {
-      const userAnswer = answers[question.id];
-      if (userAnswer === question.correctAnswer) {
-        score += question.points;
-        correctCount++;
-        correctAnswers.add(index);
-      }
+    gradeResult.questionResults.forEach((r, index) => {
+      if (r.isCorrect) correctAnswers.add(index);
     });
+    return { correctAnswers };
+  }, [gradeResult]);
 
-    const totalPoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
-    return { score, totalPoints, correctCount, correctAnswers };
-  }, [quiz, answers]);
+  // Enrich quiz questions with correct answers for review mode
+  const enrichedQuiz = useMemo(() => {
+    if (!quiz || !gradeResult) return quiz;
+    return {
+      ...quiz,
+      questions: quiz.questions.map((q) => {
+        const result = gradeResult.questionResults.find((r) => r.questionId === q.id);
+        return result ? { ...q, correctAnswer: result.correctAnswer, explanation: result.explanation } : q;
+      }),
+    };
+  }, [quiz, gradeResult]);
 
-  const passed = useMemo(() => {
-    if (!quiz) return false;
-    const percentage = (calculateResults.score / calculateResults.totalPoints) * 100;
-    return percentage >= quiz.passingScore;
-  }, [quiz, calculateResults]);
+  const passed = gradeResult?.passed ?? false;
 
   // Handlers
   const handleAnswerSelect = (answerId: string) => {
@@ -145,12 +189,13 @@ export default function QuizInterface() {
   };
 
   const handleSubmit = () => {
-    setQuizState('results');
+    gradeMutation.mutate();
   };
 
   const handleRetry = () => {
     setAnswers({});
     setCurrentQuestionIndex(0);
+    setGradeResult(null);
     setQuizState('taking');
   };
 
@@ -161,7 +206,6 @@ export default function QuizInterface() {
 
   const handleContinue = () => {
     if (course && lesson) {
-      // Find next lesson
       let foundCurrent = false;
       for (const section of course.sections) {
         for (const l of section.lessons) {
@@ -174,7 +218,6 @@ export default function QuizInterface() {
           }
         }
       }
-      // If no next lesson, go back to course
       navigate(`/learn/${courseId}/${lessonId}`);
     }
   };
@@ -192,7 +235,8 @@ export default function QuizInterface() {
     return <Navigate to={`/learn/${courseId}/${lessonId || ''}`} replace />;
   }
 
-  const currentQuestion = quiz.questions[currentQuestionIndex];
+  const displayQuiz = quizState === 'review' && enrichedQuiz ? enrichedQuiz : quiz;
+  const currentQuestion = displayQuiz.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
   const allAnswered = answeredQuestions.size === quiz.questions.length;
 
@@ -230,15 +274,15 @@ export default function QuizInterface() {
 
       {/* Main Content */}
       <main className="container max-w-4xl mx-auto px-4 py-8">
-        {isLoading ? (
+        {gradeMutation.isPending ? (
           <QuizSkeleton />
-        ) : quizState === 'results' ? (
+        ) : quizState === 'results' && gradeResult ? (
           <QuizResults
             quiz={quiz}
-            score={calculateResults.score}
-            totalPoints={calculateResults.totalPoints}
-            correctCount={calculateResults.correctCount}
-            totalQuestions={quiz.questions.length}
+            score={gradeResult.score}
+            totalPoints={gradeResult.totalPoints}
+            correctCount={gradeResult.correctCount}
+            totalQuestions={gradeResult.totalQuestions}
             passed={passed}
             onRetry={handleRetry}
             onReview={handleReview}
@@ -256,7 +300,7 @@ export default function QuizInterface() {
                   selectedAnswer={answers[currentQuestion.id] || null}
                   onAnswerSelect={handleAnswerSelect}
                   showResult={quizState === 'review'}
-                  isCorrect={calculateResults.correctAnswers.has(currentQuestionIndex)}
+                  isCorrect={reviewData.correctAnswers.has(currentQuestionIndex)}
                 />
 
                 {/* Navigation */}
@@ -275,7 +319,7 @@ export default function QuizInterface() {
                     isLastQuestion ? (
                       <Button
                         onClick={handleSubmit}
-                        disabled={!allAnswered}
+                        disabled={!allAnswered || gradeMutation.isPending}
                         className="gap-2"
                       >
                         <Send className="h-4 w-4" />
@@ -312,7 +356,7 @@ export default function QuizInterface() {
                     answeredQuestions={answeredQuestions}
                     onQuestionClick={(index) => setCurrentQuestionIndex(index)}
                     isReviewMode={quizState === 'review'}
-                    correctAnswers={calculateResults.correctAnswers}
+                    correctAnswers={reviewData.correctAnswers}
                   />
 
                   {quizState === 'taking' && (
@@ -322,11 +366,11 @@ export default function QuizInterface() {
                       </p>
                       <Button
                         onClick={handleSubmit}
-                        disabled={!allAnswered}
+                        disabled={!allAnswered || gradeMutation.isPending}
                         className="w-full gap-2"
                       >
                         <Send className="h-4 w-4" />
-                        Submit Quiz
+                        {gradeMutation.isPending ? 'Submitting...' : 'Submit Quiz'}
                       </Button>
                     </div>
                   )}
