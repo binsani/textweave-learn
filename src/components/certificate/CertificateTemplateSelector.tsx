@@ -98,7 +98,7 @@ function LivePreview({ templateId, customBgUrl }: { templateId: string; customBg
           style={{
             aspectRatio: '1.414',
             border: template.borderStyle,
-            background: template.bgGradient,
+            ...bgStyle,
           }}
         >
           {/* Inner border */}
