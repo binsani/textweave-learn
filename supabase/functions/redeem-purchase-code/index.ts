@@ -98,16 +98,18 @@ Deno.serve(async (req) => {
     const fName = purchaseCode.student_first_name || first_name?.trim() || "Student";
     const lName = purchaseCode.student_last_name || last_name?.trim() || "";
 
-    // Build credentials using the name-based email format
-    const generatedEmail = buildEmail(fName, lName);
+    // Build credentials using the name-based email format (handles duplicates)
     const generatedPassword = buildPassword(purchaseCode.code);
+    const baseCheck = buildBaseEmail(fName, lName);
 
-    if (!generatedEmail) {
+    if (!baseCheck) {
       return new Response(JSON.stringify({ error: "Invalid student name on this purchase code" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const generatedEmail = await findUniqueEmail(adminClient, fName, lName);
 
     // Check for existing redemption (return login)
     const { data: existingRedemption } = await adminClient
