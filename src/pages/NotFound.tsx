@@ -6,7 +6,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const NotFound = () => {
   const location = useLocation();
-  useDocumentTitle("Page Not Found - Masashi LMS");
+  useDocumentTitle("Page Not Found - MasashiLearn");
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);

@@ -47,7 +47,7 @@ export default function Privacy() {
           <section className="mb-10">
             <h2 className="font-serif text-2xl font-bold text-foreground mb-4">1. Introduction</h2>
             <p className="text-muted-foreground mb-4">
-              Welcome to Masashi LMS. We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
+              Welcome to MasashiLearn. We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
             </p>
             <p className="text-muted-foreground">
               Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the platform.
@@ -136,7 +136,7 @@ export default function Privacy() {
               <li><strong>Opt-out:</strong> Opt out of marketing communications</li>
             </ul>
             <p className="text-muted-foreground mt-4">
-              To exercise these rights, please contact us at privacy@masashilms.com.
+              To exercise these rights, please contact us at privacy@masashilearn.com.
             </p>
           </section>
 
@@ -169,8 +169,8 @@ export default function Privacy() {
             <Card>
               <CardContent className="pt-6">
                 <p className="text-muted-foreground">
-                  <strong>Masashi LMS Privacy Team</strong><br />
-                  Email: privacy@masashilms.com<br />
+                  <strong>MasashiLearn Privacy Team</strong><br />
+                  Email: privacy@masashilearn.com<br />
                   Address: 123 Learning Street, San Francisco, CA 94102
                 </p>
               </CardContent>

@@ -43,7 +43,7 @@ import {
 } from '@/components/instructor';
 
 export default function InstructorDashboard() {
-  useDocumentTitle('Instructor Dashboard - Masashi LMS');
+  useDocumentTitle('Instructor Dashboard - MasashiLearn');
   const { user } = useAuthStore();
 
   // Fetch instructor's courses from database

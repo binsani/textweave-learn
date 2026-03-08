@@ -58,7 +58,7 @@ export default function ForgotPassword() {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
                 <BookOpen className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="font-serif text-2xl font-bold">Masashi LMS</span>
+              <span className="font-serif text-2xl font-bold">MasashiLearn</span>
             </Link>
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
               <CheckCircle className="h-6 w-6 text-primary" />
@@ -97,7 +97,7 @@ export default function ForgotPassword() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
               <BookOpen className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-serif text-2xl font-bold">Masashi LMS</span>
+            <span className="font-serif text-2xl font-bold">MasashiLearn</span>
           </Link>
           <CardTitle className="font-serif text-2xl">Forgot password?</CardTitle>
           <CardDescription>

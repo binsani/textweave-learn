@@ -26,7 +26,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function AdminDashboard() {
-  useDocumentTitle('Admin Dashboard - Masashi LMS');
+  useDocumentTitle('Admin Dashboard - MasashiLearn');
 
   const { data: coursesData = [] } = useQuery({
     queryKey: ['admin-courses'],

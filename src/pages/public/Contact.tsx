@@ -22,7 +22,7 @@ const contactMethods = [
     icon: Mail,
     title: 'Email Us',
     description: 'Get in touch via email',
-    value: 'support@masashilms.com',
+    value: 'support@masashilearn.com',
   },
   {
     icon: Phone,
@@ -66,7 +66,7 @@ const faqItems = [
 ];
 
 export default function Contact() {
-  useDocumentTitle('Contact - Masashi LMS');
+  useDocumentTitle('Contact - MasashiLearn');
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({

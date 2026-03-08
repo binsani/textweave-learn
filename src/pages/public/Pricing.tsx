@@ -105,7 +105,7 @@ const comparisonFeatures = [
 ];
 
 export default function Pricing() {
-  useDocumentTitle('Pricing - Masashi LMS');
+  useDocumentTitle('Pricing - MasashiLearn');
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -271,7 +271,7 @@ export default function Pricing() {
             Ready to Start Learning?
           </h2>
           <p className="mx-auto mb-8 max-w-xl text-muted-foreground">
-            Join thousands of learners who have transformed their careers with Masashi LMS.
+            Join thousands of learners who have transformed their careers with MasashiLearn.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>

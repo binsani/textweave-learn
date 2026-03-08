@@ -67,7 +67,7 @@ export default function CertificateVerify() {
             Certificate Verification
           </h1>
           <p className="text-muted-foreground">
-            Verify the authenticity of a certificate issued by Masashi LMS
+            Verify the authenticity of a certificate issued by MasashiLearn
           </p>
         </div>
 

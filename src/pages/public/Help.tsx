@@ -108,7 +108,7 @@ const supportChannels = [
 ];
 
 export default function Help() {
-  useDocumentTitle('Help Center - Masashi LMS');
+  useDocumentTitle('Help Center - MasashiLearn');
   const [searchQuery, setSearchQuery] = useState('');
   
   const filteredCategories = faqCategories.map(category => ({

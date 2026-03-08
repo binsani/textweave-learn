@@ -12,7 +12,7 @@ import { usePublishedCourses, dbCourseToCardProps } from '@/hooks/useCourses';
 import { useMemo } from 'react';
 
 export default function StudentDashboard() {
-  useDocumentTitle('Dashboard - Masashi LMS');
+  useDocumentTitle('Dashboard - MasashiLearn');
   const { user } = useAuthStore();
   const { data: enrolledCourses = [], isLoading: enrollLoading } = useEnrolledCourses();
   const { data: progressMap = {} } = useCourseProgress();

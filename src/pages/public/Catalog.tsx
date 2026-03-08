@@ -67,7 +67,7 @@ const sortOptions = [
 const COURSES_PER_PAGE = 9;
 
 export default function Catalog() {
-  useDocumentTitle('Course Catalog - Masashi LMS');
+  useDocumentTitle('Course Catalog - MasashiLearn');
   const { data: dbCourses = [], isLoading } = usePublishedCourses();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');

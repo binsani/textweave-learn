@@ -168,7 +168,7 @@ export default function Instructors() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center mb-12">
-            <h2 className="mb-4 text-3xl font-bold font-serif">Why Teach on Masashi LMS?</h2>
+            <h2 className="mb-4 text-3xl font-bold font-serif">Why Teach on MasashiLearn?</h2>
             <p className="text-muted-foreground">
               Join a platform that puts instructors first. We provide the tools, 
               support, and audience you need to succeed.
@@ -495,7 +495,7 @@ export default function Instructors() {
           </h2>
           <p className="mx-auto mb-8 max-w-xl text-muted-foreground">
             Join thousands of instructors who are sharing their knowledge and 
-            earning income on Masashi LMS.
+            earning income on MasashiLearn.
           </p>
           <Button size="lg" asChild>
             <a href="#apply">Start Your Application</a>

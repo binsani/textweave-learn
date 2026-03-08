@@ -75,8 +75,8 @@ const blogPosts = [
     id: 6,
     title: 'New Feature: Interactive Code Playgrounds',
     excerpt: 'We\'re excited to announce our new interactive coding environments for hands-on practice.',
-    author: 'Masashi Team',
-    authorAvatar: 'MT',
+    author: 'MasashiLearn Team',
+    authorAvatar: 'ML',
     date: '2025-01-15',
     readTime: '3 min read',
     category: 'Platform Updates',
@@ -86,7 +86,7 @@ const blogPosts = [
 ];
 
 export default function Blog() {
-  useDocumentTitle('Blog - Masashi LMS');
+  useDocumentTitle('Blog - MasashiLearn');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -107,7 +107,7 @@ export default function Blog() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Masashi LMS Blog
+              MasashiLearn Blog
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Insights, tips, and stories from our community of learners and educators.

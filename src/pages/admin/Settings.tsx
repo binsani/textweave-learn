@@ -72,9 +72,9 @@ export default function AdminSettings() {
   const form = useForm<GeneralFormValues>({
     resolver: zodResolver(generalSchema),
     defaultValues: {
-      siteName: 'Masashi LMS',
+      siteName: 'MasashiLearn',
       siteDescription: 'A comprehensive learning management system for modern education',
-      supportEmail: 'support@masashilms.com',
+      supportEmail: 'support@masashilearn.com',
       timezone: 'America/Los_Angeles',
       language: 'en',
     },
@@ -379,11 +379,11 @@ export default function AdminSettings() {
               </div>
               <div>
                 <Label htmlFor="from-email">From Email</Label>
-                <Input id="from-email" defaultValue="noreply@masashilms.com" className="mt-2" />
+                <Input id="from-email" defaultValue="noreply@masashilearn.com" className="mt-2" />
               </div>
               <div>
                 <Label htmlFor="from-name">From Name</Label>
-                <Input id="from-name" defaultValue="Masashi LMS" className="mt-2" />
+                <Input id="from-name" defaultValue="MasashiLearn" className="mt-2" />
               </div>
               <Separator />
               <Button variant="outline">

@@ -40,7 +40,7 @@ export function PublicLayout() {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
                 <BookOpen className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="font-serif text-xl font-bold text-foreground">Masashi LMS</span>
+              <span className="font-serif text-xl font-bold text-foreground">MasashiLearn</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -140,7 +140,7 @@ export function PublicLayout() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                   <BookOpen className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <span className="font-serif text-lg font-bold">Masashi LMS</span>
+                <span className="font-serif text-lg font-bold">MasashiLearn</span>
               </Link>
               <p className="text-sm text-muted-foreground">
                 A text-first learning platform designed for deep understanding and academic excellence.
@@ -178,7 +178,7 @@ export function PublicLayout() {
 
           <div className="mt-8 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Masashi LMS. All rights reserved.
+              © {new Date().getFullYear()} MasashiLearn. All rights reserved.
             </p>
             <p className="text-sm text-muted-foreground">
               Made for learners, by learners.

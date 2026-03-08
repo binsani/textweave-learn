@@ -1,6 +1,6 @@
 {
-  "name": "Masashi LMS",
-  "short_name": "Masashi",
+  "name": "MasashiLearn",
+  "short_name": "MasashiLearn",
   "description": "A text-first learning platform designed for deep understanding and academic excellence.",
   "start_url": "/",
   "display": "standalone",

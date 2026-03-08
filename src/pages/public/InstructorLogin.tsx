@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 export default function InstructorLogin() {
-  useDocumentTitle('Instructor Login - Masashi LMS');
+  useDocumentTitle('Instructor Login - MasashiLearn');
   const navigate = useNavigate();
   const { login } = useAuthStore();
   const { toast } = useToast();
