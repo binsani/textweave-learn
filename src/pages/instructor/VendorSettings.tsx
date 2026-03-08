@@ -85,6 +85,7 @@ export default function VendorSettings() {
           about_html: currentForm.about_html,
           primary_color: currentForm.primary_color,
           accent_color: currentForm.accent_color,
+          certificate_template: currentForm.certificate_template,
         })
         .eq('id', vendor.id);
       if (error) throw error;
