@@ -130,7 +130,7 @@ export default function VendorSettings() {
     }
 
     const publicUrl = getPublicUrl(path);
-    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : 'certificate_bg_url';
+    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : type === 'certificate_bg' ? 'certificate_bg_url' : 'certificate_signature_url';
 
     const { error: updateErr } = await supabase
       .from('vendors')
