@@ -69,6 +69,7 @@ export default function AdminSettings() {
   const [instructorSignup, setInstructorSignup] = useState(true);
   const [emailVerification, setEmailVerification] = useState(true);
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+  const [defaultCertTemplate, setDefaultCertTemplate] = useState('classic');
 
   const form = useForm<GeneralFormValues>({
     resolver: zodResolver(generalSchema),
