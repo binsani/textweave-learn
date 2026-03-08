@@ -183,10 +183,10 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                   className="text-2xl md:text-4xl tracking-widest"
                   style={{ color: template.titleColor, fontFamily: template.titleFont }}
                 >
-                  CERTIFICATE
+                  {t.heading}
                 </h1>
                 <p className="text-xs md:text-sm tracking-wider mt-2" style={{ color: template.textColor }}>
-                  OF COMPLETION
+                  {t.subheading}
                 </p>
               </div>
 
