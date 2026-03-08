@@ -8,11 +8,37 @@ const corsHeaders = {
 
 const DOMAIN = "masashilearn.com.ng";
 
-function buildEmail(firstName: string, lastName: string): string {
+function buildBaseEmail(firstName: string, lastName: string): string {
   const f = firstName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
   const l = lastName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
   if (!f) return "";
-  return l ? `${f}.${l}@${DOMAIN}` : `${f}@${DOMAIN}`;
+  return l ? `${f}.${l}` : f;
+}
+
+async function findUniqueEmail(adminClient: any, firstName: string, lastName: string): Promise<string> {
+  const base = buildBaseEmail(firstName, lastName);
+  if (!base) return "";
+
+  // Try base email first
+  let candidate = `${base}@${DOMAIN}`;
+  const { count } = await adminClient
+    .from("purchase_code_redemptions")
+    .select("id", { count: "exact", head: true })
+    .eq("generated_email", candidate);
+
+  if (!count || count === 0) return candidate;
+
+  // Append incrementing number until unique
+  let i = 2;
+  while (true) {
+    candidate = `${base}${i}@${DOMAIN}`;
+    const { count: c } = await adminClient
+      .from("purchase_code_redemptions")
+      .select("id", { count: "exact", head: true })
+      .eq("generated_email", candidate);
+    if (!c || c === 0) return candidate;
+    i++;
+  }
 }
 
 function buildPassword(code: string): string {
