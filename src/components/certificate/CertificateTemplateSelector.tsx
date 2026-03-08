@@ -1,5 +1,8 @@
-import { Check, Award } from 'lucide-react';
+import { useRef } from 'react';
+import { Check, Award, Upload, Trash2, Loader2, ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { CERTIFICATE_TEMPLATES, getTemplate, type CertificateTemplate } from './certificateTemplates';
@@ -8,6 +11,10 @@ import { format } from 'date-fns';
 interface CertificateTemplateSelectorProps {
   value: string;
   onChange: (templateId: string) => void;
+  customBgUrl?: string;
+  onBgUpload?: (file: File) => void;
+  onBgRemove?: () => void;
+  bgUploading?: boolean;
 }
 
 function TemplateThumb({ template, selected }: { template: CertificateTemplate; selected: boolean }) {
