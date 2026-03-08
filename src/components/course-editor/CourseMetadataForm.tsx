@@ -41,6 +41,7 @@ const courseFormSchema = z.object({
   price: z.number().min(0, 'Price must be positive'),
   isFree: z.boolean(),
   thumbnail: z.string().optional(),
+  vendorId: z.string().optional(),
   learningObjectives: z.array(z.string()).min(1, 'Add at least one learning objective'),
   requirements: z.array(z.string()),
   tags: z.array(z.string()),
@@ -49,7 +50,7 @@ const courseFormSchema = z.object({
 type CourseFormData = z.infer<typeof courseFormSchema>;
 
 interface CourseMetadataFormProps {
-  initialData?: Partial<CourseFormData> & { thumbnail?: string };
+  initialData?: Partial<CourseFormData> & { thumbnail?: string; vendorId?: string };
   onSave: (data: CourseFormData) => void;
 }
 
