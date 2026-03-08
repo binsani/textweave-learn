@@ -133,8 +133,8 @@ export default function AdminSettings() {
   } : undefined;
 
   const filteredSchools = (instructorCertData ?? []).filter(v => {
-    if (vendorDialogFilter === 'defaults') return !v.isCustom;
-    if (vendorDialogFilter === 'custom') return v.isCustom;
+    if (schoolDialogFilter === 'defaults') return !v.isCustom;
+    if (schoolDialogFilter === 'custom') return v.isCustom;
     return true;
   });
 
