@@ -144,7 +144,7 @@ export default function VendorSettings() {
     }
 
     queryClient.invalidateQueries({ queryKey: ['my-vendor-settings'] });
-    const label = type === 'logo' ? 'Logo' : type === 'banner' ? 'Banner' : 'Certificate background';
+    const label = type === 'logo' ? 'Logo' : type === 'banner' ? 'Banner' : type === 'certificate_bg' ? 'Certificate background' : 'Signature';
     toast({ title: `${label} updated!` });
   };
 
