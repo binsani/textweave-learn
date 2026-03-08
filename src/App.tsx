@@ -143,6 +143,7 @@ const App = () => (
                   <Route path="students" element={<InstructorStudents />} />
                   <Route path="settings" element={<InstructorSettings />} />
                   <Route path="vendor" element={<VendorApplication />} />
+                  <Route path="vendor/settings" element={<VendorSettings />} />
                 </Route>
               </Route>
 
