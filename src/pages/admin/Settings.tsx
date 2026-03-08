@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { CertificateTemplateSelector } from '@/components/certificate/CertificateTemplateSelector';
+import { useState, useRef } from 'react';
+import { CertificateTemplateSelector, type CertificateCustomText } from '@/components/certificate/CertificateTemplateSelector';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,7 +13,8 @@ import {
   Save,
   RefreshCw,
   AlertTriangle,
-  Mail
+  Mail,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,6 +72,41 @@ export default function AdminSettings() {
   const [emailVerification, setEmailVerification] = useState(true);
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [defaultCertTemplate, setDefaultCertTemplate] = useState('classic');
+  const [adminCertBgUrl, setAdminCertBgUrl] = useState<string | undefined>(undefined);
+  const [adminCertBgUploading, setAdminCertBgUploading] = useState(false);
+  const [adminCertText, setAdminCertText] = useState<CertificateCustomText>({});
+
+  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+  const handleAdminBgUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Please select an image file', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Image must be under 5MB', variant: 'destructive' });
+      return;
+    }
+    setAdminCertBgUploading(true);
+    const ext = file.name.split('.').pop() || 'png';
+    const path = `platform/certificate-bg.${ext}`;
+    const { error: uploadErr } = await supabase.storage
+      .from('vendor-assets')
+      .upload(path, file, { upsert: true, contentType: file.type });
+    setAdminCertBgUploading(false);
+    if (uploadErr) {
+      toast({ title: 'Upload failed', description: uploadErr.message, variant: 'destructive' });
+      return;
+    }
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/vendor-assets/${path}`;
+    setAdminCertBgUrl(publicUrl);
+    toast({ title: 'Certificate background uploaded!' });
+  };
+
+  const handleAdminBgRemove = () => {
+    setAdminCertBgUrl(undefined);
+    toast({ title: 'Certificate background removed' });
+  };
 
   const form = useForm<GeneralFormValues>({
     resolver: zodResolver(generalSchema),
@@ -272,6 +309,12 @@ export default function AdminSettings() {
           <CertificateTemplateSelector
             value={defaultCertTemplate}
             onChange={setDefaultCertTemplate}
+            customBgUrl={adminCertBgUrl}
+            onBgUpload={handleAdminBgUpload}
+            onBgRemove={handleAdminBgRemove}
+            bgUploading={adminCertBgUploading}
+            customText={adminCertText}
+            onCustomTextChange={setAdminCertText}
           />
           <div className="flex justify-end">
             <Button onClick={() => toast({ title: 'Default certificate template saved!' })}>
