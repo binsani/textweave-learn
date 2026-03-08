@@ -18,6 +18,7 @@ interface CertificateData {
   vendorName?: string;
   vendorLogo?: string;
   templateId?: string;
+  customBgUrl?: string;
 }
 
 interface CertificatePreviewProps {
