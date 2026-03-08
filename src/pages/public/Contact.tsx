@@ -28,7 +28,7 @@ const contactMethods = [
     icon: Phone,
     title: 'Call Us',
     description: 'Mon-Fri, 9am-6pm EST',
-    value: '+1 (555) 123-4567',
+    value: '+234 903 794 6881',
   },
   {
     icon: MapPin,
