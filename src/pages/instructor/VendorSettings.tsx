@@ -144,9 +144,9 @@ export default function VendorSettings() {
     toast({ title: `${type === 'logo' ? 'Logo' : 'Banner'} updated!` });
   };
 
-  const handleRemoveImage = async (type: 'logo' | 'banner') => {
+  const handleRemoveImage = async (type: 'logo' | 'banner' | 'certificate_bg') => {
     if (!vendor) return;
-    const column = type === 'logo' ? 'logo_url' : 'banner_url';
+    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : 'certificate_bg_url';
     const { error } = await supabase
       .from('vendors')
       .update({ [column]: null })
