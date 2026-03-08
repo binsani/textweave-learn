@@ -49,7 +49,7 @@ export default function VendorSettings() {
 
   const [form, setForm] = useState<Record<string, string>>({});
   const [certText, setCertText] = useState<CertificateCustomText | null>(null);
-  const [uploading, setUploading] = useState<'logo' | 'banner' | 'certificate_bg' | null>(null);
+  const [uploading, setUploading] = useState<'logo' | 'banner' | 'certificate_bg' | 'certificate_signature' | null>(null);
   const certBgInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize form from vendor data
@@ -103,7 +103,7 @@ export default function VendorSettings() {
     },
   });
 
-  const handleImageUpload = async (type: 'logo' | 'banner' | 'certificate_bg', file: File) => {
+  const handleImageUpload = async (type: 'logo' | 'banner' | 'certificate_bg' | 'certificate_signature', file: File) => {
     if (!vendor) return;
     if (!file.type.startsWith('image/')) {
       toast({ title: 'Please select an image file', variant: 'destructive' });
@@ -130,7 +130,7 @@ export default function VendorSettings() {
     }
 
     const publicUrl = getPublicUrl(path);
-    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : 'certificate_bg_url';
+    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : type === 'certificate_bg' ? 'certificate_bg_url' : 'certificate_signature_url';
 
     const { error: updateErr } = await supabase
       .from('vendors')
@@ -144,13 +144,13 @@ export default function VendorSettings() {
     }
 
     queryClient.invalidateQueries({ queryKey: ['my-vendor-settings'] });
-    const label = type === 'logo' ? 'Logo' : type === 'banner' ? 'Banner' : 'Certificate background';
+    const label = type === 'logo' ? 'Logo' : type === 'banner' ? 'Banner' : type === 'certificate_bg' ? 'Certificate background' : 'Signature';
     toast({ title: `${label} updated!` });
   };
 
-  const handleRemoveImage = async (type: 'logo' | 'banner' | 'certificate_bg') => {
+  const handleRemoveImage = async (type: 'logo' | 'banner' | 'certificate_bg' | 'certificate_signature') => {
     if (!vendor) return;
-    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : 'certificate_bg_url';
+    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : type === 'certificate_bg' ? 'certificate_bg_url' : 'certificate_signature_url';
     const { error } = await supabase
       .from('vendors')
       .update({ [column]: null })
@@ -161,7 +161,7 @@ export default function VendorSettings() {
       return;
     }
     queryClient.invalidateQueries({ queryKey: ['my-vendor-settings'] });
-    const label = type === 'logo' ? 'Logo' : type === 'banner' ? 'Banner' : 'Certificate background';
+    const label = type === 'logo' ? 'Logo' : type === 'banner' ? 'Banner' : type === 'certificate_bg' ? 'Certificate background' : 'Signature';
     toast({ title: `${label} removed` });
   };
 
@@ -477,6 +477,10 @@ export default function VendorSettings() {
         bgUploading={uploading === 'certificate_bg'}
         customText={certText ?? (vendor.certificate_custom_text as CertificateCustomText) ?? {}}
         onCustomTextChange={setCertText}
+        signatureUrl={vendor.certificate_signature_url || undefined}
+        onSignatureUpload={(file) => handleImageUpload('certificate_signature', file)}
+        onSignatureRemove={() => handleRemoveImage('certificate_signature')}
+        signatureUploading={uploading === 'certificate_signature'}
       />
 
       {/* Save */}

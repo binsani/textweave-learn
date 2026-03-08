@@ -41,6 +41,10 @@ interface CertificateTemplateSelectorProps {
   bgUploading?: boolean;
   customText?: CertificateCustomText;
   onCustomTextChange?: (text: CertificateCustomText) => void;
+  signatureUrl?: string;
+  onSignatureUpload?: (file: File) => void;
+  onSignatureRemove?: () => void;
+  signatureUploading?: boolean;
 }
 
 function TemplateThumb({ template, selected }: { template: CertificateTemplate; selected: boolean }) {
@@ -102,7 +106,7 @@ function TemplateThumb({ template, selected }: { template: CertificateTemplate; 
   );
 }
 
-function LivePreview({ templateId, customBgUrl, customText }: { templateId: string; customBgUrl?: string; customText?: CertificateCustomText }) {
+function LivePreview({ templateId, customBgUrl, customText, signatureUrl }: { templateId: string; customBgUrl?: string; customText?: CertificateCustomText; signatureUrl?: string }) {
   const template = getTemplate(templateId);
   const today = format(new Date(), 'MMMM d, yyyy');
   const t = { ...DEFAULT_CERT_TEXT, ...customText };
@@ -203,6 +207,9 @@ function LivePreview({ templateId, customBgUrl, customText }: { templateId: stri
             {/* Footer */}
             <div className="w-full flex justify-between px-2 sm:px-6 md:px-10">
               <div className="text-center">
+                {signatureUrl && (
+                  <img src={signatureUrl} alt="Signature" className="h-6 sm:h-8 md:h-10 mx-auto mb-1 object-contain" />
+                )}
                 <div className="w-20 sm:w-28 md:w-36 mb-1" style={{ borderTop: `1px solid ${template.accentColor}` }} />
                 <p className="text-[9px] sm:text-xs font-medium" style={{ color: template.titleColor }}>
                   John Smith
@@ -246,8 +253,13 @@ export function CertificateTemplateSelector({
   bgUploading,
   customText,
   onCustomTextChange,
+  signatureUrl,
+  onSignatureUpload,
+  onSignatureRemove,
+  signatureUploading,
 }: CertificateTemplateSelectorProps) {
   const bgInputRef = useRef<HTMLInputElement>(null);
+  const sigInputRef = useRef<HTMLInputElement>(null);
   const mergedText = { ...DEFAULT_CERT_TEXT, ...customText };
 
   const updateTextField = (key: keyof CertificateCustomText, val: string) => {
@@ -447,7 +459,68 @@ export function CertificateTemplateSelector({
           </>
         )}
 
-        <LivePreview templateId={value} customBgUrl={customBgUrl} customText={mergedText} />
+        {/* Signature Image Upload */}
+        {onSignatureUpload && (
+          <>
+            <Separator className="my-6" />
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                Signature Image
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Upload a signature image to display above the signer line on certificates.
+              </p>
+              <div className="flex items-center gap-4">
+                {signatureUrl ? (
+                  <div className="relative h-16 w-32 rounded-lg border border-border overflow-hidden bg-muted/20 flex items-center justify-center">
+                    <img src={signatureUrl} alt="Signature" className="max-h-full max-w-full object-contain" />
+                  </div>
+                ) : (
+                  <div className="h-16 w-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/30">
+                    <Type className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => sigInputRef.current?.click()}
+                      disabled={signatureUploading}
+                    >
+                      {signatureUploading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4 mr-2" />
+                      )}
+                      {signatureUrl ? 'Replace' : 'Upload'}
+                    </Button>
+                    {signatureUrl && onSignatureRemove && (
+                      <Button variant="ghost" size="sm" onClick={onSignatureRemove}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">PNG with transparent background recommended, max 5MB</p>
+                </div>
+                <input
+                  ref={sigInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) onSignatureUpload(file);
+                    e.target.value = '';
+                  }}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        <LivePreview templateId={value} customBgUrl={customBgUrl} customText={mergedText} signatureUrl={signatureUrl} />
       </CardContent>
     </Card>
   );

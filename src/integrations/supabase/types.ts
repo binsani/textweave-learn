@@ -622,6 +622,7 @@ export type Database = {
           banner_url: string | null
           certificate_bg_url: string | null
           certificate_custom_text: Json
+          certificate_signature_url: string | null
           certificate_template: string
           contact_email: string | null
           created_at: string
@@ -645,6 +646,7 @@ export type Database = {
           banner_url?: string | null
           certificate_bg_url?: string | null
           certificate_custom_text?: Json
+          certificate_signature_url?: string | null
           certificate_template?: string
           contact_email?: string | null
           created_at?: string
@@ -668,6 +670,7 @@ export type Database = {
           banner_url?: string | null
           certificate_bg_url?: string | null
           certificate_custom_text?: Json
+          certificate_signature_url?: string | null
           certificate_template?: string
           contact_email?: string | null
           created_at?: string
