@@ -139,28 +139,38 @@ export default function VendorStorefront() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map(course => {
               const instructor = course.instructor as any;
+              const instructorName = instructor ? [instructor.first_name, instructor.last_name].filter(Boolean).join(' ') : 'Instructor';
               const totalLessons = (course.sections ?? []).reduce(
                 (acc: number, s: any) => acc + (s.lessons?.length || 0), 0
               );
-              return (
-                <CourseCard
-                  key={course.id}
-                  id={course.id}
-                  title={course.title}
-                  description={course.short_description}
-                  thumbnail={course.thumbnail || undefined}
-                  instructor={instructor ? [instructor.first_name, instructor.last_name].filter(Boolean).join(' ') : 'Instructor'}
-                  category={course.category}
-                  level={course.level}
-                  rating={Number(course.rating)}
-                  reviewCount={course.review_count}
-                  enrolledCount={course.enrolled_count}
-                  totalLessons={totalLessons}
-                  estimatedHours={Number(course.estimated_hours)}
-                  price={Number(course.price)}
-                  isFree={course.is_free}
-                />
-              );
+              const mappedCourse = {
+                id: course.id,
+                title: course.title,
+                slug: course.slug,
+                description: course.description,
+                shortDescription: course.short_description,
+                thumbnail: course.thumbnail || undefined,
+                instructorId: course.instructor_id,
+                instructor: { id: course.instructor_id, email: '', name: instructorName, role: 'instructor' as const, createdAt: '' },
+                category: course.category as any,
+                tags: course.tags || [],
+                level: course.level as any,
+                status: course.status as any,
+                sections: [],
+                totalLessons,
+                totalDuration: 0,
+                enrolledCount: course.enrolled_count,
+                estimatedHours: Number(course.estimated_hours),
+                learningObjectives: course.learning_objectives || [],
+                requirements: course.requirements || [],
+                rating: Number(course.rating),
+                reviewCount: course.review_count,
+                price: Number(course.price),
+                isFree: course.is_free,
+                createdAt: course.created_at,
+                updatedAt: course.updated_at,
+              };
+              return <CourseCard key={course.id} course={mappedCourse} />;
             })}
           </div>
         )}
