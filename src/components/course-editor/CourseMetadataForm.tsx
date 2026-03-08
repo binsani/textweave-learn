@@ -41,7 +41,7 @@ const courseFormSchema = z.object({
   price: z.number().min(0, 'Price must be positive'),
   isFree: z.boolean(),
   thumbnail: z.string().optional(),
-  vendorId: z.string().optional(),
+  
   learningObjectives: z.array(z.string()).min(1, 'Add at least one learning objective'),
   requirements: z.array(z.string()),
   tags: z.array(z.string()),
