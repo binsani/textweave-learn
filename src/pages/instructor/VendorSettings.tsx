@@ -148,9 +148,9 @@ export default function VendorSettings() {
     toast({ title: `${label} updated!` });
   };
 
-  const handleRemoveImage = async (type: 'logo' | 'banner' | 'certificate_bg') => {
+  const handleRemoveImage = async (type: 'logo' | 'banner' | 'certificate_bg' | 'certificate_signature') => {
     if (!vendor) return;
-    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : 'certificate_bg_url';
+    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : type === 'certificate_bg' ? 'certificate_bg_url' : 'certificate_signature_url';
     const { error } = await supabase
       .from('vendors')
       .update({ [column]: null })
