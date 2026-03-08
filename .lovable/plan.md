@@ -1,40 +1,25 @@
 
 
-# Deploy-Readiness: Pending Tasks
+## Project Status
 
----
+### Completed (11 tasks)
+- Real Authentication (Supabase Auth)
+- Remove mockData.ts
+- Migrate pages off mock data
+- Progress/notes/bookmarks to DB
+- Certificates from DB
+- Database seeded (courses, sections, lessons)
+- Seed quiz data (7 quizzes, 20 questions)
+- Wire CertificateVerify to DB
+- Image fallbacks on CoursePreview/EnrollmentCard
+- Accessibility pass (aria-labels on layouts)
+- Environment cleanup
 
-## Completed
+### Still Pending
 
-| Task | Status |
-|------|--------|
-| Real Authentication (Supabase Auth) | ✅ Done |
-| Remove `mockData.ts` | ✅ Done |
-| Migrate pages off mock data | ✅ Done |
-| Progress/notes/bookmarks to DB | ✅ Done |
-| Certificates from DB | ✅ Done |
-| Database seeded (courses, sections, lessons) | ✅ Done |
-| Seed quiz data (7 quizzes, 20 questions) | ✅ Done |
-| Wire CertificateVerify to DB | ✅ Done |
-| Image fallbacks on CoursePreview/EnrollmentCard | ✅ Done |
-| Accessibility pass (aria-labels on layouts) | ✅ Done |
-| Environment cleanup | ✅ Done |
+**1. Rename "Masashi LMS" across the entire app** (High Priority)
+- ~269 occurrences of "Masashi" across ~30 files (page titles, component text, edge function password format, email domain, etc.)
+- Blocked on your decision: **What should the platform be called?**
 
----
+That is the only remaining task on the plan. Once you provide a name, the rename can be executed across all files including the edge function credentials format, email domain references, and UI text.
 
-## Still Pending
-
-### High Priority
-
-**1. Rename "Masashi LMS" across the entire app**
-- ~269 occurrences of "Masashi" across ~30 files.
-- Awaiting user's name choice.
-- Effort: Medium
-
----
-
-## Summary
-
-| # | Task | Priority | Status |
-|---|------|----------|--------|
-| 1 | Rename platform (choose name) | High | Pending — awaiting name choice |
