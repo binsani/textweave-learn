@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -97,8 +98,18 @@ export default function CourseEditor() {
 
   if (!isNewCourse && isLoading) return <PageLoader />;
 
-  const handleSaveDetails = (data: any) => {
+  const handleSaveDetails = async (data: any) => {
     setCourse({ ...course, ...data, updatedAt: new Date().toISOString() });
+
+    // Persist vendor_id to DB if editing existing course
+    if (!isNewCourse && courseId) {
+      const vendorId = data.vendorId || null;
+      await supabase
+        .from('courses')
+        .update({ vendor_id: vendorId })
+        .eq('id', courseId);
+    }
+
     toast.success('Course details saved');
   };
 
@@ -301,6 +312,7 @@ export default function CourseEditor() {
               learningObjectives: course.learningObjectives,
               requirements: course.requirements,
               tags: course.tags,
+              vendorId: (course as any).vendorId || '',
             }}
             onSave={handleSaveDetails}
           />

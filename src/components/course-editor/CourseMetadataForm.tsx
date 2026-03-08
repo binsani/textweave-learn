@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +28,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Store } from 'lucide-react';
 import { ImageUpload } from '@/components/ui/image-upload';
 import type { CourseCategory, CourseLevel } from '@/types';
 
@@ -38,6 +41,7 @@ const courseFormSchema = z.object({
   price: z.number().min(0, 'Price must be positive'),
   isFree: z.boolean(),
   thumbnail: z.string().optional(),
+  vendorId: z.string().optional(),
   learningObjectives: z.array(z.string()).min(1, 'Add at least one learning objective'),
   requirements: z.array(z.string()),
   tags: z.array(z.string()),
@@ -46,7 +50,7 @@ const courseFormSchema = z.object({
 type CourseFormData = z.infer<typeof courseFormSchema>;
 
 interface CourseMetadataFormProps {
-  initialData?: Partial<CourseFormData> & { thumbnail?: string };
+  initialData?: Partial<CourseFormData> & { thumbnail?: string; vendorId?: string };
   onSave: (data: CourseFormData) => void;
 }
 
@@ -70,9 +74,25 @@ const levels: { value: CourseLevel; label: string }[] = [
 ];
 
 export function CourseMetadataForm({ initialData, onSave }: CourseMetadataFormProps) {
+  const { user } = useAuthStore();
   const [newObjective, setNewObjective] = useState('');
   const [newRequirement, setNewRequirement] = useState('');
   const [newTag, setNewTag] = useState('');
+
+  // Fetch instructor's approved vendors
+  const { data: myVendors = [] } = useQuery({
+    queryKey: ['my-approved-vendors', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data } = await supabase
+        .from('vendors')
+        .select('id, name, slug, logo_url')
+        .eq('owner_id', user.id)
+        .eq('status', 'approved');
+      return data ?? [];
+    },
+    enabled: !!user,
+  });
 
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseFormSchema),
@@ -85,6 +105,7 @@ export function CourseMetadataForm({ initialData, onSave }: CourseMetadataFormPr
       price: initialData?.price || 0,
       isFree: initialData?.isFree ?? true,
       thumbnail: initialData?.thumbnail || '',
+      vendorId: initialData?.vendorId || '',
       learningObjectives: initialData?.learningObjectives || [],
       requirements: initialData?.requirements || [],
       tags: initialData?.tags || [],
@@ -275,6 +296,51 @@ export function CourseMetadataForm({ initialData, onSave }: CourseMetadataFormPr
             />
           </CardContent>
         </Card>
+
+        {/* School Assignment */}
+        {myVendors.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-serif flex items-center gap-2">
+                <Store className="h-5 w-5" />
+                School Assignment
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="vendorId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assign to School</FormLabel>
+                    <Select
+                      onValueChange={(val) => field.onChange(val === '__none__' ? '' : val)}
+                      defaultValue={field.value || '__none__'}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="No school (platform course)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="__none__">No school (platform course)</SelectItem>
+                        {myVendors.map((v) => (
+                          <SelectItem key={v.id} value={v.id}>
+                            {v.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Assign this course to your school so it appears on your school page (/school/{myVendors.find(v => v.id === field.value)?.slug || '...'})
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Pricing */}
         <Card>
