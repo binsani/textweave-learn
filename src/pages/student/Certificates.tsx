@@ -14,6 +14,8 @@ interface CertificateData {
   instructorName: string;
   completionDate: string;
   courseHours: number;
+  vendorName?: string;
+  vendorLogo?: string;
 }
 
 export default function StudentCertificates() {
