@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { CourseCard } from '@/components/course/CourseCard';
 import { BookOpen, Globe, Store, Users } from 'lucide-react';
 
-export default function VendorStorefront() {
+export default function SchoolStorefront() {
   const { slug } = useParams<{ slug: string }>();
 
   const { data: instructor, isLoading: instructorLoading } = useQuery({

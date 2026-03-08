@@ -26,7 +26,7 @@ const Contact = lazy(() => import("@/pages/public/Contact"));
 const Pricing = lazy(() => import("@/pages/public/Pricing"));
 const Instructors = lazy(() => import("@/pages/public/Instructors"));
 const CertificateVerify = lazy(() => import("@/pages/public/CertificateVerify"));
-const VendorStorefront = lazy(() => import("@/pages/public/VendorStorefront"));
+const SchoolStorefront = lazy(() => import("@/pages/public/SchoolStorefront"));
 const Help = lazy(() => import("@/pages/public/Help"));
 const Blog = lazy(() => import("@/pages/public/Blog"));
 const Community = lazy(() => import("@/pages/public/Community"));
@@ -52,7 +52,7 @@ const InstructorCourses = lazy(() => import("@/pages/instructor/Courses"));
 const InstructorAnalytics = lazy(() => import("@/pages/instructor/Analytics"));
 const InstructorStudents = lazy(() => import("@/pages/instructor/Students"));
 const InstructorSettings = lazy(() => import("@/pages/instructor/Settings"));
-const SchoolSettings = lazy(() => import("@/pages/instructor/VendorSettings"));
+const SchoolSettings = lazy(() => import("@/pages/instructor/SchoolSettings"));
 
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminUsers = lazy(() => import("@/pages/admin/Users"));
@@ -106,7 +106,7 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/cookies" element={<Cookies />} />
                 <Route path="/verify" element={<CertificateVerify />} />
-                <Route path="/school/:slug" element={<VendorStorefront />} />
+                <Route path="/school/:slug" element={<SchoolStorefront />} />
                 <Route path="/portal/secure-access-9x4k" element={<AdminLogin />} />
                 <Route path="/student/login" element={<StudentLogin />} />
                 <Route path="/instructor/login" element={<InstructorLogin />} />

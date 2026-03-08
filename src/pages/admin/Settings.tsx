@@ -100,8 +100,8 @@ export default function AdminSettings() {
   const [adminSignatureUploading, setAdminSignatureUploading] = useState(false);
   const [certSaving, setCertSaving] = useState(false);
   const [certLoading, setCertLoading] = useState(true);
-  const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
-  const [vendorDialogFilter, setVendorDialogFilter] = useState<'all' | 'defaults' | 'custom'>('all');
+  const [schoolDialogOpen, setSchoolDialogOpen] = useState(false);
+  const [schoolDialogFilter, setSchoolDialogFilter] = useState<'all' | 'defaults' | 'custom'>('all');
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
   // Fetch instructor certificate usage stats
@@ -133,8 +133,8 @@ export default function AdminSettings() {
   } : undefined;
 
   const filteredSchools = (instructorCertData ?? []).filter(v => {
-    if (vendorDialogFilter === 'defaults') return !v.isCustom;
-    if (vendorDialogFilter === 'custom') return v.isCustom;
+    if (schoolDialogFilter === 'defaults') return !v.isCustom;
+    if (schoolDialogFilter === 'custom') return v.isCustom;
     return true;
   });
 
@@ -455,21 +455,21 @@ export default function AdminSettings() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <button
                     className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
-                    onClick={() => { setVendorDialogFilter('all'); setVendorDialogOpen(true); }}
+                    onClick={() => { setSchoolDialogFilter('all'); setSchoolDialogOpen(true); }}
                   >
                     <p className="text-2xl font-bold text-foreground">{schoolStats.total}</p>
                     <p className="text-xs text-muted-foreground">Total Schools</p>
                   </button>
                   <button
                     className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
-                    onClick={() => { setVendorDialogFilter('defaults'); setVendorDialogOpen(true); }}
+                    onClick={() => { setSchoolDialogFilter('defaults'); setSchoolDialogOpen(true); }}
                   >
                     <p className="text-2xl font-bold text-primary">{schoolStats.usingDefaults}</p>
                     <p className="text-xs text-muted-foreground">Using Defaults</p>
                   </button>
                   <button
                     className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
-                    onClick={() => { setVendorDialogFilter('custom'); setVendorDialogOpen(true); }}
+                    onClick={() => { setSchoolDialogFilter('custom'); setSchoolDialogOpen(true); }}
                   >
                     <p className="text-2xl font-bold text-foreground">{schoolStats.custom}</p>
                     <p className="text-xs text-muted-foreground">Custom Design</p>
@@ -490,12 +490,12 @@ export default function AdminSettings() {
           )}
 
           {/* School Details Dialog */}
-          <Dialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen}>
+          <Dialog open={schoolDialogOpen} onOpenChange={setSchoolDialogOpen}>
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
-                  {vendorDialogFilter === 'defaults' ? 'Schools Using Platform Defaults' : vendorDialogFilter === 'custom' ? 'Schools with Custom Design' : 'All Schools'}
+                  {schoolDialogFilter === 'defaults' ? 'Schools Using Platform Defaults' : schoolDialogFilter === 'custom' ? 'Schools with Custom Design' : 'All Schools'}
                 </DialogTitle>
                 <DialogDescription>
                   {filteredSchools.length} school{filteredSchools.length !== 1 ? 's' : ''}
@@ -505,9 +505,9 @@ export default function AdminSettings() {
                 {(['all', 'defaults', 'custom'] as const).map(f => (
                   <Badge
                     key={f}
-                    variant={vendorDialogFilter === f ? 'default' : 'outline'}
+                    variant={schoolDialogFilter === f ? 'default' : 'outline'}
                     className="cursor-pointer"
-                    onClick={() => setVendorDialogFilter(f)}
+                    onClick={() => setSchoolDialogFilter(f)}
                   >
                     {f === 'all' ? 'All' : f === 'defaults' ? 'Defaults' : 'Custom'}
                   </Badge>

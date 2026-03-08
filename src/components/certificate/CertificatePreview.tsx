@@ -16,8 +16,8 @@ interface CertificateData {
   instructorName: string;
   completionDate: string;
   courseHours: number;
-  vendorName?: string;
-  vendorLogo?: string;
+  schoolName?: string;
+  schoolLogo?: string;
   templateId?: string;
   customBgUrl?: string;
   customText?: CertificateCustomText;
@@ -162,10 +162,10 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
             <div className="relative h-full flex flex-col items-center justify-between text-center">
               {/* Header */}
               <div>
-                {certificate.vendorLogo ? (
+                {certificate.schoolLogo ? (
                   <img
-                    src={certificate.vendorLogo}
-                    alt={certificate.vendorName}
+                    src={certificate.schoolLogo}
+                    alt={certificate.schoolName}
                     className="h-12 w-12 md:h-16 md:w-16 mx-auto rounded-lg object-cover mb-3"
                     onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
@@ -175,9 +175,9 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                     style={{ color: template.accentColor }}
                   />
                 )}
-                {certificate.vendorName && (
+                {certificate.schoolName && (
                   <p className="text-xs md:text-sm font-semibold mb-1" style={{ color: template.accentColor }}>
-                    {certificate.vendorName}
+                    {certificate.schoolName}
                   </p>
                 )}
                 <h1
@@ -244,7 +244,7 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                   <p className="text-xs" style={{ color: template.textColor }}>
                     Certificate ID: {certificate.id}
                   </p>
-                  {certificate.vendorName && (
+                  {certificate.schoolName && (
                     <p className="text-[10px] mt-0.5" style={{ color: `${template.textColor}99` }}>
                       Powered by MasashiLearn
                     </p>

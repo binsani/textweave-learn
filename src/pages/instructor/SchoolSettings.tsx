@@ -20,10 +20,10 @@ import { toast } from '@/hooks/use-toast';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 function getPublicUrl(path: string) {
-  return `${SUPABASE_URL}/storage/v1/object/public/vendor-assets/${path}`;
+  return `${SUPABASE_URL}/storage/v1/object/public/school-assets/${path}`;
 }
 
-export default function VendorSettings() {
+export default function SchoolSettings() {
   useDocumentTitle('School Settings - MasashiLearn');
   const { user } = useAuthStore();
   const queryClient = useQueryClient();

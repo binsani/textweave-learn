@@ -15,8 +15,8 @@ interface CertificateData {
   instructorName: string;
   completionDate: string;
   courseHours: number;
-  vendorName?: string;
-  vendorLogo?: string;
+  schoolName?: string;
+  schoolLogo?: string;
   templateId?: string;
   customBgUrl?: string;
   customText?: CertificateCustomText;
@@ -92,8 +92,8 @@ export default function StudentCertificates() {
             instructorName,
             completionDate: completed.lastDate,
             courseHours: Number(course.estimated_hours),
-            vendorName: instructor?.school_name || undefined,
-            vendorLogo: instructor?.logo_url || undefined,
+            schoolName: instructor?.school_name || undefined,
+            schoolLogo: instructor?.logo_url || undefined,
             templateId: (hasSchoolTemplate ? instructor.certificate_template : null) || platformCert.template || 'classic',
             customBgUrl: instructor?.certificate_bg_url || platformCert.bg_url || undefined,
             customText: (hasSchoolText ? instructor.certificate_custom_text as CertificateCustomText : null) || (Object.keys(platformCert.custom_text ?? {}).length > 0 ? platformCert.custom_text : undefined),
