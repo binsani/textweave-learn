@@ -280,50 +280,6 @@ export function CourseMetadataForm({ initialData, onSave }: CourseMetadataFormPr
           </CardContent>
         </Card>
 
-        {/* School Assignment */}
-        {myVendors.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-serif flex items-center gap-2">
-                <Store className="h-5 w-5" />
-                School Assignment
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="vendorId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assign to School</FormLabel>
-                    <Select
-                      onValueChange={(val) => field.onChange(val === '__none__' ? '' : val)}
-                      defaultValue={field.value || '__none__'}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="No school (platform course)" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="__none__">No school (platform course)</SelectItem>
-                        {myVendors.map((v) => (
-                          <SelectItem key={v.id} value={v.id}>
-                            {v.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Assign this course to your school so it appears on your school page (/school/{myVendors.find(v => v.id === field.value)?.slug || '...'})
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-        )}
 
         {/* Pricing */}
         <Card>

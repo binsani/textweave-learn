@@ -302,7 +302,6 @@ export default function CourseEditor() {
               learningObjectives: course.learningObjectives,
               requirements: course.requirements,
               tags: course.tags,
-              vendorId: (course as any).vendorId || '',
             }}
             onSave={handleSaveDetails}
           />
