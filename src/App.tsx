@@ -52,6 +52,7 @@ const InstructorCourses = lazy(() => import("@/pages/instructor/Courses"));
 const InstructorAnalytics = lazy(() => import("@/pages/instructor/Analytics"));
 const InstructorStudents = lazy(() => import("@/pages/instructor/Students"));
 const InstructorSettings = lazy(() => import("@/pages/instructor/Settings"));
+const VendorApplication = lazy(() => import("@/pages/instructor/VendorApplication"));
 
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminUsers = lazy(() => import("@/pages/admin/Users"));
