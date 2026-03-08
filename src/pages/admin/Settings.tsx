@@ -505,9 +505,9 @@ export default function AdminSettings() {
                 {(['all', 'defaults', 'custom'] as const).map(f => (
                   <Badge
                     key={f}
-                    variant={vendorDialogFilter === f ? 'default' : 'outline'}
+                    variant={schoolDialogFilter === f ? 'default' : 'outline'}
                     className="cursor-pointer"
-                    onClick={() => setVendorDialogFilter(f)}
+                    onClick={() => setSchoolDialogFilter(f)}
                   >
                     {f === 'all' ? 'All' : f === 'defaults' ? 'Defaults' : 'Custom'}
                   </Badge>
