@@ -16,6 +16,8 @@ import {
   AlertTriangle,
   Mail,
   Loader2,
+  Building2,
+  PaintBucket,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
