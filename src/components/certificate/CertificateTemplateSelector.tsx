@@ -177,7 +177,7 @@ function LivePreview({ templateId, customBgUrl, customText }: { templateId: stri
             {/* Main content */}
             <div className="flex-1 flex flex-col justify-center py-2">
               <p className="text-[10px] sm:text-xs mb-1" style={{ color: template.textColor }}>
-                This is to certify that
+                {t.presentedTo}
               </p>
               <p
                 className="text-base sm:text-xl md:text-2xl italic my-2"
@@ -186,13 +186,18 @@ function LivePreview({ templateId, customBgUrl, customText }: { templateId: stri
                 Jane Doe
               </p>
               <p className="text-[10px] sm:text-xs leading-relaxed max-w-md mx-auto" style={{ color: template.textColor }}>
-                has successfully completed the course<br />
+                {t.bodyText}<br />
                 <span className="font-semibold" style={{ color: template.titleColor }}>
                   "Introduction to Web Development"
                 </span>
                 <br />
-                comprising 24 hours of instruction
+                {t.closingText?.replace('{hours}', '24')}
               </p>
+              {t.congratsMessage && (
+                <p className="text-[9px] sm:text-[10px] mt-2 italic max-w-sm mx-auto" style={{ color: template.accentColor }}>
+                  {t.congratsMessage}
+                </p>
+              )}
             </div>
 
             {/* Footer */}
