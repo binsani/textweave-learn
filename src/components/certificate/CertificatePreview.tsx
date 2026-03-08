@@ -223,14 +223,14 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                   <p className="text-xs md:text-sm font-medium" style={{ color: template.titleColor }}>
                     {certificate.instructorName}
                   </p>
-                  <p className="text-xs" style={{ color: template.textColor }}>Course Instructor</p>
+                  <p className="text-xs" style={{ color: template.textColor }}>{t.signerTitle}</p>
                 </div>
                 <div className="text-center">
                   <div className="w-32 md:w-48 mb-2" style={{ borderTop: `1px solid ${template.accentColor}` }} />
                   <p className="text-xs md:text-sm font-medium" style={{ color: template.titleColor }}>
                     {format(new Date(certificate.completionDate), 'MMMM d, yyyy')}
                   </p>
-                  <p className="text-xs" style={{ color: template.textColor }}>Date of Completion</p>
+                  <p className="text-xs" style={{ color: template.textColor }}>{t.footerLabel}</p>
                 </div>
               </div>
 
