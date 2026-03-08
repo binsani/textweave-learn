@@ -475,6 +475,8 @@ export default function VendorSettings() {
         onBgUpload={(file) => handleImageUpload('certificate_bg', file)}
         onBgRemove={() => handleRemoveImage('certificate_bg')}
         bgUploading={uploading === 'certificate_bg'}
+        customText={certText ?? (vendor.certificate_custom_text as CertificateCustomText) ?? {}}
+        onCustomTextChange={setCertText}
       />
 
       {/* Save */}
