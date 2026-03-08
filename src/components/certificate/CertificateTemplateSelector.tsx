@@ -76,9 +76,12 @@ function TemplateThumb({ template, selected }: { template: CertificateTemplate; 
   );
 }
 
-function LivePreview({ templateId }: { templateId: string }) {
+function LivePreview({ templateId, customBgUrl }: { templateId: string; customBgUrl?: string }) {
   const template = getTemplate(templateId);
   const today = format(new Date(), 'MMMM d, yyyy');
+  const bgStyle = customBgUrl
+    ? { backgroundImage: `url(${customBgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { background: template.bgGradient };
 
   return (
     <div className="mt-6">
