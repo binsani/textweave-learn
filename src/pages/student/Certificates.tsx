@@ -82,6 +82,7 @@ export default function StudentCertificates() {
           const instructorName = instructor
             ? [instructor.first_name, instructor.last_name].filter(Boolean).join(' ')
             : 'Instructor';
+          const vendor = course.vendor_id ? vendorMap[course.vendor_id] : null;
           certs.push({
             id: `CERT-${course.id.slice(0, 8).toUpperCase()}`,
             studentName: user.name,
@@ -89,6 +90,8 @@ export default function StudentCertificates() {
             instructorName,
             completionDate: completed.lastDate,
             courseHours: Number(course.estimated_hours),
+            vendorName: vendor?.name,
+            vendorLogo: vendor?.logo_url || undefined,
           });
         }
       }
