@@ -100,6 +100,8 @@ export default function AdminSettings() {
   const [adminSignatureUploading, setAdminSignatureUploading] = useState(false);
   const [certSaving, setCertSaving] = useState(false);
   const [certLoading, setCertLoading] = useState(true);
+  const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
+  const [vendorDialogFilter, setVendorDialogFilter] = useState<'all' | 'defaults' | 'custom'>('all');
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
   // Fetch instructor certificate usage stats
