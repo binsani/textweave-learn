@@ -48,7 +48,8 @@ export default function VendorSettings() {
   });
 
   const [form, setForm] = useState<Record<string, string>>({});
-  const [uploading, setUploading] = useState<'logo' | 'banner' | null>(null);
+  const [uploading, setUploading] = useState<'logo' | 'banner' | 'certificate_bg' | null>(null);
+  const certBgInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize form from vendor data
   const initForm = useCallback(() => {
@@ -99,7 +100,7 @@ export default function VendorSettings() {
     },
   });
 
-  const handleImageUpload = async (type: 'logo' | 'banner', file: File) => {
+  const handleImageUpload = async (type: 'logo' | 'banner' | 'certificate_bg', file: File) => {
     if (!vendor) return;
     if (!file.type.startsWith('image/')) {
       toast({ title: 'Please select an image file', variant: 'destructive' });
@@ -126,7 +127,7 @@ export default function VendorSettings() {
     }
 
     const publicUrl = getPublicUrl(path);
-    const column = type === 'logo' ? 'logo_url' : 'banner_url';
+    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : 'certificate_bg_url';
 
     const { error: updateErr } = await supabase
       .from('vendors')
@@ -140,12 +141,13 @@ export default function VendorSettings() {
     }
 
     queryClient.invalidateQueries({ queryKey: ['my-vendor-settings'] });
-    toast({ title: `${type === 'logo' ? 'Logo' : 'Banner'} updated!` });
+    const label = type === 'logo' ? 'Logo' : type === 'banner' ? 'Banner' : 'Certificate background';
+    toast({ title: `${label} updated!` });
   };
 
-  const handleRemoveImage = async (type: 'logo' | 'banner') => {
+  const handleRemoveImage = async (type: 'logo' | 'banner' | 'certificate_bg') => {
     if (!vendor) return;
-    const column = type === 'logo' ? 'logo_url' : 'banner_url';
+    const column = type === 'logo' ? 'logo_url' : type === 'banner' ? 'banner_url' : 'certificate_bg_url';
     const { error } = await supabase
       .from('vendors')
       .update({ [column]: null })
@@ -156,7 +158,8 @@ export default function VendorSettings() {
       return;
     }
     queryClient.invalidateQueries({ queryKey: ['my-vendor-settings'] });
-    toast({ title: `${type === 'logo' ? 'Logo' : 'Banner'} removed` });
+    const label = type === 'logo' ? 'Logo' : type === 'banner' ? 'Banner' : 'Certificate background';
+    toast({ title: `${label} removed` });
   };
 
   if (isLoading) {
@@ -465,6 +468,10 @@ export default function VendorSettings() {
       <CertificateTemplateSelector
         value={currentForm.certificate_template || 'classic'}
         onChange={(id) => updateField('certificate_template', id)}
+        customBgUrl={vendor.certificate_bg_url || undefined}
+        onBgUpload={(file) => handleImageUpload('certificate_bg', file)}
+        onBgRemove={() => handleRemoveImage('certificate_bg')}
+        bgUploading={uploading === 'certificate_bg'}
       />
 
       {/* Save */}

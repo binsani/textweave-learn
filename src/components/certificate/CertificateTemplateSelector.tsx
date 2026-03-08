@@ -1,5 +1,8 @@
-import { Check, Award } from 'lucide-react';
+import { useRef } from 'react';
+import { Check, Award, Upload, Trash2, Loader2, ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { CERTIFICATE_TEMPLATES, getTemplate, type CertificateTemplate } from './certificateTemplates';
@@ -8,6 +11,10 @@ import { format } from 'date-fns';
 interface CertificateTemplateSelectorProps {
   value: string;
   onChange: (templateId: string) => void;
+  customBgUrl?: string;
+  onBgUpload?: (file: File) => void;
+  onBgRemove?: () => void;
+  bgUploading?: boolean;
 }
 
 function TemplateThumb({ template, selected }: { template: CertificateTemplate; selected: boolean }) {
@@ -69,9 +76,12 @@ function TemplateThumb({ template, selected }: { template: CertificateTemplate; 
   );
 }
 
-function LivePreview({ templateId }: { templateId: string }) {
+function LivePreview({ templateId, customBgUrl }: { templateId: string; customBgUrl?: string }) {
   const template = getTemplate(templateId);
   const today = format(new Date(), 'MMMM d, yyyy');
+  const bgStyle = customBgUrl
+    ? { backgroundImage: `url(${customBgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { background: template.bgGradient };
 
   return (
     <div className="mt-6">
@@ -88,7 +98,7 @@ function LivePreview({ templateId }: { templateId: string }) {
           style={{
             aspectRatio: '1.414',
             border: template.borderStyle,
-            background: template.bgGradient,
+            ...bgStyle,
           }}
         >
           {/* Inner border */}
@@ -195,7 +205,16 @@ function LivePreview({ templateId }: { templateId: string }) {
   );
 }
 
-export function CertificateTemplateSelector({ value, onChange }: CertificateTemplateSelectorProps) {
+export function CertificateTemplateSelector({
+  value,
+  onChange,
+  customBgUrl,
+  onBgUpload,
+  onBgRemove,
+  bgUploading,
+}: CertificateTemplateSelectorProps) {
+  const bgInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <Card>
       <CardHeader>
@@ -216,7 +235,68 @@ export function CertificateTemplateSelector({ value, onChange }: CertificateTemp
           ))}
         </div>
 
-        <LivePreview templateId={value} />
+        {/* Custom Background Upload */}
+        {onBgUpload && (
+          <>
+            <Separator className="my-6" />
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                Custom Background Image
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Upload a custom background image that will replace the template gradient on your certificates.
+              </p>
+              <div className="flex items-center gap-4">
+                {customBgUrl ? (
+                  <div className="relative h-20 w-28 rounded-lg border border-border overflow-hidden">
+                    <img src={customBgUrl} alt="Certificate background" className="h-full w-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="h-20 w-28 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/30">
+                    <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => bgInputRef.current?.click()}
+                      disabled={bgUploading}
+                    >
+                      {bgUploading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4 mr-2" />
+                      )}
+                      {customBgUrl ? 'Replace' : 'Upload'}
+                    </Button>
+                    {customBgUrl && onBgRemove && (
+                      <Button variant="ghost" size="sm" onClick={onBgRemove}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Recommended: 1400×1000px, landscape, max 5MB</p>
+                </div>
+                <input
+                  ref={bgInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) onBgUpload(file);
+                    e.target.value = '';
+                  }}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        <LivePreview templateId={value} customBgUrl={customBgUrl} />
       </CardContent>
     </Card>
   );

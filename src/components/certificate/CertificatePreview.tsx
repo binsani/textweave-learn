@@ -18,6 +18,7 @@ interface CertificateData {
   vendorName?: string;
   vendorLogo?: string;
   templateId?: string;
+  customBgUrl?: string;
 }
 
 interface CertificatePreviewProps {
@@ -121,7 +122,9 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
             style={{
               aspectRatio: '1.414',
               border: template.borderStyle,
-              background: template.bgGradient,
+              ...(certificate.customBgUrl
+                ? { backgroundImage: `url(${certificate.customBgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                : { background: template.bgGradient }),
             }}
           >
             {/* Inner border */}
