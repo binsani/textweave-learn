@@ -49,7 +49,7 @@ export default function VendorSettings() {
 
   const [form, setForm] = useState<Record<string, string>>({});
   const [certText, setCertText] = useState<CertificateCustomText | null>(null);
-  const [uploading, setUploading] = useState<'logo' | 'banner' | 'certificate_bg' | null>(null);
+  const [uploading, setUploading] = useState<'logo' | 'banner' | 'certificate_bg' | 'certificate_signature' | null>(null);
   const certBgInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize form from vendor data
