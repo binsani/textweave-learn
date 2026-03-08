@@ -58,6 +58,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const generalSchema = z.object({
   siteName: z.string().min(2, 'Site name must be at least 2 characters'),
@@ -84,28 +100,42 @@ export default function AdminSettings() {
   const [adminSignatureUploading, setAdminSignatureUploading] = useState(false);
   const [certSaving, setCertSaving] = useState(false);
   const [certLoading, setCertLoading] = useState(true);
+  const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
+  const [vendorDialogFilter, setVendorDialogFilter] = useState<'all' | 'defaults' | 'custom'>('all');
 
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
   // Fetch vendor certificate usage stats
-  const { data: vendorStats } = useQuery({
+  const isVendorCustom = (v: { certificate_template: string; certificate_bg_url: string | null; certificate_signature_url: string | null; certificate_custom_text: unknown }) => {
+    const hasTemplate = v.certificate_template && v.certificate_template !== 'classic';
+    const hasBg = !!v.certificate_bg_url;
+    const hasSig = !!v.certificate_signature_url;
+    const hasText = v.certificate_custom_text && typeof v.certificate_custom_text === 'object' && Object.keys(v.certificate_custom_text as Record<string, unknown>).length > 0;
+    return !!(hasTemplate || hasBg || hasSig || hasText);
+  };
+
+  const { data: vendorCertData } = useQuery({
     queryKey: ['vendor-cert-stats'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vendors')
-        .select('id, certificate_template, certificate_bg_url, certificate_custom_text, certificate_signature_url')
+        .select('id, name, slug, certificate_template, certificate_bg_url, certificate_custom_text, certificate_signature_url')
         .eq('status', 'approved');
       if (error) throw error;
-      const total = data?.length ?? 0;
-      const custom = (data ?? []).filter(v => {
-        const hasTemplate = v.certificate_template && v.certificate_template !== 'classic';
-        const hasBg = !!v.certificate_bg_url;
-        const hasSig = !!v.certificate_signature_url;
-        const hasText = v.certificate_custom_text && typeof v.certificate_custom_text === 'object' && Object.keys(v.certificate_custom_text as Record<string, unknown>).length > 0;
-        return hasTemplate || hasBg || hasSig || hasText;
-      }).length;
-      return { total, custom, usingDefaults: total - custom };
+      return (data ?? []).map(v => ({ ...v, isCustom: isVendorCustom(v) }));
     },
+  });
+
+  const vendorStats = vendorCertData ? {
+    total: vendorCertData.length,
+    custom: vendorCertData.filter(v => v.isCustom).length,
+    usingDefaults: vendorCertData.filter(v => !v.isCustom).length,
+  } : undefined;
+
+  const filteredVendors = (vendorCertData ?? []).filter(v => {
+    if (vendorDialogFilter === 'defaults') return !v.isCustom;
+    if (vendorDialogFilter === 'custom') return v.isCustom;
+    return true;
   });
 
   // Load persisted certificate settings on mount
@@ -423,18 +453,27 @@ export default function AdminSettings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="rounded-lg border bg-muted/40 p-3">
+                  <button
+                    className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
+                    onClick={() => { setVendorDialogFilter('all'); setVendorDialogOpen(true); }}
+                  >
                     <p className="text-2xl font-bold text-foreground">{vendorStats.total}</p>
                     <p className="text-xs text-muted-foreground">Total Vendors</p>
-                  </div>
-                  <div className="rounded-lg border bg-muted/40 p-3">
+                  </button>
+                  <button
+                    className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
+                    onClick={() => { setVendorDialogFilter('defaults'); setVendorDialogOpen(true); }}
+                  >
                     <p className="text-2xl font-bold text-primary">{vendorStats.usingDefaults}</p>
                     <p className="text-xs text-muted-foreground">Using Defaults</p>
-                  </div>
-                  <div className="rounded-lg border bg-muted/40 p-3">
+                  </button>
+                  <button
+                    className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
+                    onClick={() => { setVendorDialogFilter('custom'); setVendorDialogOpen(true); }}
+                  >
                     <p className="text-2xl font-bold text-foreground">{vendorStats.custom}</p>
                     <p className="text-xs text-muted-foreground">Custom Design</p>
-                  </div>
+                  </button>
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs text-muted-foreground">
@@ -449,6 +488,61 @@ export default function AdminSettings() {
               </CardContent>
             </Card>
           )}
+
+          {/* Vendor Details Dialog */}
+          <Dialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  {vendorDialogFilter === 'defaults' ? 'Vendors Using Platform Defaults' : vendorDialogFilter === 'custom' ? 'Vendors with Custom Design' : 'All Vendors'}
+                </DialogTitle>
+                <DialogDescription>
+                  {filteredVendors.length} vendor{filteredVendors.length !== 1 ? 's' : ''}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex gap-2 mb-2">
+                {(['all', 'defaults', 'custom'] as const).map(f => (
+                  <Badge
+                    key={f}
+                    variant={vendorDialogFilter === f ? 'default' : 'outline'}
+                    className="cursor-pointer"
+                    onClick={() => setVendorDialogFilter(f)}
+                  >
+                    {f === 'all' ? 'All' : f === 'defaults' ? 'Defaults' : 'Custom'}
+                  </Badge>
+                ))}
+              </div>
+              <ScrollArea className="max-h-[400px]">
+                {filteredVendors.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">No vendors in this category</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Vendor</TableHead>
+                        <TableHead>Template</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredVendors.map(v => (
+                        <TableRow key={v.id}>
+                          <TableCell className="font-medium">{v.name}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs capitalize">{v.certificate_template}</TableCell>
+                          <TableCell>
+                            <Badge variant={v.isCustom ? 'secondary' : 'outline'} className="text-xs">
+                              {v.isCustom ? 'Custom' : 'Default'}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
           <CertificateTemplateSelector
             value={defaultCertTemplate}
             onChange={setDefaultCertTemplate}
