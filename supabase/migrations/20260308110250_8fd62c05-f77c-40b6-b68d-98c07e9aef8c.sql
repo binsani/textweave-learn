@@ -1,0 +1,1 @@
+ALTER TABLE public.vendors ADD COLUMN certificate_bg_url text DEFAULT NULL;
