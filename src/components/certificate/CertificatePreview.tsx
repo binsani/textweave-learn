@@ -244,7 +244,7 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                   <p className="text-xs" style={{ color: template.textColor }}>
                     Certificate ID: {certificate.id}
                   </p>
-                  {certificate.vendorName && (
+                  {certificate.schoolName && (
                     <p className="text-[10px] mt-0.5" style={{ color: `${template.textColor}99` }}>
                       Powered by MasashiLearn
                     </p>
