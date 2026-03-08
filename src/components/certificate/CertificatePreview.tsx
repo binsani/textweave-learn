@@ -162,10 +162,10 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
             <div className="relative h-full flex flex-col items-center justify-between text-center">
               {/* Header */}
               <div>
-                {certificate.vendorLogo ? (
+                {certificate.schoolLogo ? (
                   <img
-                    src={certificate.vendorLogo}
-                    alt={certificate.vendorName}
+                    src={certificate.schoolLogo}
+                    alt={certificate.schoolName}
                     className="h-12 w-12 md:h-16 md:w-16 mx-auto rounded-lg object-cover mb-3"
                     onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
@@ -175,9 +175,9 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                     style={{ color: template.accentColor }}
                   />
                 )}
-                {certificate.vendorName && (
+                {certificate.schoolName && (
                   <p className="text-xs md:text-sm font-semibold mb-1" style={{ color: template.accentColor }}>
-                    {certificate.vendorName}
+                    {certificate.schoolName}
                   </p>
                 )}
                 <h1
