@@ -99,6 +99,7 @@ export default function StudentCertificates() {
             templateId: vendor?.certificate_template || 'classic',
             customBgUrl: vendor?.certificate_bg_url || undefined,
             customText: (vendor?.certificate_custom_text as CertificateCustomText) || undefined,
+            signatureUrl: (vendor as any)?.certificate_signature_url || undefined,
           });
         }
       }
