@@ -1,10 +1,6 @@
+# Deploy-Readiness Plan — ✅ COMPLETE
 
-
-# Deploy-Readiness: Pending Tasks
-
----
-
-## Completed
+All tasks finished. Platform name confirmed as **MasashiLearn**.
 
 | Task | Status |
 |------|--------|
@@ -19,22 +15,4 @@
 | Image fallbacks on CoursePreview/EnrollmentCard | ✅ Done |
 | Accessibility pass (aria-labels on layouts) | ✅ Done |
 | Environment cleanup | ✅ Done |
-
----
-
-## Still Pending
-
-### High Priority
-
-**1. Rename "Masashi LMS" across the entire app**
-- ~269 occurrences of "Masashi" across ~30 files.
-- Awaiting user's name choice.
-- Effort: Medium
-
----
-
-## Summary
-
-| # | Task | Priority | Status |
-|---|------|----------|--------|
-| 1 | Rename platform (choose name) | High | Pending — awaiting name choice |
+| Platform naming (MasashiLearn) | ✅ Done |
