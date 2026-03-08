@@ -21,6 +21,7 @@ interface CertificateData {
   templateId?: string;
   customBgUrl?: string;
   customText?: CertificateCustomText;
+  signatureUrl?: string;
 }
 
 interface CertificatePreviewProps {
