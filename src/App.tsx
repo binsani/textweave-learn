@@ -54,6 +54,7 @@ const InstructorStudents = lazy(() => import("@/pages/instructor/Students"));
 const InstructorSettings = lazy(() => import("@/pages/instructor/Settings"));
 const VendorApplication = lazy(() => import("@/pages/instructor/VendorApplication"));
 const VendorSettings = lazy(() => import("@/pages/instructor/VendorSettings"));
+const VendorAnalytics = lazy(() => import("@/pages/instructor/VendorAnalytics"));
 
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminUsers = lazy(() => import("@/pages/admin/Users"));
@@ -144,6 +145,7 @@ const App = () => (
                   <Route path="settings" element={<InstructorSettings />} />
                   <Route path="vendor" element={<VendorApplication />} />
                   <Route path="vendor/settings" element={<VendorSettings />} />
+                  <Route path="vendor/analytics" element={<VendorAnalytics />} />
                 </Route>
               </Route>
 
