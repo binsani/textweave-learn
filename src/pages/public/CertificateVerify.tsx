@@ -1,53 +1,62 @@
 import { useSearchParams } from 'react-router-dom';
-import { Award, CheckCircle, XCircle, Calendar, Clock, User, BookOpen } from 'lucide-react';
+import { Award, CheckCircle, XCircle, Calendar, Clock, User, BookOpen, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
-// Mock certificate database for verification
-const certificateDatabase: Record<string, {
-  id: string;
+interface CertificateData {
   studentName: string;
   courseName: string;
   instructorName: string;
   completionDate: string;
   courseHours: number;
-  isValid: boolean;
-}> = {
-  'CERT-2024-001': {
-    id: 'CERT-2024-001',
-    studentName: 'Alex Thompson',
-    courseName: 'Python Programming Fundamentals',
-    instructorName: 'Dr. Sarah Mitchell',
-    completionDate: '2024-06-15T10:00:00Z',
-    courseHours: 15,
-    isValid: true,
-  },
-  'CERT-2024-002': {
-    id: 'CERT-2024-002',
-    studentName: 'Alex Thompson',
-    courseName: 'Data Science with Python',
-    instructorName: 'Prof. James Anderson',
-    completionDate: '2024-08-20T10:00:00Z',
-    courseHours: 24,
-    isValid: true,
-  },
-  'CERT-2024-003': {
-    id: 'CERT-2024-003',
-    studentName: 'Alex Thompson',
-    courseName: 'Machine Learning Essentials',
-    instructorName: 'Dr. Emily Chen',
-    completionDate: '2024-10-05T10:00:00Z',
-    courseHours: 30,
-    isValid: true,
-  },
-};
+}
+
+async function verifyCertificate(progressId: string): Promise<CertificateData | null> {
+  // Look up a completed course_progress entry by its ID
+  const { data, error } = await supabase
+    .from('course_progress')
+    .select(`
+      completed_at,
+      course:courses!course_progress_course_id_fkey (
+        title,
+        estimated_hours,
+        instructor:profiles!courses_instructor_id_fkey ( first_name, last_name )
+      ),
+      student:profiles!course_progress_user_id_fkey ( first_name, last_name )
+    `)
+    .eq('id', progressId)
+    .eq('is_completed', true)
+    .maybeSingle();
+
+  if (error || !data || !data.course || !data.student) return null;
+
+  const course = data.course as any;
+  const student = data.student as any;
+  const instructor = course.instructor as any;
+
+  return {
+    studentName: [student.first_name, student.last_name].filter(Boolean).join(' ') || 'Student',
+    courseName: course.title,
+    instructorName: instructor
+      ? [instructor.first_name, instructor.last_name].filter(Boolean).join(' ') || 'Instructor'
+      : 'Instructor',
+    completionDate: data.completed_at!,
+    courseHours: course.estimated_hours ?? 0,
+  };
+}
 
 export default function CertificateVerify() {
   const [searchParams] = useSearchParams();
   const certId = searchParams.get('id');
 
-  const certificate = certId ? certificateDatabase[certId] : null;
+  const { data: certificate, isLoading } = useQuery({
+    queryKey: ['certificate-verify', certId],
+    queryFn: () => verifyCertificate(certId!),
+    enabled: !!certId,
+  });
 
   return (
     <div className="min-h-screen bg-background py-12 px-4">
@@ -72,6 +81,14 @@ export default function CertificateVerify() {
               </p>
             </CardContent>
           </Card>
+        ) : isLoading ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Loader2 className="h-12 w-12 mx-auto text-primary mb-4 animate-spin" />
+              <h3 className="font-medium text-lg mb-2">Verifying Certificate...</h3>
+              <p className="text-muted-foreground">Please wait while we check the records.</p>
+            </CardContent>
+          </Card>
         ) : certificate ? (
           <Card className="border-2 border-green-500/20">
             <CardHeader className="text-center pb-2">
@@ -85,7 +102,7 @@ export default function CertificateVerify() {
               </Badge>
               <CardTitle className="text-xl">This certificate is authentic</CardTitle>
               <CardDescription>
-                Certificate ID: {certificate.id}
+                Certificate ID: {certId}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

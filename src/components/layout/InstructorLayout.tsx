@@ -102,6 +102,7 @@ export function InstructorLayout() {
           ) : (
             <button
               onClick={toggleLeftSidebar}
+              aria-label={isLeftSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
               className={cn(
                 'p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors',
                 !isLeftSidebarOpen && 'absolute -right-3 top-6 bg-card border border-border shadow-sm'
@@ -148,6 +149,7 @@ export function InstructorLayout() {
         <div className={cn('p-3', (sidebarOpen || isMobile) && 'border-t border-border')}>
           <button
             onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             className={cn(
               'flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
               'text-muted-foreground hover:text-foreground hover:bg-muted',
