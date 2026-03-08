@@ -449,6 +449,8 @@ export type Database = {
           is_active: boolean
           max_uses: number
           notes: string | null
+          student_first_name: string | null
+          student_last_name: string | null
           used_count: number
         }
         Insert: {
@@ -461,6 +463,8 @@ export type Database = {
           is_active?: boolean
           max_uses?: number
           notes?: string | null
+          student_first_name?: string | null
+          student_last_name?: string | null
           used_count?: number
         }
         Update: {
@@ -473,6 +477,8 @@ export type Database = {
           is_active?: boolean
           max_uses?: number
           notes?: string | null
+          student_first_name?: string | null
+          student_last_name?: string | null
           used_count?: number
         }
         Relationships: []
