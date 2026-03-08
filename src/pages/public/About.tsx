@@ -25,35 +25,6 @@ const values = [
   },
 ];
 
-const stats = [
-  { value: '50K+', label: 'Active Learners' },
-  { value: '500+', label: 'Expert Instructors' },
-  { value: '1,200+', label: 'Courses Available' },
-  { value: '95%', label: 'Completion Rate' },
-];
-
-const team = [
-  {
-    name: 'Dr. Sarah Chen',
-    role: 'Founder & CEO',
-    bio: 'Former professor with 15 years in educational technology.',
-  },
-  {
-    name: 'Marcus Johnson',
-    role: 'Head of Product',
-    bio: 'Previously led product at major EdTech companies.',
-  },
-  {
-    name: 'Elena Rodriguez',
-    role: 'Head of Content',
-    bio: 'Curriculum designer passionate about accessible learning.',
-  },
-  {
-    name: 'David Park',
-    role: 'CTO',
-    bio: 'Engineering leader focused on scalable learning platforms.',
-  },
-];
 
 export default function About() {
   useDocumentTitle('About - MasashiLearn');
