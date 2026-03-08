@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   CheckCircle, 
   XCircle, 
@@ -32,6 +32,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { dbCourseToCardProps, type DbCourse } from '@/hooks/useCourses';
 import type { CourseStatus } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 
 const statusColors: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -46,6 +47,8 @@ export function CourseApprovalList() {
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: allCourses = [], isLoading } = useQuery({
     queryKey: ['admin-all-courses'],
@@ -59,6 +62,23 @@ export function CourseApprovalList() {
     },
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ courseId, status }: { courseId: string; status: string }) => {
+      const updateData: Record<string, any> = { status };
+      if (status === 'published') {
+        updateData.published_at = new Date().toISOString();
+      }
+      const { error } = await supabase
+        .from('courses')
+        .update(updateData)
+        .eq('id', courseId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-all-courses'] });
+    },
+  });
+
   const filteredCourses = allCourses.filter(course => {
     if (statusFilter === 'all') return true;
     return course.status === statusFilter;
@@ -67,14 +87,35 @@ export function CourseApprovalList() {
   const pendingCount = allCourses.filter(c => c.status === 'pending_review').length;
 
   const handleApprove = (courseId: string) => {
-    // TODO: Update course status via Supabase
+    updateStatusMutation.mutate(
+      { courseId, status: 'published' },
+      {
+        onSuccess: () => {
+          toast({ title: 'Course approved', description: 'The course is now published.' });
+        },
+        onError: (error) => {
+          toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        },
+      }
+    );
   };
 
   const handleReject = () => {
-    // TODO: Update course status via Supabase
-    setRejectDialogOpen(false);
-    setRejectReason('');
-    setSelectedCourse(null);
+    if (!selectedCourse) return;
+    updateStatusMutation.mutate(
+      { courseId: selectedCourse, status: 'draft' },
+      {
+        onSuccess: () => {
+          toast({ title: 'Course rejected', description: 'The course has been sent back to draft.' });
+          setRejectDialogOpen(false);
+          setRejectReason('');
+          setSelectedCourse(null);
+        },
+        onError: (error) => {
+          toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        },
+      }
+    );
   };
 
   if (isLoading) {
@@ -164,6 +205,7 @@ export function CourseApprovalList() {
                           variant="outline" 
                           size="sm"
                           className="text-destructive hover:text-destructive"
+                          disabled={updateStatusMutation.isPending}
                           onClick={() => {
                             setSelectedCourse(course.id);
                             setRejectDialogOpen(true);
@@ -174,6 +216,7 @@ export function CourseApprovalList() {
                         </Button>
                         <Button 
                           size="sm"
+                          disabled={updateStatusMutation.isPending}
                           onClick={() => handleApprove(course.id)}
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
@@ -221,7 +264,7 @@ export function CourseApprovalList() {
             <Button 
               variant="destructive" 
               onClick={handleReject}
-              disabled={!rejectReason.trim()}
+              disabled={!rejectReason.trim() || updateStatusMutation.isPending}
             >
               <XCircle className="h-4 w-4 mr-2" />
               Reject Course
