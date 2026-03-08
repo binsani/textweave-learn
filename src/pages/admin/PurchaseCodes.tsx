@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Ticket, Plus, Copy, Trash2, Users, Calendar, BookOpen, Mail, Key } from 'lucide-react';
+import { Ticket, Plus, Copy, Trash2, Users, Calendar, BookOpen, Mail, Key, ClipboardList } from 'lucide-react';
 import { format } from 'date-fns';
 
 const DOMAIN = 'masashilearn.com.ng';
@@ -426,16 +426,30 @@ export default function PurchaseCodes() {
                           />
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => {
-                              if (confirm('Delete this purchase code?')) deleteMutation.mutate(pc.id);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Copy all credentials"
+                              onClick={() => {
+                                const text = `Purchase Code: ${pc.code}\nEmail: ${displayEmail || 'N/A'}\nPassword: ${password}`;
+                                copyToClipboard(text, 'All credentials');
+                              }}
+                            >
+                              <ClipboardList className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => {
+                                if (confirm('Delete this purchase code?')) deleteMutation.mutate(pc.id);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
