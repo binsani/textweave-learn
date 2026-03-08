@@ -26,6 +26,7 @@ const Contact = lazy(() => import("@/pages/public/Contact"));
 const Pricing = lazy(() => import("@/pages/public/Pricing"));
 const Instructors = lazy(() => import("@/pages/public/Instructors"));
 const CertificateVerify = lazy(() => import("@/pages/public/CertificateVerify"));
+const VendorStorefront = lazy(() => import("@/pages/public/VendorStorefront"));
 const Help = lazy(() => import("@/pages/public/Help"));
 const Blog = lazy(() => import("@/pages/public/Blog"));
 const Community = lazy(() => import("@/pages/public/Community"));
@@ -51,12 +52,14 @@ const InstructorCourses = lazy(() => import("@/pages/instructor/Courses"));
 const InstructorAnalytics = lazy(() => import("@/pages/instructor/Analytics"));
 const InstructorStudents = lazy(() => import("@/pages/instructor/Students"));
 const InstructorSettings = lazy(() => import("@/pages/instructor/Settings"));
+const VendorApplication = lazy(() => import("@/pages/instructor/VendorApplication"));
 
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminUsers = lazy(() => import("@/pages/admin/Users"));
 const AdminCourses = lazy(() => import("@/pages/admin/Courses"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/Analytics"));
 const AdminSettings = lazy(() => import("@/pages/admin/Settings"));
+const AdminVendors = lazy(() => import("@/pages/admin/Vendors"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -103,6 +106,7 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/cookies" element={<Cookies />} />
                 <Route path="/verify" element={<CertificateVerify />} />
+                <Route path="/school/:slug" element={<VendorStorefront />} />
                 <Route path="/portal/secure-access-9x4k" element={<AdminLogin />} />
                 <Route path="/student/login" element={<StudentLogin />} />
                 <Route path="/instructor/login" element={<InstructorLogin />} />
@@ -137,6 +141,7 @@ const App = () => (
                   <Route path="analytics" element={<InstructorAnalytics />} />
                   <Route path="students" element={<InstructorStudents />} />
                   <Route path="settings" element={<InstructorSettings />} />
+                  <Route path="vendor" element={<VendorApplication />} />
                 </Route>
               </Route>
 
@@ -148,6 +153,7 @@ const App = () => (
                   <Route path="courses" element={<AdminCourses />} />
                   <Route path="analytics" element={<AdminAnalytics />} />
                   <Route path="settings" element={<AdminSettings />} />
+                  <Route path="vendors" element={<AdminVendors />} />
                 </Route>
               </Route>
 

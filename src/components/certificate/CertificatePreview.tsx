@@ -14,6 +14,8 @@ interface CertificateData {
   instructorName: string;
   completionDate: string;
   courseHours: number;
+  vendorName?: string;
+  vendorLogo?: string;
 }
 
 interface CertificatePreviewProps {
@@ -151,7 +153,21 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
             <div className="relative h-full flex flex-col items-center justify-between text-center">
               {/* Header */}
               <div className="header">
-                <Award className="icon h-12 w-12 md:h-16 md:w-16 mx-auto text-primary mb-3" />
+                {certificate.vendorLogo ? (
+                  <img
+                    src={certificate.vendorLogo}
+                    alt={certificate.vendorName}
+                    className="h-12 w-12 md:h-16 md:w-16 mx-auto rounded-lg object-cover mb-3"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                ) : (
+                  <Award className="icon h-12 w-12 md:h-16 md:w-16 mx-auto text-primary mb-3" />
+                )}
+                {certificate.vendorName && (
+                  <p className="text-xs md:text-sm font-semibold text-primary mb-1">
+                    {certificate.vendorName}
+                  </p>
+                )}
                 <h1 className="title text-2xl md:text-4xl text-primary font-serif tracking-widest">
                   CERTIFICATE
                 </h1>
@@ -200,11 +216,18 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
                 </div>
               </div>
 
-              {/* Certificate ID and QR Code */}
+              {/* Certificate ID, QR Code, and Co-branding */}
               <div className="absolute bottom-2 left-0 right-0 flex items-end justify-between px-4">
-                <p className="cert-id text-xs text-muted-foreground">
-                  Certificate ID: {certificate.id}
-                </p>
+                <div>
+                  <p className="cert-id text-xs text-muted-foreground">
+                    Certificate ID: {certificate.id}
+                  </p>
+                  {certificate.vendorName && (
+                    <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                      Powered by MasashiLearn
+                    </p>
+                  )}
+                </div>
                 <div className="bg-white p-1 rounded shadow-sm">
                   <QRCodeSVG 
                     value={verificationUrl} 
