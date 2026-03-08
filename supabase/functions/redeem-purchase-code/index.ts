@@ -6,6 +6,19 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const DOMAIN = "masashilearn.com.ng";
+
+function buildEmail(firstName: string, lastName: string): string {
+  const f = firstName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+  const l = lastName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (!f) return "";
+  return l ? `${f}.${l}@${DOMAIN}` : `${f}@${DOMAIN}`;
+}
+
+function buildPassword(code: string): string {
+  return `Masashi_${code}!`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -55,6 +68,21 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Use name from purchase code record (set by admin at creation time)
+    const fName = purchaseCode.student_first_name || first_name?.trim() || "Student";
+    const lName = purchaseCode.student_last_name || last_name?.trim() || "";
+
+    // Build credentials using the name-based email format
+    const generatedEmail = buildEmail(fName, lName);
+    const generatedPassword = buildPassword(purchaseCode.code);
+
+    if (!generatedEmail) {
+      return new Response(JSON.stringify({ error: "Invalid student name on this purchase code" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Check for existing redemption (return login)
     const { data: existingRedemption } = await adminClient
       .from("purchase_code_redemptions")
@@ -62,8 +90,6 @@ Deno.serve(async (req) => {
       .eq("code_id", purchaseCode.id)
       .limit(1)
       .maybeSingle();
-
-    const generatedPassword = `pc_${purchaseCode.code}_${serviceRoleKey.slice(-12)}`;
 
     if (existingRedemption) {
       // Sign in as existing user
@@ -98,11 +124,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    // Generate a unique email for this purchase code user
-    const generatedEmail = `purchase-${purchaseCode.code.toLowerCase().replace(/[^a-z0-9]/g, "")}@platform.masashilearn.local`;
-    const fName = first_name?.trim() || "Student";
-    const lName = last_name?.trim() || "";
 
     // Create user via admin API
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
