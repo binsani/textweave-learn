@@ -6,6 +6,7 @@ import { CertificateCard, CertificatePreview } from '@/components/certificate';
 import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { CertificateCustomText } from '@/components/certificate/CertificateTemplateSelector';
 
 interface CertificateData {
   id: string;
