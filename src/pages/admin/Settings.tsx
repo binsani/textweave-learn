@@ -469,7 +469,7 @@ export default function AdminSettings() {
                   </button>
                   <button
                     className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
-                    onClick={() => { setVendorDialogFilter('custom'); setVendorDialogOpen(true); }}
+                    onClick={() => { setSchoolDialogFilter('custom'); setSchoolDialogOpen(true); }}
                   >
                     <p className="text-2xl font-bold text-foreground">{schoolStats.custom}</p>
                     <p className="text-xs text-muted-foreground">Custom Design</p>
