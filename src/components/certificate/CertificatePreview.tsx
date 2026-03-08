@@ -16,8 +16,8 @@ interface CertificateData {
   instructorName: string;
   completionDate: string;
   courseHours: number;
-  vendorName?: string;
-  vendorLogo?: string;
+  schoolName?: string;
+  schoolLogo?: string;
   templateId?: string;
   customBgUrl?: string;
   customText?: CertificateCustomText;
