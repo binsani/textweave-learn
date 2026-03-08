@@ -104,19 +104,21 @@ export default function StudentSettings() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  disabled
-                />
-                <p className="text-xs text-muted-foreground">
-                  Contact support to change your email address
-                </p>
-              </div>
+              {!isPurchaseCodeUser && (
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    disabled
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Contact support to change your email address
+                  </p>
+                </div>
+              )}
             </div>
 
             <Button onClick={handleSaveProfile}>Save Changes</Button>
