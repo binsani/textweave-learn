@@ -22,7 +22,7 @@ export default function Terms() {
         <Alert className="mb-8">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Please read these terms carefully before using Masashi LMS. By accessing or using our platform, you agree to be bound by these terms.
+            Please read these terms carefully before using MasashiLearn. By accessing or using our platform, you agree to be bound by these terms.
           </AlertDescription>
         </Alert>
 
@@ -31,7 +31,7 @@ export default function Terms() {
           <section className="mb-10">
             <h2 className="font-serif text-2xl font-bold text-foreground mb-4">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground mb-4">
-              By accessing and using Masashi LMS ("the Platform"), you accept and agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these terms, you must not access or use the Platform.
+              By accessing and using MasashiLearn ("the Platform"), you accept and agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these terms, you must not access or use the Platform.
             </p>
             <p className="text-muted-foreground">
               We reserve the right to modify these terms at any time. We will notify users of significant changes via email or through the Platform. Continued use after changes constitutes acceptance of the new terms.
@@ -128,7 +128,7 @@ export default function Terms() {
           <section className="mb-10">
             <h2 className="font-serif text-2xl font-bold text-foreground mb-4">7. Intellectual Property</h2>
             <p className="text-muted-foreground mb-4">
-              The Platform and its original content (excluding User Content) are owned by Masashi LMS and protected by copyright, trademark, and other intellectual property laws.
+              The Platform and its original content (excluding User Content) are owned by MasashiLearn and protected by copyright, trademark, and other intellectual property laws.
             </p>
             <p className="text-muted-foreground">
               Our trademarks and trade dress may not be used without our prior written permission. All third-party trademarks are the property of their respective owners.
@@ -161,7 +161,7 @@ export default function Terms() {
           <section className="mb-10">
             <h2 className="font-serif text-2xl font-bold text-foreground mb-4">10. Limitation of Liability</h2>
             <p className="text-muted-foreground">
-              TO THE MAXIMUM EXTENT PERMITTED BY LAW, MASASHI LMS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY. OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID TO US IN THE PAST 12 MONTHS.
+              TO THE MAXIMUM EXTENT PERMITTED BY LAW, MASASHILEARN SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY. OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID TO US IN THE PAST 12 MONTHS.
             </p>
           </section>
 
@@ -187,8 +187,8 @@ export default function Terms() {
             <Card>
               <CardContent className="pt-6">
                 <p className="text-muted-foreground">
-                  <strong>Masashi LMS Legal Team</strong><br />
-                  Email: legal@masashilms.com<br />
+                  <strong>MasashiLearn Legal Team</strong><br />
+                  Email: legal@masashilearn.com<br />
                   Address: 123 Learning Street, San Francisco, CA 94102
                 </p>
               </CardContent>

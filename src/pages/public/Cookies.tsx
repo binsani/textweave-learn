@@ -185,8 +185,8 @@ export default function Cookies() {
             <Card>
               <CardContent className="pt-6">
                 <p className="text-muted-foreground">
-                  <strong>Masashi LMS Privacy Team</strong><br />
-                  Email: privacy@masashilms.com<br />
+                  <strong>MasashiLearn Privacy Team</strong><br />
+                  Email: privacy@masashilearn.com<br />
                   Address: 123 Learning Street, San Francisco, CA 94102
                 </p>
               </CardContent>
