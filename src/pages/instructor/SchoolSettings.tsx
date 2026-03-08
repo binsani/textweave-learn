@@ -23,7 +23,7 @@ function getPublicUrl(path: string) {
   return `${SUPABASE_URL}/storage/v1/object/public/school-assets/${path}`;
 }
 
-export default function VendorSettings() {
+export default function SchoolSettings() {
   useDocumentTitle('School Settings - MasashiLearn');
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
