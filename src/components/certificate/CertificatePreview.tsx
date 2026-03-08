@@ -153,7 +153,21 @@ export function CertificatePreview({ open, onOpenChange, certificate }: Certific
             <div className="relative h-full flex flex-col items-center justify-between text-center">
               {/* Header */}
               <div className="header">
-                <Award className="icon h-12 w-12 md:h-16 md:w-16 mx-auto text-primary mb-3" />
+                {certificate.vendorLogo ? (
+                  <img
+                    src={certificate.vendorLogo}
+                    alt={certificate.vendorName}
+                    className="h-12 w-12 md:h-16 md:w-16 mx-auto rounded-lg object-cover mb-3"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                ) : (
+                  <Award className="icon h-12 w-12 md:h-16 md:w-16 mx-auto text-primary mb-3" />
+                )}
+                {certificate.vendorName && (
+                  <p className="text-xs md:text-sm font-semibold text-primary mb-1">
+                    {certificate.vendorName}
+                  </p>
+                )}
                 <h1 className="title text-2xl md:text-4xl text-primary font-serif tracking-widest">
                   CERTIFICATE
                 </h1>
