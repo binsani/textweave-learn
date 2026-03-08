@@ -77,8 +77,53 @@ export default function AdminSettings() {
   const [adminCertText, setAdminCertText] = useState<CertificateCustomText>({});
   const [adminSignatureUrl, setAdminSignatureUrl] = useState<string | undefined>(undefined);
   const [adminSignatureUploading, setAdminSignatureUploading] = useState(false);
+  const [certSaving, setCertSaving] = useState(false);
+  const [certLoading, setCertLoading] = useState(true);
 
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+  // Load persisted certificate settings on mount
+  useEffect(() => {
+    const loadCertConfig = async () => {
+      setCertLoading(true);
+      const { data, error } = await supabase
+        .from('platform_settings' as any)
+        .select('value')
+        .eq('key', 'certificate_config')
+        .single();
+      if (!error && data) {
+        const config = (data as any).value as Record<string, any>;
+        if (config.template) setDefaultCertTemplate(config.template);
+        if (config.bg_url) setAdminCertBgUrl(config.bg_url);
+        if (config.signature_url) setAdminSignatureUrl(config.signature_url);
+        if (config.custom_text && typeof config.custom_text === 'object') {
+          setAdminCertText(config.custom_text as CertificateCustomText);
+        }
+      }
+      setCertLoading(false);
+    };
+    loadCertConfig();
+  }, []);
+
+  const saveCertConfig = useCallback(async () => {
+    setCertSaving(true);
+    const value = {
+      template: defaultCertTemplate,
+      bg_url: adminCertBgUrl || null,
+      signature_url: adminSignatureUrl || null,
+      custom_text: adminCertText,
+    };
+    const { error } = await supabase
+      .from('platform_settings' as any)
+      .update({ value, updated_at: new Date().toISOString() } as any)
+      .eq('key', 'certificate_config');
+    setCertSaving(false);
+    if (error) {
+      toast({ title: 'Failed to save', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Certificate settings saved!' });
+    }
+  }, [defaultCertTemplate, adminCertBgUrl, adminSignatureUrl, adminCertText, toast]);
 
   const handleAdminBgUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
