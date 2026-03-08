@@ -309,6 +309,12 @@ export default function AdminSettings() {
           <CertificateTemplateSelector
             value={defaultCertTemplate}
             onChange={setDefaultCertTemplate}
+            customBgUrl={adminCertBgUrl}
+            onBgUpload={handleAdminBgUpload}
+            onBgRemove={handleAdminBgRemove}
+            bgUploading={adminCertBgUploading}
+            customText={adminCertText}
+            onCustomTextChange={setAdminCertText}
           />
           <div className="flex justify-end">
             <Button onClick={() => toast({ title: 'Default certificate template saved!' })}>
