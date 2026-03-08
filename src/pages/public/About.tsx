@@ -56,7 +56,7 @@ const team = [
 ];
 
 export default function About() {
-  useDocumentTitle('About - Masashi LMS');
+  useDocumentTitle('About - MasashiLearn');
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -65,7 +65,7 @@ export default function About() {
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
             <BookOpen className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h1 className="mb-4 text-4xl font-bold font-serif md:text-5xl">About Masashi LMS</h1>
+          <h1 className="mb-4 text-4xl font-bold font-serif md:text-5xl">About MasashiLearn</h1>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
             We're on a mission to transform how people learn—through thoughtful design, 
             expert instruction, and a commitment to deep understanding over superficial coverage.
@@ -79,7 +79,7 @@ export default function About() {
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-6 text-3xl font-bold font-serif">Our Mission</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Masashi LMS was founded on a simple belief: that learning should be transformative, 
+              MasashiLearn was founded on a simple belief: that learning should be transformative, 
               not transactional. In a world of quick fixes and surface-level content, we champion 
               the art of deep learning—the kind that changes how you think, not just what you know.
             </p>
@@ -158,7 +158,7 @@ export default function About() {
           <h2 className="mb-4 text-3xl font-bold font-serif">Join Our Learning Community</h2>
           <p className="mx-auto mb-8 max-w-xl text-muted-foreground">
             Whether you're looking to master a new skill, advance your career, or explore 
-            your curiosity, Masashi LMS is here to guide your journey.
+            your curiosity, MasashiLearn is here to guide your journey.
           </p>
         </div>
       </section>

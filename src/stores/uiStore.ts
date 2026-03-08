@@ -74,7 +74,7 @@ export const useUIStore = create<UIState>()(
       toggleDevMode: () => set({ devMode: !get().devMode }),
     }),
     {
-      name: 'masashi-ui',
+      name: 'masashilearn-ui',
       partialize: (state) => ({
         theme: state.theme,
         sidebarCollapsed: state.sidebarCollapsed,

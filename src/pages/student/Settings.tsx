@@ -123,7 +123,7 @@ export default function StudentSettings() {
               <Palette className="h-5 w-5" />
               Appearance
             </CardTitle>
-            <CardDescription>Customize how Masashi LMS looks</CardDescription>
+            <CardDescription>Customize how MasashiLearn looks</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">

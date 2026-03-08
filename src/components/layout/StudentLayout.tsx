@@ -86,7 +86,7 @@ export function StudentLayout() {
               <BookOpen className="h-5 w-5 text-primary-foreground" />
             </div>
             {(sidebarOpen || isMobile) && (
-              <span className="font-serif text-xl font-bold text-foreground">Masashi LMS</span>
+              <span className="font-serif text-xl font-bold text-foreground">MasashiLearn</span>
             )}
           </Link>
           

@@ -87,7 +87,7 @@ export function AdminLayout() {
             </div>
             {(sidebarOpen || isMobile) && (
               <div className="flex items-center gap-2">
-                <span className="font-serif text-xl font-bold text-foreground">Masashi LMS</span>
+                <span className="font-serif text-xl font-bold text-foreground">MasashiLearn</span>
                 <Badge variant="destructive" className="text-xs">Admin</Badge>
               </div>
             )}

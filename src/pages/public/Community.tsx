@@ -138,7 +138,7 @@ export default function Community() {
         <div className="container mx-auto px-4 text-center">
           <Badge variant="secondary" className="mb-4">Join 50,000+ learners</Badge>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Masashi LMS Community
+            MasashiLearn Community
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
             Connect with fellow learners, share your knowledge, ask questions, and grow together in our supportive community.

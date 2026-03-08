@@ -25,7 +25,7 @@ const features = [
 ];
 
 export default function Landing() {
-  useDocumentTitle('Masashi LMS - Text-First Learning Platform');
+  useDocumentTitle('MasashiLearn - Text-First Learning Platform');
   const { data: dbCourses, isLoading } = usePublishedCourses();
   const featuredCourses = useMemo(
     () => (dbCourses ?? []).slice(0, 3).map(dbCourseToCardProps),
@@ -56,7 +56,7 @@ export default function Landing() {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed animate-fade-up stagger-2">
-              Masashi LMS offers a distraction-free learning experience designed for deep comprehension. 
+              MasashiLearn offers a distraction-free learning experience designed for deep comprehension. 
               No videos, no fluff — just expertly crafted lessons that help you truly understand.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up stagger-3">
@@ -98,7 +98,7 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <Badge variant="outline" className="mb-4">Why Masashi LMS?</Badge>
+              <Badge variant="outline" className="mb-4">Why MasashiLearn?</Badge>
               <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-6">
                 Learning Through Reading Works Better
               </h2>

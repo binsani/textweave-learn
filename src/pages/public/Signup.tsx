@@ -61,7 +61,7 @@ export default function Signup() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
               <BookOpen className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-serif text-2xl font-bold">Masashi LMS</span>
+            <span className="font-serif text-2xl font-bold">MasashiLearn</span>
           </Link>
           <CardTitle className="font-serif text-2xl">Create your account</CardTitle>
           <CardDescription>Start your learning journey today</CardDescription>
