@@ -207,6 +207,9 @@ function LivePreview({ templateId, customBgUrl, customText, signatureUrl }: { te
             {/* Footer */}
             <div className="w-full flex justify-between px-2 sm:px-6 md:px-10">
               <div className="text-center">
+                {signatureUrl && (
+                  <img src={signatureUrl} alt="Signature" className="h-6 sm:h-8 md:h-10 mx-auto mb-1 object-contain" />
+                )}
                 <div className="w-20 sm:w-28 md:w-36 mb-1" style={{ borderTop: `1px solid ${template.accentColor}` }} />
                 <p className="text-[9px] sm:text-xs font-medium" style={{ color: template.titleColor }}>
                   John Smith
