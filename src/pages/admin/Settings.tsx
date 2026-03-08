@@ -462,7 +462,7 @@ export default function AdminSettings() {
                   </button>
                   <button
                     className="rounded-lg border bg-muted/40 p-3 hover:bg-muted/70 transition-colors cursor-pointer"
-                    onClick={() => { setVendorDialogFilter('defaults'); setVendorDialogOpen(true); }}
+                    onClick={() => { setSchoolDialogFilter('defaults'); setSchoolDialogOpen(true); }}
                   >
                     <p className="text-2xl font-bold text-primary">{schoolStats.usingDefaults}</p>
                     <p className="text-xs text-muted-foreground">Using Defaults</p>
