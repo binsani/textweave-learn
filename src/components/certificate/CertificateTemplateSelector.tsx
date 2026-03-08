@@ -253,8 +253,13 @@ export function CertificateTemplateSelector({
   bgUploading,
   customText,
   onCustomTextChange,
+  signatureUrl,
+  onSignatureUpload,
+  onSignatureRemove,
+  signatureUploading,
 }: CertificateTemplateSelectorProps) {
   const bgInputRef = useRef<HTMLInputElement>(null);
+  const sigInputRef = useRef<HTMLInputElement>(null);
   const mergedText = { ...DEFAULT_CERT_TEXT, ...customText };
 
   const updateTextField = (key: keyof CertificateCustomText, val: string) => {
