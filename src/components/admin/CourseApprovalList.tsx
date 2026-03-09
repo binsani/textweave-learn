@@ -63,10 +63,14 @@ export function CourseApprovalList() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ courseId, status }: { courseId: string; status: string }) => {
+    mutationFn: async ({ courseId, status, rejectionReason }: { courseId: string; status: string; rejectionReason?: string }) => {
       const updateData: Record<string, any> = { status };
       if (status === 'published') {
         updateData.published_at = new Date().toISOString();
+        updateData.rejection_reason = null;
+      }
+      if (status === 'draft' && rejectionReason) {
+        updateData.rejection_reason = rejectionReason;
       }
       const { error } = await supabase
         .from('courses')
