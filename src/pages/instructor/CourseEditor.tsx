@@ -24,7 +24,9 @@ import {
   Settings,
   BookOpen,
   Loader2,
+  AlertTriangle,
 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuthStore } from '@/stores/authStore';
 import { useCourseById, dbCourseToCardProps } from '@/hooks/useCourses';
 import {
