@@ -484,6 +484,20 @@ export default function CourseEditor() {
         {getStatusMessage()}
       </div>
 
+      {/* Rejection Feedback */}
+      {rejectionReason && course.status === 'draft' && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Course Rejected</AlertTitle>
+          <AlertDescription>
+            Your course was rejected by an admin. Please address the feedback below and resubmit for review.
+            <blockquote className="mt-2 border-l-2 border-destructive/50 pl-3 italic text-sm">
+              {rejectionReason}
+            </blockquote>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'details' | 'curriculum')}>
         <TabsList className="mb-6">
