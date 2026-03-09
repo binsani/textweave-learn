@@ -24,7 +24,9 @@ import {
   Settings,
   BookOpen,
   Loader2,
+  AlertTriangle,
 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuthStore } from '@/stores/authStore';
 import { useCourseById, dbCourseToCardProps } from '@/hooks/useCourses';
 import {
@@ -376,6 +378,8 @@ export default function CourseEditor() {
     }
   };
 
+  const rejectionReason = dbCourse?.rejection_reason;
+
   if (editorView === 'lesson' && editingLesson) {
     return (
       <div className="p-6 md:p-8 max-w-5xl mx-auto">
@@ -479,6 +483,20 @@ export default function CourseEditor() {
       <div className="mb-6 p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
         {getStatusMessage()}
       </div>
+
+      {/* Rejection Feedback */}
+      {rejectionReason && course.status === 'draft' && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Course Rejected</AlertTitle>
+          <AlertDescription>
+            Your course was rejected by an admin. Please address the feedback below and resubmit for review.
+            <blockquote className="mt-2 border-l-2 border-destructive/50 pl-3 italic text-sm">
+              {rejectionReason}
+            </blockquote>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'details' | 'curriculum')}>
