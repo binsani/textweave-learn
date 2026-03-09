@@ -26,7 +26,7 @@ export interface AuthState {
 }
 
 // Course Types
-export type CourseStatus = 'draft' | 'pending_review' | 'published' | 'archived' | 'under_review';
+export type CourseStatus = 'draft' | 'pending_review' | 'published' | 'archived';
 export type CourseLevel = 'beginner' | 'intermediate' | 'advanced';
 export type CourseCategory = 
   | 'programming'
