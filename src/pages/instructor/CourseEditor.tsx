@@ -378,6 +378,8 @@ export default function CourseEditor() {
     }
   };
 
+  const rejectionReason = dbCourse?.rejection_reason;
+
   if (editorView === 'lesson' && editingLesson) {
     return (
       <div className="p-6 md:p-8 max-w-5xl mx-auto">

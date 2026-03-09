@@ -107,7 +107,7 @@ export function CourseApprovalList() {
   const handleReject = () => {
     if (!selectedCourse) return;
     updateStatusMutation.mutate(
-      { courseId: selectedCourse, status: 'draft' },
+      { courseId: selectedCourse, status: 'draft', rejectionReason: rejectReason },
       {
         onSuccess: () => {
           toast({ title: 'Course rejected', description: 'The course has been sent back to draft.' });
