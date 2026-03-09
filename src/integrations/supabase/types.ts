@@ -130,6 +130,7 @@ export type Database = {
           price: number
           published_at: string | null
           rating: number
+          rejection_reason: string | null
           requirements: string[] | null
           review_count: number
           short_description: string
@@ -154,6 +155,7 @@ export type Database = {
           price?: number
           published_at?: string | null
           rating?: number
+          rejection_reason?: string | null
           requirements?: string[] | null
           review_count?: number
           short_description?: string
@@ -178,6 +180,7 @@ export type Database = {
           price?: number
           published_at?: string | null
           rating?: number
+          rejection_reason?: string | null
           requirements?: string[] | null
           review_count?: number
           short_description?: string
