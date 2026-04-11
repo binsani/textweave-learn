@@ -251,7 +251,7 @@ export default function AdminDashboard() {
                   'bg-destructive/10 text-destructive'
                 }`}>
                   {stat.changeType === 'up' && <ArrowUpRight className="h-3 w-3" />}
-                  {stat.changeType === 'down' && <ArrowDownRight className="h-3 w-3" />}
+                  {(stat.changeType as string) === 'down' && <ArrowDownRight className="h-3 w-3" />}
                   {stat.changeType === 'warning' && <Activity className="h-3 w-3" />}
                   {stat.change}
                 </div>
