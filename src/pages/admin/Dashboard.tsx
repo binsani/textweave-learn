@@ -24,6 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useMemo } from 'react';
 
 export default function AdminDashboard() {
   useDocumentTitle('Admin Dashboard - MasashiLearn');
@@ -31,7 +32,7 @@ export default function AdminDashboard() {
   const { data: coursesData = [] } = useQuery({
     queryKey: ['admin-courses'],
     queryFn: async () => {
-      const { data } = await supabase.from('courses').select('id, title, status, enrolled_count, rating, instructor_id');
+      const { data } = await supabase.from('courses').select('id, title, status, enrolled_count, rating, instructor_id, created_at');
       return data ?? [];
     },
   });
@@ -49,6 +50,27 @@ export default function AdminDashboard() {
       return data ?? [];
     },
   });
+  const { data: enrollmentsData = [] } = useQuery({
+    queryKey: ['admin-enrollments'],
+    queryFn: async () => {
+      const { data } = await supabase.from('enrollments').select('id, user_id, course_id, enrolled_at, status');
+      return data ?? [];
+    },
+  });
+  const { data: progressData = [] } = useQuery({
+    queryKey: ['admin-progress'],
+    queryFn: async () => {
+      const { data } = await supabase.from('course_progress').select('id, user_id, course_id, is_completed, completed_at, last_accessed_at');
+      return data ?? [];
+    },
+  });
+  const { data: reviewsData = [] } = useQuery({
+    queryKey: ['admin-reviews'],
+    queryFn: async () => {
+      const { data } = await supabase.from('reviews').select('id, rating');
+      return data ?? [];
+    },
+  });
 
   const getUserRole = (userId: string) => rolesData.find(r => r.user_id === userId)?.role || 'student';
 
@@ -58,13 +80,95 @@ export default function AdminDashboard() {
   const publishedCourses = coursesData.filter(c => c.status === 'published').length;
   const students = rolesData.filter(r => r.role === 'student').length;
   const instructors = rolesData.filter(r => r.role === 'instructor').length;
+  const totalEnrollments = enrollmentsData.length;
+
+  // Platform health calculations
+  const platformHealth = useMemo(() => {
+    const totalLessonsTracked = progressData.length;
+    const completedLessons = progressData.filter(p => p.is_completed).length;
+    const completionRate = totalLessonsTracked > 0 ? Math.round((completedLessons / totalLessonsTracked) * 100) : 0;
+
+    const avgRating = reviewsData.length > 0
+      ? (reviewsData.reduce((sum, r) => sum + r.rating, 0) / reviewsData.length).toFixed(1)
+      : '0.0';
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const activeThisWeek = new Set(
+      progressData
+        .filter(p => new Date(p.last_accessed_at) >= oneWeekAgo)
+        .map(p => p.user_id)
+    ).size;
+    const activeRate = totalUsers > 0 ? Math.round((activeThisWeek / totalUsers) * 100) : 0;
+
+    return { completionRate, avgRating, activeRate };
+  }, [progressData, reviewsData, totalUsers]);
+
+  // Recent activity from real data
+  const recentActivity = useMemo(() => {
+    type ActivityItem = { type: string; user: string; action: string; target: string; time: string; icon: typeof GraduationCap; timestamp: Date };
+    const items: ActivityItem[] = [];
+
+    // Recent enrollments
+    for (const e of enrollmentsData.slice(0, 20)) {
+      const profile = profilesData.find(p => p.id === e.user_id);
+      const course = coursesData.find(c => c.id === e.course_id);
+      if (profile && course) {
+        items.push({
+          type: 'enrollment',
+          user: [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.email,
+          action: 'enrolled in',
+          target: course.title,
+          time: '',
+          icon: GraduationCap,
+          timestamp: new Date(e.enrolled_at),
+        });
+      }
+    }
+
+    // Recent signups
+    for (const p of profilesData.slice(0, 20)) {
+      items.push({
+        type: 'signup',
+        user: [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email,
+        action: 'created an account',
+        target: '',
+        time: '',
+        icon: UserPlus,
+        timestamp: new Date(p.created_at),
+      });
+    }
+
+    // Recent course submissions
+    for (const c of coursesData.filter(c => c.status === 'pending_review' || c.status === 'published').slice(0, 10)) {
+      const instructor = profilesData.find(p => p.id === c.instructor_id);
+      if (instructor) {
+        items.push({
+          type: 'course',
+          user: [instructor.first_name, instructor.last_name].filter(Boolean).join(' ') || instructor.email,
+          action: c.status === 'published' ? 'published' : 'submitted',
+          target: c.title,
+          time: '',
+          icon: BookOpen,
+          timestamp: new Date(c.created_at),
+        });
+      }
+    }
+
+    // Sort by timestamp descending and take top 5
+    items.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return items.slice(0, 5).map(item => ({
+      ...item,
+      time: formatTimeAgo(item.timestamp),
+    }));
+  }, [enrollmentsData, profilesData, coursesData]);
 
   const stats = [
     {
       label: 'Total Users',
       value: totalUsers,
       icon: Users,
-      change: '+12%',
+      change: `${students} students`,
       changeType: 'up' as const,
       subtitle: `${students} students · ${instructors} instructors`,
     },
@@ -72,7 +176,7 @@ export default function AdminDashboard() {
       label: 'Active Courses',
       value: publishedCourses,
       icon: BookOpen,
-      change: '+3',
+      change: `${totalCourses} total`,
       changeType: 'up' as const,
       subtitle: `${totalCourses} total courses`,
     },
@@ -85,21 +189,13 @@ export default function AdminDashboard() {
       subtitle: 'Course submissions',
     },
     {
-      label: 'Open Reports',
-      value: 3,
-      icon: ShieldAlert,
-      change: '+2',
-      changeType: 'down' as const,
-      subtitle: 'Needs investigation',
+      label: 'Enrollments',
+      value: totalEnrollments,
+      icon: GraduationCap,
+      change: `${enrollmentsData.filter(e => e.status === 'active').length} active`,
+      changeType: 'up' as const,
+      subtitle: `${enrollmentsData.filter(e => e.status === 'completed').length} completed`,
     },
-  ];
-
-  const recentActivity = [
-    { type: 'enrollment', user: 'Alex Thompson', action: 'enrolled in', target: 'Python Fundamentals', time: '2 min ago', icon: GraduationCap },
-    { type: 'signup', user: 'Emma Wilson', action: 'created an account', target: '', time: '15 min ago', icon: UserPlus },
-    { type: 'course', user: 'Dr. Sarah Mitchell', action: 'submitted', target: 'Advanced Algorithms', time: '1 hr ago', icon: BookOpen },
-    { type: 'report', user: 'System', action: 'flagged content in', target: 'Web Dev Bootcamp', time: '3 hrs ago', icon: ShieldAlert },
-    { type: 'enrollment', user: 'Jordan Lee', action: 'completed', target: 'Data Science 101', time: '5 hrs ago', icon: CheckCircle },
   ];
 
   const topCourses = coursesData
@@ -107,7 +203,9 @@ export default function AdminDashboard() {
     .sort((a, b) => b.enrolled_count - a.enrolled_count)
     .slice(0, 4);
 
-  const recentUsers = profilesData.slice(0, 5);
+  const recentUsers = [...profilesData]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5);
 
   const getInitials = (name: string) =>
     name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -177,38 +275,38 @@ export default function AdminDashboard() {
                 <CardTitle className="font-serif text-lg">Recent Activity</CardTitle>
                 <CardDescription>Latest platform events</CardDescription>
               </div>
-              <Button variant="ghost" size="sm" className="text-muted-foreground">
-                View all
-                <ArrowRight className="ml-1 h-3 w-3" />
-              </Button>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="space-y-1">
-              {recentActivity.map((item, i) => (
-                <div key={i}>
-                  <div className="flex items-start gap-3 py-3">
-                    <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                      item.type === 'report' ? 'bg-destructive/10 text-destructive' :
-                      item.type === 'signup' ? 'bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]' :
-                      item.type === 'course' ? 'bg-[hsl(var(--info))]/10 text-[hsl(var(--info))]' :
-                      'bg-primary/10 text-primary'
-                    }`}>
-                      <item.icon className="h-4 w-4" />
+            {recentActivity.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground text-sm">No activity yet</div>
+            ) : (
+              <div className="space-y-1">
+                {recentActivity.map((item, i) => (
+                  <div key={i}>
+                    <div className="flex items-start gap-3 py-3">
+                      <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                        item.type === 'report' ? 'bg-destructive/10 text-destructive' :
+                        item.type === 'signup' ? 'bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]' :
+                        item.type === 'course' ? 'bg-[hsl(var(--info))]/10 text-[hsl(var(--info))]' :
+                        'bg-primary/10 text-primary'
+                      }`}>
+                        <item.icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm">
+                          <span className="font-medium">{item.user}</span>{' '}
+                          <span className="text-muted-foreground">{item.action}</span>{' '}
+                          {item.target && <span className="font-medium">{item.target}</span>}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{item.time}</p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm">
-                        <span className="font-medium">{item.user}</span>{' '}
-                        <span className="text-muted-foreground">{item.action}</span>{' '}
-                        {item.target && <span className="font-medium">{item.target}</span>}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{item.time}</p>
-                    </div>
+                    {i < recentActivity.length - 1 && <Separator />}
                   </div>
-                  {i < recentActivity.length - 1 && <Separator />}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -280,23 +378,23 @@ export default function AdminDashboard() {
               <div>
                 <div className="flex justify-between text-sm mb-1.5">
                   <span className="text-muted-foreground">Course completion rate</span>
-                  <span className="font-medium">68%</span>
+                  <span className="font-medium">{platformHealth.completionRate}%</span>
                 </div>
-                <Progress value={68} className="h-2" />
+                <Progress value={platformHealth.completionRate} className="h-2" />
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1.5">
                   <span className="text-muted-foreground">Student satisfaction</span>
-                  <span className="font-medium">4.5/5.0</span>
+                  <span className="font-medium">{platformHealth.avgRating}/5.0</span>
                 </div>
-                <Progress value={90} className="h-2" />
+                <Progress value={Number(platformHealth.avgRating) * 20} className="h-2" />
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1.5">
                   <span className="text-muted-foreground">Active this week</span>
-                  <span className="font-medium">73%</span>
+                  <span className="font-medium">{platformHealth.activeRate}%</span>
                 </div>
-                <Progress value={73} className="h-2" />
+                <Progress value={platformHealth.activeRate} className="h-2" />
               </div>
             </CardContent>
           </Card>
@@ -322,27 +420,31 @@ export default function AdminDashboard() {
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="space-y-3">
-              {topCourses.map((course, i) => {
-                const maxEnroll = topCourses[0]?.enrolled_count || 1;
-                return (
-                  <div key={course.id} className="flex items-center gap-3">
-                    <span className="text-lg font-bold text-muted-foreground/50 w-6 text-center tabular-nums">
-                      {i + 1}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{course.title}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Progress value={(course.enrolled_count / maxEnroll) * 100} className="h-1.5 flex-1" />
-                        <span className="text-xs text-muted-foreground tabular-nums whitespace-nowrap">
-                          {course.enrolled_count} students
-                        </span>
+            {topCourses.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No published courses yet</p>
+            ) : (
+              <div className="space-y-3">
+                {topCourses.map((course, i) => {
+                  const maxEnroll = topCourses[0]?.enrolled_count || 1;
+                  return (
+                    <div key={course.id} className="flex items-center gap-3">
+                      <span className="text-lg font-bold text-muted-foreground/50 w-6 text-center tabular-nums">
+                        {i + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{course.title}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Progress value={(course.enrolled_count / maxEnroll) * 100} className="h-1.5 flex-1" />
+                          <span className="text-xs text-muted-foreground tabular-nums whitespace-nowrap">
+                            {course.enrolled_count} students
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -363,42 +465,59 @@ export default function AdminDashboard() {
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="space-y-1">
-              {recentUsers.map((user, i) => {
-                const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email;
-                const role = getUserRole(user.id);
-                return (
-                <div key={user.id}>
-                  <div className="flex items-center gap-3 py-2.5">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src={user.avatar_url ?? undefined} alt={name} />
-                      <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
-                        {getInitials(name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            {recentUsers.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No users yet</p>
+            ) : (
+              <div className="space-y-1">
+                {recentUsers.map((user, i) => {
+                  const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email;
+                  const role = getUserRole(user.id);
+                  return (
+                  <div key={user.id}>
+                    <div className="flex items-center gap-3 py-2.5">
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage src={user.avatar_url ?? undefined} alt={name} />
+                        <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
+                          {getInitials(name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={`capitalize text-xs ${
+                          role === 'admin' ? 'border-destructive/30 text-destructive' :
+                          role === 'instructor' ? 'border-[hsl(var(--info))]/30 text-[hsl(var(--info))]' :
+                          'border-primary/30 text-primary'
+                        }`}
+                      >
+                        {role}
+                      </Badge>
                     </div>
-                    <Badge
-                      variant="outline"
-                      className={`capitalize text-xs ${
-                        role === 'admin' ? 'border-destructive/30 text-destructive' :
-                        role === 'instructor' ? 'border-[hsl(var(--info))]/30 text-[hsl(var(--info))]' :
-                        'border-primary/30 text-primary'
-                      }`}
-                    >
-                      {role}
-                    </Badge>
+                    {i < recentUsers.length - 1 && <Separator />}
                   </div>
-                  {i < recentUsers.length - 1 && <Separator />}
-                </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
     </div>
   );
+}
+
+function formatTimeAgo(date: Date): string {
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString();
 }
