@@ -1,8 +1,7 @@
+import { useMemo } from 'react';
 import { 
   Users, 
   BookOpen, 
-  TrendingUp, 
-  DollarSign,
   GraduationCap,
   Award
 } from 'lucide-react';
@@ -29,31 +28,31 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const userGrowthData = [
-  { month: 'Jan', users: 120, students: 100, instructors: 20 },
-  { month: 'Feb', users: 180, students: 150, instructors: 30 },
-  { month: 'Mar', users: 250, students: 210, instructors: 40 },
-  { month: 'Apr', users: 320, students: 270, instructors: 50 },
-  { month: 'May', users: 410, students: 350, instructors: 60 },
-  { month: 'Jun', users: 520, students: 440, instructors: 80 },
-];
+const CATEGORY_COLORS: Record<string, string> = {
+  programming: 'hsl(var(--primary))',
+  'data-science': 'hsl(var(--accent))',
+  business: 'hsl(200, 70%, 50%)',
+  design: 'hsl(280, 70%, 50%)',
+  marketing: 'hsl(30, 70%, 50%)',
+  'personal-development': 'hsl(160, 70%, 50%)',
+  mathematics: 'hsl(340, 70%, 50%)',
+  science: 'hsl(60, 70%, 45%)',
+  humanities: 'hsl(120, 50%, 45%)',
+  language: 'hsl(220, 70%, 55%)',
+};
 
-const enrollmentData = [
-  { month: 'Jan', enrollments: 45, completions: 12 },
-  { month: 'Feb', enrollments: 78, completions: 23 },
-  { month: 'Mar', enrollments: 112, completions: 45 },
-  { month: 'Apr', enrollments: 156, completions: 67 },
-  { month: 'May', enrollments: 189, completions: 89 },
-  { month: 'Jun', enrollments: 234, completions: 112 },
-];
-
-const categoryDistribution = [
-  { name: 'Programming', value: 35, color: 'hsl(var(--primary))' },
-  { name: 'Data Science', value: 25, color: 'hsl(var(--accent))' },
-  { name: 'Business', value: 20, color: 'hsl(200, 70%, 50%)' },
-  { name: 'Design', value: 12, color: 'hsl(280, 70%, 50%)' },
-  { name: 'Other', value: 8, color: 'hsl(var(--muted-foreground))' },
-];
+const CATEGORY_LABELS: Record<string, string> = {
+  programming: 'Programming',
+  'data-science': 'Data Science',
+  business: 'Business',
+  design: 'Design',
+  marketing: 'Marketing',
+  'personal-development': 'Personal Dev',
+  mathematics: 'Mathematics',
+  science: 'Science',
+  humanities: 'Humanities',
+  language: 'Language',
+};
 
 const chartConfig: ChartConfig = {
   users: { label: 'Total Users', color: 'hsl(var(--primary))' },
@@ -74,7 +73,28 @@ export function PlatformAnalytics() {
   const { data: coursesData = [] } = useQuery({
     queryKey: ['admin-courses-analytics'],
     queryFn: async () => {
-      const { data } = await supabase.from('courses').select('status, enrolled_count');
+      const { data } = await supabase.from('courses').select('status, enrolled_count, category');
+      return data ?? [];
+    },
+  });
+  const { data: profilesData = [] } = useQuery({
+    queryKey: ['admin-profiles-analytics'],
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('id, created_at');
+      return data ?? [];
+    },
+  });
+  const { data: enrollmentsData = [] } = useQuery({
+    queryKey: ['admin-enrollments-analytics'],
+    queryFn: async () => {
+      const { data } = await supabase.from('enrollments').select('id, enrolled_at, status');
+      return data ?? [];
+    },
+  });
+  const { data: progressData = [] } = useQuery({
+    queryKey: ['admin-progress-analytics'],
+    queryFn: async () => {
+      const { data } = await supabase.from('course_progress').select('id, is_completed, completed_at, last_accessed_at');
       return data ?? [];
     },
   });
@@ -82,34 +102,97 @@ export function PlatformAnalytics() {
   const totalStudents = rolesData.filter(r => r.role === 'student').length;
   const totalInstructors = rolesData.filter(r => r.role === 'instructor').length;
   const publishedCourses = coursesData.filter(c => c.status === 'published').length;
-  const totalEnrollments = coursesData.reduce((acc, c) => acc + c.enrolled_count, 0);
+  const totalEnrollments = enrollmentsData.length;
+
+  // User growth data by month (last 6 months)
+  const userGrowthData = useMemo(() => {
+    const months: { month: string; students: number; instructors: number }[] = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+      const monthLabel = d.toLocaleString('en', { month: 'short' });
+
+      // Count cumulative users up to this month
+      const usersUpToMonth = profilesData.filter(p => new Date(p.created_at) <= monthEnd).length;
+      // Approximate student/instructor split based on current ratio
+      const ratio = totalStudents + totalInstructors > 0 ? totalStudents / (totalStudents + totalInstructors) : 0.8;
+      months.push({
+        month: monthLabel,
+        students: Math.round(usersUpToMonth * ratio),
+        instructors: Math.round(usersUpToMonth * (1 - ratio)),
+      });
+    }
+    return months;
+  }, [profilesData, totalStudents, totalInstructors]);
+
+  // Enrollment vs completion data by month (last 6 months)
+  const enrollmentChartData = useMemo(() => {
+    const months: { month: string; enrollments: number; completions: number }[] = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+      const monthLabel = d.toLocaleString('en', { month: 'short' });
+
+      const monthEnrollments = enrollmentsData.filter(e => {
+        const ed = new Date(e.enrolled_at);
+        return ed >= d && ed <= monthEnd;
+      }).length;
+
+      const monthCompletions = progressData.filter(p => {
+        if (!p.is_completed || !p.completed_at) return false;
+        const cd = new Date(p.completed_at);
+        return cd >= d && cd <= monthEnd;
+      }).length;
+
+      months.push({ month: monthLabel, enrollments: monthEnrollments, completions: monthCompletions });
+    }
+    return months;
+  }, [enrollmentsData, progressData]);
+
+  // Category distribution from real courses
+  const categoryDistribution = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const c of coursesData) {
+      counts[c.category] = (counts[c.category] || 0) + 1;
+    }
+    const total = coursesData.length || 1;
+    return Object.entries(counts)
+      .map(([name, count]) => ({
+        name: CATEGORY_LABELS[name] || name,
+        value: Math.round((count / total) * 100),
+        color: CATEGORY_COLORS[name] || 'hsl(var(--muted-foreground))',
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [coursesData]);
 
   const stats = [
     { 
       label: 'Total Students', 
       value: totalStudents,
-      change: '+18%',
+      change: `${totalStudents}`,
       icon: GraduationCap,
       color: 'text-blue-500'
     },
     { 
       label: 'Total Instructors', 
       value: totalInstructors,
-      change: '+12%',
+      change: `${totalInstructors}`,
       icon: Users,
       color: 'text-primary'
     },
     { 
       label: 'Published Courses', 
       value: publishedCourses,
-      change: '+24%',
+      change: `${coursesData.length} total`,
       icon: BookOpen,
       color: 'text-accent'
     },
     { 
       label: 'Total Enrollments', 
       value: totalEnrollments,
-      change: '+32%',
+      change: `${enrollmentsData.filter(e => e.status === 'active').length} active`,
       icon: Award,
       color: 'text-green-500'
     },
@@ -186,7 +269,7 @@ export function PlatformAnalytics() {
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
-              <BarChart data={enrollmentData}>
+              <BarChart data={enrollmentChartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
                   dataKey="month" 
@@ -222,42 +305,46 @@ export function PlatformAnalytics() {
           <CardTitle className="font-serif">Course Category Distribution</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col lg:flex-row items-center gap-8">
-            <div className="h-[250px] w-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryDistribution}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {categoryDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex-1 grid grid-cols-2 gap-4">
-              {categoryDistribution.map((category) => (
-                <div key={category.name} className="flex items-center gap-3">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: category.color }}
-                  />
-                  <div>
-                    <p className="font-medium text-sm">{category.name}</p>
-                    <p className="text-xs text-muted-foreground">{category.value}%</p>
+          {categoryDistribution.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">No courses yet</p>
+          ) : (
+            <div className="flex flex-col lg:flex-row items-center gap-8">
+              <div className="h-[250px] w-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={categoryDistribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {categoryDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex-1 grid grid-cols-2 gap-4">
+                {categoryDistribution.map((category) => (
+                  <div key={category.name} className="flex items-center gap-3">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: category.color }}
+                    />
+                    <div>
+                      <p className="font-medium text-sm">{category.name}</p>
+                      <p className="text-xs text-muted-foreground">{category.value}%</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>
